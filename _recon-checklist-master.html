@@ -1,0 +1,3316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Recon Master Checklist // Bug Bounty Framework</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+        :root {
+            --bg: #080b0f;
+            --bg2: #0d1117;
+            --bg3: #111820;
+            --border: #1e2d3d;
+            --accent: #00ff9d;
+            --accent2: #00c8ff;
+            --accent3: #ff4e6a;
+            --accent4: #ffd166;
+            --accent5: #b47aff;
+            --text: #c9d4e0;
+            --dim: #556070;
+            --hi: #e8f0fe;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.75;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* SIDEBAR */
+        nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 240px;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 100;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .nav-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 12px;
+            color: var(--accent);
+            padding: 0 18px 18px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-logo span {
+            color: var(--dim);
+            font-weight: 400;
+            display: block;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .nav-cat {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--dim);
+            padding: 12px 18px 4px;
+            opacity: .5;
+        }
+
+        nav a {
+            display: block;
+            padding: 6px 18px;
+            color: var(--dim);
+            text-decoration: none;
+            font-size: 11px;
+            border-left: 2px solid transparent;
+            transition: all .15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: rgba(0, 255, 157, .04);
+        }
+
+        /* PROGRESS */
+        .nav-progress {
+            padding: 14px 18px;
+            border-top: 1px solid var(--border);
+            margin-top: 12px;
+        }
+
+        .progress-label {
+            font-size: 10px;
+            color: var(--dim);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 2px;
+            transition: width .3s;
+        }
+
+        /* MAIN */
+        main {
+            margin-left: 240px;
+            padding: 40px 50px 80px;
+            max-width: 1080px;
+        }
+
+        /* HERO */
+        .hero {
+            margin-bottom: 48px;
+            padding: 44px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--accent);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(0, 255, 157, .06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-tag {
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+            opacity: .8;
+        }
+
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 34px;
+            line-height: 1.1;
+            color: var(--hi);
+            margin-bottom: 14px;
+        }
+
+        .hero h1 span {
+            color: var(--accent);
+        }
+
+        .hero-sub {
+            color: var(--dim);
+            font-size: 12px;
+            max-width: 580px;
+            margin-bottom: 22px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* PHASE SECTIONS */
+        .phase {
+            margin-bottom: 60px;
+            scroll-margin-top: 20px;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .phase-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent);
+            background: rgba(0, 255, 157, .08);
+            border: 1px solid rgba(0, 255, 157, .2);
+            padding: 3px 8px;
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        .phase-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--hi);
+            flex: 1;
+        }
+
+        .phase-toggle {
+            color: var(--dim);
+            font-size: 18px;
+            transition: transform .3s;
+            flex-shrink: 0;
+        }
+
+        .phase-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .phase-body {
+            display: block;
+        }
+
+        .phase-body.collapsed {
+            display: none;
+        }
+
+        /* STEP CARDS */
+        .step-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .step-header:hover {
+            background: rgba(255, 255, 255, .015);
+        }
+
+        .step-check {
+            width: 18px;
+            height: 18px;
+            border: 1px solid var(--dim);
+            flex-shrink: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: var(--accent);
+            background: rgba(0, 255, 157, .04);
+            transition: all .2s;
+        }
+
+        .step-check.done {
+            border-color: var(--accent);
+            background: rgba(0, 255, 157, .12);
+        }
+
+        .step-check.done::after {
+            content: '✓';
+        }
+
+        .step-title {
+            flex: 1;
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--hi);
+        }
+
+        .step-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .step-tool {
+            font-size: 10px;
+            color: var(--accent2);
+            border: 1px solid rgba(0, 200, 255, .2);
+            background: rgba(0, 200, 255, .05);
+            padding: 2px 7px;
+            letter-spacing: .5px;
+        }
+
+        .badge {
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            flex-shrink: 0;
+        }
+
+        .badge-crit {
+            color: var(--accent3);
+            border: 1px solid rgba(255, 78, 106, .3);
+            background: rgba(255, 78, 106, .06);
+        }
+
+        .badge-hi {
+            color: var(--accent4);
+            border: 1px solid rgba(255, 209, 102, .3);
+            background: rgba(255, 209, 102, .06);
+        }
+
+        .badge-med {
+            color: var(--accent2);
+            border: 1px solid rgba(0, 200, 255, .3);
+            background: rgba(0, 200, 255, .06);
+        }
+
+        .step-expand {
+            color: var(--dim);
+            font-size: 14px;
+            transition: transform .25s;
+            flex-shrink: 0;
+        }
+
+        .step-expand.open {
+            transform: rotate(180deg);
+        }
+
+        /* STEP BODY */
+        .step-body {
+            padding: 0 18px 18px;
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+
+        .step-body.open {
+            display: block;
+        }
+
+        .step-purpose {
+            color: var(--text);
+            font-size: 12.5px;
+            margin: 14px 0 10px;
+            line-height: 1.7;
+        }
+
+        .step-purpose strong {
+            color: var(--accent4);
+        }
+
+        /* CODE BLOCKS */
+        .cb {
+            background: #060a0e;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 16px 18px;
+            margin: 10px 0;
+            overflow-x: auto;
+            font-size: 11.5px;
+            line-height: 1.85;
+            position: relative;
+            white-space: pre;
+        }
+
+        .cb.blue {
+            border-left-color: var(--accent2);
+        }
+
+        .cb.red {
+            border-left-color: var(--accent3);
+        }
+
+        .cb.yellow {
+            border-left-color: var(--accent4);
+        }
+
+        .cb-label {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--dim);
+            opacity: .6;
+        }
+
+        .cb .c {
+            color: var(--dim);
+        }
+
+        .cb .cmd {
+            color: var(--accent);
+        }
+
+        .cb .f {
+            color: var(--accent2);
+        }
+
+        .cb .a {
+            color: var(--accent4);
+        }
+
+        .cb .o {
+            color: var(--accent5);
+        }
+
+        .cb .s {
+            color: #f8c291;
+        }
+
+        .cb .k {
+            color: var(--accent3);
+        }
+
+        /* SCENARIO BOXES */
+        .scenarios {
+            margin: 12px 0;
+        }
+
+        .scenario {
+            display: flex;
+            gap: 10px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: rgba(0, 255, 157, .03);
+            border-left: 2px solid var(--border);
+        }
+
+        .scenario.fire {
+            border-left-color: var(--accent3);
+            background: rgba(255, 78, 106, .04);
+        }
+
+        .scenario.warn {
+            border-left-color: var(--accent4);
+            background: rgba(255, 209, 102, .04);
+        }
+
+        .scenario.info {
+            border-left-color: var(--accent2);
+            background: rgba(0, 200, 255, .03);
+        }
+
+        .scenario-icon {
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .scenario-text {
+            font-size: 12px;
+            color: var(--text);
+        }
+
+        .scenario-text strong {
+            color: var(--hi);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* INSTALL BLOCK */
+        .install-block {
+            margin: 10px 0;
+            padding: 12px 16px;
+            background: rgba(180, 122, 255, .04);
+            border: 1px solid rgba(180, 122, 255, .15);
+            border-left: 3px solid var(--accent5);
+        }
+
+        .install-label {
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent5);
+            margin-bottom: 6px;
+            opacity: .8;
+        }
+
+        .install-block code {
+            font-size: 11.5px;
+            color: var(--accent5);
+        }
+
+        /* INSIGHT/WARNING */
+        .insight {
+            background: rgba(0, 255, 157, .04);
+            border: 1px solid rgba(0, 255, 157, .15);
+            border-left: 3px solid var(--accent);
+            padding: 14px 18px;
+            margin: 12px 0;
+            font-size: 12px;
+        }
+
+        .insight::before {
+            content: '▶  INSIGHT';
+            display: block;
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 6px;
+            opacity: .7;
+        }
+
+        .warn-box {
+            background: rgba(255, 209, 102, .04);
+            border: 1px solid rgba(255, 209, 102, .15);
+            border-left: 3px solid var(--accent4);
+            padding: 14px 18px;
+            margin: 12px 0;
+            font-size: 12px;
+        }
+
+        .warn-box::before {
+            content: '⚠  PRO TIP';
+            display: block;
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--accent4);
+            margin-bottom: 6px;
+            opacity: .8;
+        }
+
+        .crit-box {
+            background: rgba(255, 78, 106, .04);
+            border: 1px solid rgba(255, 78, 106, .15);
+            border-left: 3px solid var(--accent3);
+            padding: 14px 18px;
+            margin: 12px 0;
+            font-size: 12px;
+        }
+
+        .crit-box::before {
+            content: '🔥  CRITICAL FIND';
+            display: block;
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--accent3);
+            margin-bottom: 6px;
+            opacity: .8;
+        }
+
+        /* CHECKLIST ITEMS */
+        .mini-check {
+            list-style: none;
+            margin: 10px 0;
+        }
+
+        .mini-check li {
+            display: flex;
+            gap: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(30, 45, 61, .5);
+            font-size: 12px;
+            align-items: flex-start;
+        }
+
+        .mini-check li:last-child {
+            border-bottom: none;
+        }
+
+        .mc-box {
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--dim);
+            flex-shrink: 0;
+            margin-top: 2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+        }
+
+        .mc-box.done {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin: 12px 0;
+        }
+
+        th {
+            background: #0a1520;
+            color: var(--accent2);
+            text-align: left;
+            padding: 9px 12px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, .015);
+        }
+
+        td:first-child {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* PHASE SUMMARY */
+        .phase-summary {
+            background: linear-gradient(135deg, rgba(0, 255, 157, .04), rgba(0, 200, 255, .03));
+            border: 1px solid var(--border);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+
+        .phase-summary h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .phase-summary p {
+            font-size: 12px;
+            color: var(--dim);
+        }
+
+        /* PIPELINE SCRIPT BOX */
+        .pipeline {
+            background: #060a0e;
+            border: 1px solid var(--accent2);
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .pipeline-label {
+            font-family: 'Syne', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent2);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pipeline-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:860px) {
+            nav {
+                display: none;
+            }
+
+            main {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+
+        p {
+            margin-bottom: 8px;
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 24px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════ SIDEBAR ═══════ -->
+    <nav id="sidebar">
+        <div class="nav-logo">RECON MASTER<span>Elite Bug Bounty Framework</span></div>
+        <div class="nav-cat">Phases</div>
+        <a href="#env">⚙ Environment Setup</a>
+        <a href="#p1">01 · Target Scoping</a>
+        <a href="#p2">02 · Root Domain Analysis</a>
+        <a href="#p3">03 · Subdomain Passive</a>
+        <a href="#p4">04 · Subdomain Active</a>
+        <a href="#p5">05 · Live Hosts &amp; Ports</a>
+        <a href="#p6">06 · Tech Fingerprinting</a>
+        <a href="#p7">07 · Content Discovery</a>
+        <a href="#p8">08 · URL Collection</a>
+        <a href="#p9">09 · JS Analysis</a>
+        <a href="#p10">10 · Secret Discovery</a>
+        <a href="#p11">11 · Parameter Discovery</a>
+        <a href="#p12">12 · API &amp; GraphQL Recon</a>
+        <a href="#p13">13 · Cloud &amp; Infra Mapping</a>
+        <a href="#p14">14 · Subdomain Takeover</a>
+        <a href="#p15">15 · 403 Bypass</a>
+        <a href="#p16">16 · Vuln Hunting Prep</a>
+        <a href="#p17">17 · Manual Deep Dive</a>
+        <a href="#pipeline">🚀 Master Pipeline</a>
+        <div class="nav-progress">
+            <div class="progress-label"><span>Progress</span><span id="prog-pct">0%</span></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════ MAIN ═══════ -->
+    <main>
+
+        <!-- HERO -->
+        <div class="hero">
+            <div class="hero-tag">// ELITE BUG BOUNTY — MASTER RECON FRAMEWORK</div>
+            <h1>Complete Recon<br><span>Master Checklist</span></h1>
+            <p class="hero-sub">Every phase. Every tool. Every command. Step-by-step guide used by elite bug bounty
+                hunters and professional red teamers — from zero to full attack surface map.</p>
+            <div class="hero-stats">
+                <div class="stat"><span class="stat-num">17</span><span class="stat-label">Phases</span></div>
+                <div class="stat"><span class="stat-num">100+</span><span class="stat-label">Steps</span></div>
+                <div class="stat"><span class="stat-num">60+</span><span class="stat-label">Tools</span></div>
+                <div class="stat"><span class="stat-num">∞</span><span class="stat-label">Attack Surface</span></div>
+            </div>
+        </div>
+
+        <!-- ═══════ ENV SETUP ═══════ -->
+        <div class="phase" id="env">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">ENV</div>
+                <h2>Environment Setup — Ek Baar Karo</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Before Everything</h3>
+                    <p>Har target ke liye ek dedicated folder structure banao. Har command ka output save karo — baad
+                        mein kaam aata hai. Ye habit tujhe baaki hunters se aage rakhegi.</p>
+                </div>
+                <div class="cb">
+                    <span class="c"># ── Dedicated target folder structure ──────────────────────────────</span>
+                    <span class="k">export</span> <span class="a">TARGET</span>=<span class="s">"target.com"</span>
+                    <span class="cmd">mkdir</span> <span class="f">-p</span> ~/recon/<span
+                        class="a">$TARGET</span>/{scope,subdomains,live,ports,urls,js,params,endpoints,secrets,screenshots,content,notes}
+                    <span class="cmd">cd</span> ~/recon/<span class="a">$TARGET</span>
+                    <span class="cmd">echo</span> <span class="s">"[*] Workspace ready for: $TARGET"</span>
+
+                    <span class="c"># ── Install all tools (run once) ───────────────────────────────────</span>
+                    <span class="c"># Go tools</span>
+                    <span class="cmd">go</span> install <span class="f">-v</span>
+                    github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+                    <span class="cmd">go</span> install <span class="f">-v</span>
+                    github.com/projectdiscovery/httpx/v2/cmd/httpx@latest
+                    <span class="cmd">go</span> install <span class="f">-v</span>
+                    github.com/projectdiscovery/dnsx/v2/cmd/dnsx@latest
+                    <span class="cmd">go</span> install <span class="f">-v</span>
+                    github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+                    <span class="cmd">go</span> install <span class="f">-v</span>
+                    github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest
+                    <span class="cmd">go</span> install <span class="f">-v</span>
+                    github.com/projectdiscovery/katana/cmd/katana@latest
+                    <span class="cmd">go</span> install <span class="f">-v</span>
+                    github.com/projectdiscovery/alterx/cmd/alterx@latest
+                    <span class="cmd">go</span> install github.com/d3mondev/puredns/v2@latest
+                    <span class="cmd">go</span> install github.com/tomnomnom/assetfinder@latest
+                    <span class="cmd">go</span> install github.com/tomnomnom/waybackurls@latest
+                    <span class="cmd">go</span> install github.com/tomnomnom/anew@latest
+                    <span class="cmd">go</span> install github.com/tomnomnom/unfurl@latest
+                    <span class="cmd">go</span> install github.com/lc/gau/v2/cmd/gau@latest
+                    <span class="cmd">go</span> install github.com/sensepost/gowitness@latest
+                    <span class="cmd">go</span> install github.com/hakluke/hakrawler@latest
+                    <span class="cmd">go</span> install github.com/jaeles-project/gospider@latest
+                    <span class="cmd">go</span> install github.com/Josue87/gotator@latest
+                    <span class="cmd">go</span> install github.com/BishopFox/jsluice/cmd/jsluice@latest
+                    <span class="cmd">go</span> install github.com/denandz/sourcemapper@latest
+                    <span class="cmd">go</span> install github.com/ffuf/ffuf/v2@latest
+
+                    <span class="c"># Apt tools</span>
+                    <span class="cmd">sudo</span> apt install <span class="f">-y</span> amass dirsearch feroxbuster
+                    seclists gh nmap masscan
+
+                    <span class="c"># Python tools</span>
+                    <span class="cmd">pip3</span> install waymore arjun shodan trufflehog gitleaks git-dumper <span
+                        class="f">--break-system-packages</span>
+
+                    <span class="c"># Wordlists</span>
+                    <span class="cmd">wget</span>
+                    https://gist.githubusercontent.com/jhaddix/86a06c5dc309d08580a018c66354a056/raw/all.txt <span
+                        class="f">-O</span> ~/wordlists/jhaddix_all.txt
+                    <span class="cmd">wget</span>
+                    https://raw.githubusercontent.com/trickest/resolvers/main/resolvers.txt <span class="f">-O</span>
+                    ~/wordlists/resolvers.txt
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 1 ═══════ -->
+        <div class="phase" id="p1">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">01</div>
+                <h2>Target Scoping &amp; Intelligence</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Program ke rules samjho, attack surface define karo, aur target ka business context build karo —
+                        bina ek bhi tool chalaaye. Ye most underrated step hai.</p>
+                </div>
+
+                <!-- Step 1.1 -->
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">1.1 — Scope File Document Karo</div>
+                        <div class="step-meta"><span class="step-tool">Manual</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Out-of-scope asset test karne par program se
+                            directly remove kar dete hain — koi warning nahi milti. Scope pehle document karo.</div>
+                        <div class="install-block">
+                            <div class="install-label">Command</div><code>cat > ~/recon/$TARGET/scope/scope.txt</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Scope file banao — SABSE PEHLE YE KARO</span>
+                            <span class="cmd">cat</span> &gt; ~/recon/<span class="a">$TARGET</span>/scope/scope.txt
+                            <span class="s">&lt;&lt; EOF</span>
+                            === IN SCOPE ===
+                            <span class="a">$TARGET</span>
+                            www.<span class="a">$TARGET</span>
+                            [add all in-scope wildcards]
+
+                            === OUT OF SCOPE ===
+                            [jo program ne bola hai woh likho]
+
+                            === SPECIAL RULES ===
+                            [rate limiting, no automated scanning, etc.]
+
+                            === PROGRAM TYPE ===
+                            [HackerOne / Bugcrowd / Private — platform name]
+                            <span class="s">EOF</span>
+
+                            <span class="c"># Hacktivity check karo (HackerOne)</span>
+                            <span class="c"># hackerone.com/[program]/hacktivity → past reports padho</span>
+                            <span class="c"># Duplicate avoid karo + attack vectors samjho</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 1.2 -->
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">1.2 — Tech Stack Intelligence (LinkedIn + Job Postings)</div>
+                        <div class="step-meta"><span class="step-tool">Browser/Manual</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Job postings DevOps/Engineering roles reveal
+                            exact tech stack — AWS, Kubernetes, Terraform, PostgreSQL, etc. Ye pata chalne se attack
+                            surface narrow hota hai.</div>
+                        <div class="cb yellow">
+                            <span class="c"># LinkedIn pe dhundho:</span>
+                            <span class="c"># Company page → Jobs → Filter: Engineering, DevOps, Security</span>
+
+                            <span class="c"># Job posting mein ye keywords dhundho:</span>
+                            AWS / GCP / Azure → Cloud provider
+                            Kubernetes / Docker → Container infra
+                            PostgreSQL / MongoDB → Database tech
+                            Node.js / Python / Java → Backend language
+                            React / Angular / Vue → Frontend framework
+                            Nginx / Apache → Web server
+                            Terraform / Ansible → IaC tools → internal naming clues
+
+                            <span class="c"># Tech stack save karo</span>
+                            <span class="cmd">cat</span> &gt; ~/recon/<span class="a">$TARGET</span>/notes/tech_stack.md
+                            <span class="s">&lt;&lt; EOF</span>
+                            Cloud: [AWS / GCP / Azure]
+                            Backend: [language + framework]
+                            Database: [db tech]
+                            Frontend: [React / Angular / Vue]
+                            DevOps: [K8s / Docker / Terraform]
+                            CDN: [Cloudflare / Fastly / Akamai]
+                            Email: [SendGrid / Mailgun / SES]
+                            <span class="s">EOF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 1.3 -->
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">1.3 — Company Research (Acquisitions + Products)</div>
+                        <div class="step-meta"><span class="step-tool">Crunchbase / Browser</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Acquired companies ki infrastructure often
+                            forgotten aur poorly maintained hoti hai — goldmine for bugs.</div>
+                        <div class="cb">
+                            <span class="c"># Browser pe manually check karo:</span>
+                            crunchbase.com/organization/[target] → acquisitions list
+                            linkedin.com/company/[target]/about → company overview
+                            github.com/[target-org] → public repos
+
+                            <span class="c"># Kya dhundho:</span>
+                            - Acquired startups → unka domain still live?
+                            - Old product names → still have backend APIs?
+                            - App Store / Play Store → old apps → backend still running?
+                            - Old Twitter handles → linked to old infrastructure?
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 2 ═══════ -->
+        <div class="phase" id="p2">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">02</div>
+                <h2>Root Domain Analysis</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>WHOIS, DNS records, ASN discovery, aur reverse WHOIS se organization ke saare registered domains
+                        aur IP ranges map karo.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">2.1 — WHOIS Lookup</div>
+                        <div class="step-meta"><span class="step-tool">whois / cli</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Registrant email + org name milega → reverse
+                            WHOIS ke liye use karo. Old domain = forgotten assets. Own nameserver = more attack surface.
+                        </div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div><code>sudo apt install whois -y</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Basic WHOIS</span>
+                            <span class="cmd">whois</span> <span class="a">$TARGET</span> | <span class="cmd">tee</span>
+                            ~/recon/<span class="a">$TARGET</span>/notes/whois.txt
+
+                            <span class="c"># Specific fields extract karo</span>
+                            <span class="cmd">whois</span> <span class="a">$TARGET</span> | <span
+                                class="cmd">grep</span> <span class="f">-Ei</span> <span
+                                class="s">"registrar|created|expires|name server|org|email|admin"</span>
+
+                            <span class="c"># Kya note karo:
+                                # Registrar: → Cloudflare / GoDaddy?
+                                # Creation Date: → 2009 ka domain = forgotten assets honge
+                                # Name Server: → ns1.target.com = apna DNS server
+                                # cloudflare.com = CDN confirm
+                                # Registrant Email: → admin@targetcorp.com → save for reverse WHOIS
+                                # Registrant Org: → "Target Corp Inc" → exact legal name</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">2.2 — DNS Records Deep Dive</div>
+                        <div class="step-meta"><span class="step-tool">dig / nslookup</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> TXT records ek gold mine hain — company ki
+                            saari third-party services reveal hoti hain. Har service = potential integration = potential
+                            attack surface.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div><code>sudo apt install dnsutils -y</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># All records at once</span>
+                            <span class="cmd">dig</span> <span class="a">$TARGET</span> ANY +noall +answer | <span
+                                class="cmd">tee</span> ~/recon/<span class="a">$TARGET</span>/notes/dns_records.txt
+
+                            <span class="c"># Individual records</span>
+                            <span class="cmd">dig</span> <span class="a">$TARGET</span> A <span class="c"># Main
+                                IP</span>
+                            <span class="cmd">dig</span> <span class="a">$TARGET</span> MX <span class="c"># Mail server
+                                → mail.target.com type hints</span>
+                            <span class="cmd">dig</span> <span class="a">$TARGET</span> NS <span class="c">#
+                                Nameservers</span>
+                            <span class="cmd">dig</span> <span class="a">$TARGET</span> TXT <span class="c"># SPF, DKIM,
+                                verification tokens — GOLD</span>
+                            <span class="cmd">dig</span> <span class="a">$TARGET</span> CNAME <span class="c">#
+                                Redirects</span>
+                            <span class="cmd">dig</span> <span class="a">$TARGET</span> SOA <span class="c"># Zone
+                                info</span>
+
+                            <span class="c"># Zone transfer (rarely works but always try)</span>
+                            <span class="cmd">dig</span> axfr <span class="a">$TARGET</span> @ns1.<span
+                                class="a">$TARGET</span>
+
+                            <span class="c"># TXT record examples &amp; what they mean:
+                                # "v=spf1 include:sendgrid.net" → SendGrid use karte hain
+                                # "google-site-verification=xxx" → Google Search Console
+                                # "atlassian-domain-verification" → Jira/Confluence internal tools
+                                # "MS=msXXXXXX" → Microsoft 365 / Azure AD</span>
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥</span>
+                                <div class="scenario-text"><strong>Zone Transfer Success</strong> Saare subdomains ek hi
+                                    command mein milenge — extremely rare but instant jackpot. Immediately save karo.
+                                </div>
+                            </div>
+                            <div class="scenario warn"><span class="scenario-icon">💡</span>
+                                <div class="scenario-text"><strong>TXT Records</strong> Har third-party service = alag
+                                    attack surface. Atlassian found? Jira/Confluence check karo. SendGrid found? Email
+                                    spoofing test karo.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">2.3 — ASN Discovery &amp; IP Range Mapping</div>
+                        <div class="step-meta"><span class="step-tool">bgpview / ipinfo / amass</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Company ke saare IP blocks dhundho — yahan
+                            forgotten servers, internal tools, aur non-CDN origins milte hain.</div>
+                        <div class="cb">
+                            <span class="c"># Method 1: IP se ASN dhundho</span>
+                            <span class="cmd">curl</span> <span class="f">-s</span> https://ipinfo.io/$(<span
+                                class="cmd">dig</span> +short <span class="a">$TARGET</span>) | <span
+                                class="cmd">python3</span> <span class="f">-m</span> json.tool
+                            <span class="c"># Output mein "org": "AS12345 Target Corp" milega</span>
+
+                            <span class="c"># Method 2: ASN ke saare IP ranges pull karo</span>
+                            <span class="cmd">curl</span> <span class="f">-s</span> https://api.bgpview.io/asn/<span
+                                class="a">ASN_NUMBER</span>/prefixes \
+                            | <span class="cmd">python3</span> <span class="f">-c</span> <span class="s">"
+                                import json,sys
+                                d=json.load(sys.stdin)
+                                for p in d['data']['ipv4_prefixes']:
+                                print(p['prefix'])
+                                "</span> | <span class="cmd">tee</span> ~/recon/<span
+                                class="a">$TARGET</span>/notes/ip_ranges.txt
+
+                            <span class="c"># Method 3: Amass intel</span>
+                            <span class="cmd">amass</span> intel <span class="f">-org</span> <span class="s">"Target
+                                Corp"</span> <span class="f">-asn</span> | <span class="cmd">tee</span> ~/recon/<span
+                                class="a">$TARGET</span>/notes/asn.txt
+
+                            <span class="c"># Method 4: bgp.he.net manually check karo in browser</span>
+                            <span class="c"># bgp.he.net → search "Target Corp Name"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">2.4 — Reverse WHOIS (Related Domains)</div>
+                        <div class="step-meta"><span class="step-tool">viewdns / whoxy / domaintools</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Registrant email se company ke saare
+                            registered domains dhundho — different TLDs, marketing domains, acquired product domains.
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Browser pe manually check karo:</span>
+                            viewdns.info/reversewhois/ → registrant email ya org name se
+                            whoxy.com/reverse-whois/ → same process
+                            domaintools.com/reverse-whois/ → paid but free preview deta hai
+
+                            <span class="c"># Discovered related domains save karo</span>
+                            <span class="cmd">cat</span> &gt; ~/recon/<span
+                                class="a">$TARGET</span>/notes/related_domains.txt <span class="s">&lt;&lt; EOF</span>
+                            <span class="a">$TARGET</span> ← main
+                            <span class="a">$TARGET</span>.io ← alternative TLD
+                            get<span class="a">$TARGET</span>.com ← marketing domain
+                            [add more as found]
+                            <span class="s">EOF</span>
+
+                            <span class="c"># Each related domain = run full phase 2-onwards recon again</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 3 ═══════ -->
+        <div class="phase" id="p3">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">03</div>
+                <h2>Subdomain Enumeration — Passive</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Target ke server ko touch kiye bina — internet ke existing databases se saare subdomains collect
+                        karo. Completely silent. Stealth level: maximum.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">3.1 — Subfinder (40+ Passive Sources)</div>
+                        <div class="step-meta"><span class="step-tool">subfinder</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> 40+ sources (crt.sh, VirusTotal, Shodan,
+                            URLScan, SecurityTrails, etc.) se ek saath subdomains collect karo. API keys add karo for 3x
+                            more results.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Basic run</span>
+                            <span class="cmd">subfinder</span> <span class="f">-d</span> <span class="a">$TARGET</span>
+                            <span class="f">-o</span> subdomains/subfinder.txt
+
+                            <span class="c"># Full power — all sources + recursive</span>
+                            <span class="cmd">subfinder</span> <span class="f">-d</span> <span class="a">$TARGET</span>
+                            \
+                            <span class="f">-all</span> \ <span class="c"># saare sources use karo</span>
+                            <span class="f">-recursive</span> \ <span class="c"># subdomains ke subdomains bhi</span>
+                            <span class="f">-silent</span> \
+                            <span class="f">-o</span> subdomains/subfinder.txt
+
+                            <span class="cmd">echo</span> <span class="s">"[+] Subfinder: $(wc -l &lt;
+                                subdomains/subfinder.txt) subdomains"</span>
+
+                            <span class="c"># API keys add karo for best results</span>
+                            <span class="c"># nano ~/.config/subfinder/provider-config.yaml</span>
+                            <span class="c"># securitytrails: [key] → securitytrails.com (free)</span>
+                            <span class="c"># shodan: [key] → shodan.io (free tier)</span>
+                            <span class="c"># virustotal: [key] → virustotal.com (free)</span>
+                            <span class="c"># censys: [id:secret] → censys.io (free)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">3.2 — Amass (OSINT + Graph Database)</div>
+                        <div class="step-meta"><span class="step-tool">amass</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Amass ASN→IP→Hostname relationships map
+                            karta hai. Subfinder se zyada thorough — OSINT + certificate + DNS sources combine karta hai
+                            intelligently.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div><code>sudo apt install amass -y</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Passive mode — silent, safe</span>
+                            <span class="cmd">amass</span> enum <span class="f">-passive -d</span> <span
+                                class="a">$TARGET</span> <span class="f">-o</span> subdomains/amass_passive.txt
+
+                            <span class="c"># OSINT intelligence mode</span>
+                            <span class="cmd">amass</span> intel <span class="f">-d</span> <span
+                                class="a">$TARGET</span> <span class="f">-whois -o</span> subdomains/amass_intel.txt
+
+                            <span class="c"># Verbose — kahan se kya mila dekho</span>
+                            <span class="cmd">amass</span> enum <span class="f">-passive -d</span> <span
+                                class="a">$TARGET</span> <span class="f">-v</span> 2&gt;&amp;1 | <span
+                                class="cmd">tee</span> subdomains/amass_verbose.txt
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">3.3 — Certificate Transparency (crt.sh)</div>
+                        <div class="step-meta"><span class="step-tool">crt.sh / curl + python</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> SSL certificates se naming patterns samjho —
+                            dev., staging., internal., api-v2. Ye patterns brute force wordlist banane mein kaam aate
+                            hain.</div>
+                        <div class="cb">
+                            <span class="c"># Automated crt.sh query</span>
+                            <span class="cmd">curl</span> <span class="f">-s</span> <span
+                                class="s">"https://crt.sh/?q=%25.$TARGET&amp;output=json"</span> \
+                            | <span class="cmd">python3</span> <span class="f">-c</span> <span class="s">"
+                                import json,sys
+                                data=json.load(sys.stdin)
+                                names=set()
+                                for cert in data:
+                                for name in cert['name_value'].split('\n'):
+                                name=name.strip().lstrip('*.')
+                                if '$TARGET' in name:
+                                names.add(name)
+                                for n in sorted(names): print(n)
+                                "</span> | <span class="cmd">tee</span> subdomains/crtsh.txt
+
+                            <span class="c"># High-value naming patterns filter karo</span>
+                            <span class="cmd">grep</span> <span class="f">-E</span> <span
+                                class="s">"dev\.|staging\.|internal\.|api\.|admin\.|corp\.|test\."</span>
+                            subdomains/crtsh.txt
+
+                            <span class="c"># tlsx from ProjectDiscovery (faster alternative)</span>
+                            <span class="cmd">go</span> install github.com/projectdiscovery/tlsx/cmd/tlsx@latest
+                            <span class="cmd">tlsx</span> <span class="f">-san -cn -silent -ro -host</span> <span
+                                class="a">$TARGET</span> | <span class="cmd">anew</span> subdomains/tlsx.txt
+                        </div>
+                        <div class="crit-box">Naming patterns like <code>*.corp.target.com</code>,
+                            <code>*.internal.target.com</code> in crt.sh = gold. Ye internal naming convention reveal
+                            karta hai — brute force wordlist mein add karo immediately.</div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">3.4 — Assetfinder + Wayback Historical Subs</div>
+                        <div class="step-meta"><span class="step-tool">assetfinder / wayback</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Assetfinder quick passive enum karta hai.
+                            Wayback Machine se historical subdomains milte hain jo ab public CT logs mein nahi hain.
+                        </div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install github.com/tomnomnom/assetfinder@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Assetfinder</span>
+                            <span class="cmd">assetfinder</span> <span class="f">--subs-only</span> <span
+                                class="a">$TARGET</span> | <span class="cmd">tee</span> subdomains/assetfinder.txt
+
+                            <span class="c"># Wayback Machine historical subdomains</span>
+                            <span class="cmd">curl</span> <span class="f">-s</span> <span
+                                class="s">"http://web.archive.org/cdx/search/cdx?url=*.$TARGET&amp;output=text&amp;fl=original&amp;collapse=urlkey"</span>
+                            \
+                            | <span class="cmd">sed</span> <span class="f">-e</span> <span
+                                class="s">'s_https*://__'</span> <span class="f">-e</span> <span
+                                class="s">"s_/.*__"</span> \
+                            | <span class="cmd">grep</span> <span class="s">"\.$TARGET$"</span> \
+                            | <span class="cmd">sort</span> <span class="f">-u</span> | <span class="cmd">tee</span>
+                            subdomains/wayback_subs.txt
+
+                            <span class="c"># Combine ALL passive results</span>
+                            <span class="cmd">cat</span> subdomains/subfinder.txt \
+                            subdomains/amass_passive.txt \
+                            subdomains/assetfinder.txt \
+                            subdomains/crtsh.txt \
+                            subdomains/wayback_subs.txt \
+                            | <span class="cmd">sort</span> <span class="f">-u</span> | <span class="cmd">tee</span>
+                            subdomains/all_passive.txt
+
+                            <span class="cmd">echo</span> <span class="s">"[✅] Total passive: $(wc -l &lt;
+                                subdomains/all_passive.txt) unique subdomains"</span>
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥</span>
+                                <div class="scenario-text"><strong>dev.target.com / staging.target.com found</strong>
+                                    HIGH PRIORITY — seedha manually check karo. Often: weak auth, debug mode on, real
+                                    prod data, admin panels accessible.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥</span>
+                                <div class="scenario-text"><strong>*.internal.target.com found</strong> CRITICAL — DNS
+                                    resolve karo. Agar public IP hai toh goldmine. Internal tools, admin dashboards
+                                    accessible ho sakte hain.</div>
+                            </div>
+                            <div class="scenario info"><span class="scenario-icon">📧</span>
+                                <div class="scenario-text"><strong>mail.target.com / smtp.target.com</strong> Mail
+                                    server found — SPF/DKIM/DMARC check karo. Email spoofing test possible.</div>
+                            </div>
+                            <div class="scenario warn"><span class="scenario-icon">🔐</span>
+                                <div class="scenario-text"><strong>vpn.target.com / remote.target.com</strong> VPN
+                                    gateway — version fingerprint karo, CVEs check karo. Credential stuffing possible.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 4 ═══════ -->
+        <div class="phase" id="p4">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">04</div>
+                <h2>Subdomain Enumeration — Active (DNS Brute Force)</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Wordlist se potential subdomain names guess karke DNS query bhejte hain. Passive se 3x zyada
+                        subdomains nikaal sakta hai — especially those not in public CT logs.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">4.1 — PureDNS Brute Force (Best DNS Brute Forcer)</div>
+                        <div class="step-meta"><span class="step-tool">puredns</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Wildcard DNS automatically filter karta hai
+                            — sirf real subdomains deta hai. Jhaddix all.txt = best bug bounty wordlist (9M+ words).
+                        </div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install github.com/d3mondev/puredns/v2@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Small wordlist — fast start (5000 words)</span>
+                            <span class="cmd">puredns</span> bruteforce \
+                            /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt \
+                            <span class="a">$TARGET</span> \
+                            <span class="f">-r</span> ~/wordlists/resolvers.txt \
+                            <span class="f">-o</span> subdomains/puredns_small.txt
+
+                            <span class="c"># BIG GUN — jhaddix all.txt (best wordlist for bug bounty)</span>
+                            <span class="cmd">puredns</span> bruteforce \
+                            ~/wordlists/jhaddix_all.txt \
+                            <span class="a">$TARGET</span> \
+                            <span class="f">-r</span> ~/wordlists/resolvers.txt \
+                            <span class="f">--wildcard-tests</span> <span class="a">5</span> \
+                            <span class="f">-o</span> subdomains/puredns_jhaddix.txt \
+                            <span class="f">--write-wildcards</span> subdomains/wildcards.txt
+
+                            <span class="cmd">echo</span> <span class="s">"[✅] Brute force: $(wc -l &lt;
+                                subdomains/puredns_jhaddix.txt) found"</span>
+
+                            <span class="c"># Resolvers download karo (important for speed)</span>
+                            <span class="cmd">wget</span>
+                            https://raw.githubusercontent.com/trickest/resolvers/main/resolvers.txt \
+                            <span class="f">-O</span> ~/wordlists/resolvers.txt
+                            <span class="c"># ~7000-10000 resolvers hone chahiye</span>
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥</span>
+                                <div class="scenario-text"><strong>Brute force ne naye subdomains diye jo passive ne
+                                        nahi diye</strong> Company apni subdomains public CT logs mein nahi daali → less
+                                    likely discovered by other hunters → PRIORITY HIGH.</div>
+                            </div>
+                            <div class="scenario warn"><span class="scenario-icon">⚠️</span>
+                                <div class="scenario-text"><strong>Wildcard DNS detect hua</strong> *.target.com → sab
+                                    resolve ho raha hai. puredns automatically handle karta hai — live host probe karke
+                                    confirm karo.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">4.2 — Permutation Scanning (Gotator + Alterx)</div>
+                        <div class="step-meta"><span class="step-tool">gotator / alterx</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Found subdomains se smart variations
+                            generate karo. api.target.com mila → api-v1, api-dev, api-staging, api-internal
+                            automatically try karta hai.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install github.com/Josue87/gotator@latest && go install github.com/projectdiscovery/alterx/cmd/alterx@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Gotator — permutations from passive results</span>
+                            <span class="cmd">gotator</span> <span class="f">-sub</span> subdomains/all_passive.txt \
+                            <span class="f">-perm</span> ~/wordlists/gotator_perms.txt \
+                            <span class="f">-depth</span> <span class="a">1</span> <span class="f">-numbers</span> <span
+                                class="a">3</span> <span class="f">-silent</span> \
+                            | <span class="cmd">tee</span> subdomains/permutations.txt
+
+                            <span class="c"># Alterx — smarter permutations (ProjectDiscovery)</span>
+                            <span class="cmd">cat</span> subdomains/all_passive.txt | <span class="cmd">alterx</span> |
+                            <span class="cmd">tee</span> subdomains/alterx_perms.txt
+
+                            <span class="c"># Resolve the permutations</span>
+                            <span class="cmd">puredns</span> resolve subdomains/permutations.txt \
+                            <span class="f">-r</span> ~/wordlists/resolvers.txt \
+                            <span class="f">-o</span> subdomains/puredns_perms.txt
+
+                            <span class="c"># Example: "api.target.com" → generates:
+                                # api-v1, api-v2, api-dev, api-staging, api-old
+                                # api-internal, api-test, api2 → any that resolve = NEW FIND 🔥</span>
+
+                            <span class="c"># Final combine — ALL methods</span>
+                            <span class="cmd">cat</span> subdomains/all_passive.txt \
+                            subdomains/puredns_jhaddix.txt \
+                            subdomains/puredns_perms.txt \
+                            | <span class="cmd">sort</span> <span class="f">-u</span> &gt; subdomains/all_combined.txt
+
+                            <span class="cmd">echo</span> <span class="s">"[✅] TOTAL UNIQUE: $(wc -l &lt;
+                                subdomains/all_combined.txt)"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 5 ═══════ -->
+        <div class="phase" id="p5">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">05</div>
+                <h2>Live Host Resolution, Probing &amp; Port Scanning</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>DNS resolve karo → live web servers identify karo → non-standard ports scan karo. Non-standard
+                        ports often host dev tools, admin panels, CI/CD, aur internal services.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">5.1 — DNS Resolution with dnsx</div>
+                        <div class="step-meta"><span class="step-tool">dnsx</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Sirf woh subdomains rakho jo actually DNS
+                            resolve karte hain. CNAME records takeover ke liye important hain.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install -v github.com/projectdiscovery/dnsx/v2/cmd/dnsx@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># DNS resolution + CNAME detection</span>
+                            <span class="cmd">dnsx</span> <span class="f">-l</span> subdomains/all_combined.txt \
+                            <span class="f">-silent</span> \
+                            <span class="f">-a</span> \ <span class="c"># A records</span>
+                            <span class="f">-cname</span> \ <span class="c"># CNAME records (takeover ke liye)</span>
+                            <span class="f">-resp</span> \ <span class="c"># Response include</span>
+                            <span class="f">-o</span> subdomains/resolved.txt
+
+                            <span class="cmd">echo</span> <span class="s">"[✅] Resolved: $(wc -l &lt;
+                                subdomains/resolved.txt)"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">5.2 — httpx — Live Web Server Probing</div>
+                        <div class="step-meta"><span class="step-tool">httpx</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Title, status code, tech stack, server
+                            headers — sab ek saath. Output padh ke instantly pata chalta hai kaunsa subdomain
+                            interesting hai.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install -v github.com/projectdiscovery/httpx/v2/cmd/httpx@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Full probe</span>
+                            <span class="cmd">httpx</span> <span class="f">-l</span> subdomains/resolved.txt \
+                            <span class="f">-title</span> \ <span class="c"># Page title</span>
+                            <span class="f">-status-code</span> \ <span class="c"># HTTP status</span>
+                            <span class="f">-tech-detect</span> \ <span class="c"># Technology fingerprint</span>
+                            <span class="f">-content-length</span> \ <span class="c"># Response size</span>
+                            <span class="f">-web-server</span> \ <span class="c"># Server header</span>
+                            <span class="f">-follow-redirects</span> \
+                            <span class="f">-threads</span> <span class="a">50</span> \
+                            <span class="f">-o</span> live/httpx_results.txt
+
+                            <span class="c"># Example output:
+                                # https://admin.target.com [200] [Admin Dashboard] [nginx] [React] ← 🔥
+                                # https://dev.target.com [200] [Dev Server] [Apache/2.4] [PHP/7.4] ← 🔥
+                                # https://jenkins.target.com [200] [Jenkins] [Jetty] ← 🔥🔥
+                                # https://grafana.target.com [302] [] [nginx]
+                                # https://staging.target.com [401] [Unauthorized] [nginx]</span>
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥🔥</span>
+                                <div class="scenario-text"><strong>[200] + "Admin" title</strong> Admin panel publicly
+                                    accessible. Default creds: admin/admin, admin/password, admin/admin123. Version
+                                    fingerprint → CVE search.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥</span>
+                                <div class="scenario-text"><strong>[200] + "Jenkins"</strong> CI/CD exposed. /script
+                                    console check karo → RCE possible. Anonymous access? Build logs mein credentials ho
+                                    sakte hain.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥</span>
+                                <div class="scenario-text"><strong>[200] + "Grafana"</strong> Default creds:
+                                    admin/admin. Data sources mein database credentials. Internal network dashboards
+                                    visible.</div>
+                            </div>
+                            <div class="scenario warn"><span class="scenario-icon">⚠️</span>
+                                <div class="scenario-text"><strong>[403] Forbidden</strong> Resource exist karta hai but
+                                    blocked → 403 Bypass try karo (Phase 15 dekho).</div>
+                            </div>
+                            <div class="scenario info"><span class="scenario-icon">↩️</span>
+                                <div class="scenario-text"><strong>[302] Redirect</strong> Kahan redirect ho raha hai
+                                    dekho. Agar external domain pe → open redirect possible?</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">5.3 — Port Scanning (naabu / masscan)</div>
+                        <div class="step-meta"><span class="step-tool">naabu / masscan / rustscan</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Non-standard ports pe admin panels, dev
+                            servers, aur internal services milte hain jo port 80/443 pe nahi hote.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Extract hostnames from httpx output</span>
+                            <span class="cmd">cat</span> live/httpx_results.txt | <span class="cmd">sed</span> <span
+                                class="s">'s|https\?://||'</span> | <span class="cmd">cut</span> <span
+                                class="f">-d/</span> <span class="f">-f1</span> | <span class="cmd">sort</span> <span
+                                class="f">-u</span> &gt; live/hosts_only.txt
+
+                            <span class="c"># Common interesting web ports</span>
+                            <span class="cmd">naabu</span> <span class="f">-l</span> live/hosts_only.txt \
+                            <span class="f">-p</span> <span
+                                class="a">80,443,8080,8443,8888,8000,9000,9090,3000,4000,5000,7000,7443,6443,2375,4848,9200,5601,3306,5432,6379,27017</span>
+                            \
+                            <span class="f">-silent -o</span> ports/naabu_targeted.txt
+
+                            <span class="c"># Top 1000 ports (thorough)</span>
+                            <span class="cmd">naabu</span> <span class="f">-l</span> live/hosts_only.txt <span
+                                class="f">-top-ports</span> <span class="a">1000</span> <span class="f">-silent
+                                -o</span> ports/naabu_top1000.txt
+
+                            <span class="c"># Port meanings:
+                                # 8080 → Jenkins, Tomcat, Spring Boot
+                                # 9000 → SonarQube (source code!), Portainer (Docker UI)
+                                # 3000 → Node.js dev, Grafana (admin/admin)
+                                # 5000 → Flask debug = RCE, Docker Registry
+                                # 9090 → Prometheus (metrics + env vars)
+                                # 2375 → 🔥🔥🔥 Docker API without TLS = full container access
+                                # 9200 → Elasticsearch (unauthenticated data)
+                                # 5601 → Kibana dashboard
+                                # 4200 → Angular dev server</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">5.4 — Screenshots (Gowitness)</div>
+                        <div class="step-meta"><span class="step-tool">gowitness</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> 200 subdomains ke pages ek baar mein
+                            visually dekho — admin panels, login forms, error pages instantly identify hote hain.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install github.com/sensepost/gowitness@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Screenshot all live hosts</span>
+                            <span class="cmd">gowitness</span> file \
+                            <span class="f">-f</span> live/httpx_results.txt \
+                            <span class="f">--screenshot-path</span> screenshots/ \
+                            <span class="f">--threads</span> <span class="a">10</span>
+
+                            <span class="c"># Generate visual report</span>
+                            <span class="cmd">gowitness</span> report generate \
+                            <span class="f">--screenshot-path</span> screenshots/ \
+                            <span class="f">--db-location</span> gowitness.sqlite3
+
+                            <span class="c"># Serve report in browser</span>
+                            <span class="cmd">gowitness</span> report serve <span class="f">--db-location</span>
+                            gowitness.sqlite3
+                            <span class="c"># → open localhost:7171 in browser</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 6 ═══════ -->
+        <div class="phase" id="p6">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">06</div>
+                <h2>Technology Fingerprinting</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Exact tech versions fingerprint karo — headers, cookies, error pages, favicon hashes. Version
+                        pata chala = CVE search possible.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">6.1 — Whatweb / Wappalyzer</div>
+                        <div class="step-meta"><span class="step-tool">whatweb / wappalyzer</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> CMS, framework, server, library versions —
+                            sab ek saath detect karo.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div><code>sudo apt install whatweb -y</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Whatweb on all live hosts</span>
+                            <span class="cmd">whatweb</span> <span class="f">-i</span> live/hosts_only.txt <span
+                                class="f">--log-json</span> notes/whatweb.json
+
+                            <span class="c"># Single target verbose</span>
+                            <span class="cmd">whatweb</span> <span class="f">-v</span> https://<span
+                                class="a">$TARGET</span>
+
+                            <span class="c"># Check response headers manually</span>
+                            <span class="cmd">curl</span> <span class="f">-sI</span> https://<span
+                                class="a">$TARGET</span> | <span class="cmd">grep</span> <span class="f">-Ei</span> \
+                            <span
+                                class="s">"server|x-powered-by|x-aspnet|x-debug|set-cookie|x-generator|x-drupal|x-wp"</span>
+
+                            <span class="c"># Cookie analysis — reveals backend tech:
+                                # PHPSESSID → PHP backend
+                                # JSESSIONID → Java / Tomcat
+                                # ASP.NET_SessionId → .NET / IIS
+                                # laravel_session → Laravel PHP
+                                # _rails_session → Ruby on Rails</span>
+
+                            <span class="c"># Favicon hash → Shodan search</span>
+                            <span class="cmd">curl</span> <span class="f">-s</span> https://<span
+                                class="a">$TARGET</span>/favicon.ico | <span class="cmd">python3</span> <span
+                                class="f">-c</span> \
+                            <span class="s">"import sys,mmh3,base64;
+                                print(mmh3.hash(base64.encodebytes(sys.stdin.buffer.read())))"</span>
+                            <span class="c"># Take the hash → Shodan: http.favicon.hash:[hash]</span>
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥</span>
+                                <div class="scenario-text"><strong>Apache/2.2 or PHP/5.x found</strong> Very outdated.
+                                    Run: searchsploit apache 2.2 → multiple known CVEs. Check for known exploits
+                                    immediately.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥</span>
+                                <div class="scenario-text"><strong>X-Debug-Token header found</strong> Symfony Profiler
+                                    enabled → /profiler endpoint accessible → full stack traces, config data,
+                                    credentials.</div>
+                            </div>
+                            <div class="scenario warn"><span class="scenario-icon">💡</span>
+                                <div class="scenario-text"><strong>Framework-specific paths</strong> Laravel:
+                                    /telescope, /_debugbar. Django: /admin. Spring Boot: /actuator. Check these
+                                    immediately on every host.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">6.2 — Shodan / Censys Intelligence</div>
+                        <div class="step-meta"><span class="step-tool">shodan CLI / censys</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Internet scan data se exposed services, SSL
+                            cert alternative hostnames, known CVEs, aur banners milte hain.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>pip3 install shodan --break-system-packages && shodan init YOUR_API_KEY</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Shodan search</span>
+                            <span class="cmd">shodan</span> search <span class="s">"<span
+                                    class="a">$TARGET</span>"</span> | <span class="cmd">tee</span> notes/shodan.txt
+                            <span class="cmd">shodan</span> search <span class="s">"org:Target Corp"</span> <span
+                                class="f">--fields</span> ip_str,port,hostnames,vulns
+
+                            <span class="c"># IP-specific lookup</span>
+                            <span class="a">TARGET_IP</span>=$(<span class="cmd">dig</span> +short <span
+                                class="a">$TARGET</span>)
+                            <span class="cmd">shodan</span> host <span class="a">$TARGET_IP</span>
+
+                            <span class="c"># Uncover — multiple search engines at once</span>
+                            <span class="cmd">go</span> install github.com/projectdiscovery/uncover/cmd/uncover@latest
+                            <span class="cmd">echo</span> <span class="s">"<span class="a">$TARGET</span>"</span> |
+                            <span class="cmd">uncover</span> <span class="f">-e</span> shodan,censys,fofa,binaryedge
+                            <span class="f">-silent</span>
+
+                            <span class="c"># What to note:
+                                # Open ports: → 8080? 9000? Dev ports?
+                                # Services: → Jenkins? Grafana? Kibana?
+                                # SSL Certs: → Alternative hostnames?
+                                # Vulnerabilities: → CVEs Shodan detected?</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 7 ═══════ -->
+        <div class="phase" id="p7">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">07</div>
+                <h2>Content Discovery (Directory &amp; File Brute Force)</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Wordlist se hidden directories aur files dhundho — .env, .git/, admin panels, API docs, backup
+                        files, debug endpoints. Ye phase sabse zyada quick wins deta hai.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">7.1 — ffuf (Fastest Directory Brute Forcer)</div>
+                        <div class="step-meta"><span class="step-tool">ffuf</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Raft-large wordlist (119k words) + file
+                            extensions ke combination se hidden resources dhundho.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install github.com/ffuf/ffuf/v2@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Basic directory brute force</span>
+                            <span class="cmd">ffuf</span> \
+                            <span class="f">-u</span> <span class="s">"https://$TARGET/FUZZ"</span> \
+                            <span class="f">-w</span> /usr/share/seclists/Discovery/Web-Content/raft-large-words.txt \
+                            <span class="f">-mc</span> <span class="a">200,201,204,301,302,307,401,403,405</span> \
+                            <span class="f">-t</span> <span class="a">100</span> \
+                            <span class="f">-o</span> content/ffuf_root.json <span class="f">-of</span> json \
+                            <span class="f">-ic -c</span>
+
+                            <span class="c"># With extensions</span>
+                            <span class="cmd">ffuf</span> \
+                            <span class="f">-u</span> <span class="s">"https://$TARGET/FUZZ"</span> \
+                            <span class="f">-w</span> /usr/share/seclists/Discovery/Web-Content/raft-large-words.txt \
+                            <span class="f">-e</span> <span
+                                class="a">.php,.asp,.aspx,.jsp,.html,.js,.txt,.xml,.json,.bak,.old,.backup,.zip,.sql,.env,.config</span>
+                            \
+                            <span class="f">-mc</span> <span class="a">200,201,301,302,401,403</span> \
+                            <span class="f">-t</span> <span class="a">100</span> <span class="f">-ic</span>
+
+                            <span class="c"># Recursive brute force</span>
+                            <span class="cmd">ffuf</span> \
+                            <span class="f">-u</span> <span class="s">"https://$TARGET/FUZZ"</span> \
+                            <span class="f">-w</span>
+                            /usr/share/seclists/Discovery/Web-Content/raft-large-directories.txt \
+                            <span class="f">-recursion -recursion-depth</span> <span class="a">3</span> \
+                            <span class="f">-mc</span> <span class="a">200,201,204,301,302,401,403</span> \
+                            <span class="f">-t</span> <span class="a">50</span> <span class="f">-ic</span>
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥🔥</span>
+                                <div class="scenario-text"><strong>.git/HEAD [200]</strong> Git repository exposed! Run:
+                                    git-dumper https://target.com/.git/ ./git_dump/ → Full source code, credentials,
+                                    commit history.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥🔥</span>
+                                <div class="scenario-text"><strong>.env [200]</strong> curl https://target.com/.env →
+                                    DB_PASSWORD, API_KEY, SECRET_KEY → Instant P1 bug.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥</span>
+                                <div class="scenario-text"><strong>/actuator/ [200] (Spring Boot)</strong> /actuator/env
+                                    → environment variables + secrets. /actuator/heapdump → memory dump → credentials
+                                    extract.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥</span>
+                                <div class="scenario-text"><strong>/swagger-ui [200]</strong> API documentation exposed
+                                    → all endpoints documented → try each with test data → auth bypass possible.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">7.2 — Critical Paths Wordlist (Manual High-Value Check)</div>
+                        <div class="step-meta"><span class="step-tool">ffuf / curl</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Ye specific paths manually check karo har
+                            subdomain pe — yahan sabse bade bugs milte hain.</div>
+                        <div class="cb">
+                            <span class="c"># Create critical paths wordlist</span>
+                            <span class="cmd">cat</span> &gt; ~/wordlists/critical_paths.txt <span class="s">&lt;&lt;
+                                'EOF'</span>
+                            .env
+                            .git/HEAD
+                            .git/config
+                            .htaccess
+                            .htpasswd
+                            web.config
+                            config.php
+                            config.json
+                            settings.py
+                            database.yml
+                            credentials.xml
+                            backup.zip
+                            backup.sql
+                            db.sql
+                            phpinfo.php
+                            info.php
+                            debug.php
+                            admin/
+                            wp-admin/
+                            phpmyadmin/
+                            adminer.php
+                            swagger/
+                            swagger-ui.html
+                            swagger-ui/
+                            api-docs/
+                            openapi.json
+                            openapi.yaml
+                            graphql
+                            graphiql
+                            actuator/
+                            actuator/env
+                            actuator/heapdump
+                            actuator/mappings
+                            server-status
+                            server-info
+                            console/
+                            h2-console/
+                            jenkins/
+                            kibana/
+                            grafana/
+                            prometheus/
+                            solr/
+                            <span class="s">EOF</span>
+
+                            <span class="c"># Run on ALL subdomains</span>
+                            <span class="cmd">cat</span> live/hosts_only.txt | <span class="cmd">while</span> <span
+                                class="k">read</span> sub; <span class="k">do</span>
+                            <span class="cmd">ffuf</span> <span class="f">-u</span> <span
+                                class="s">"https://$sub/FUZZ"</span> \
+                            <span class="f">-w</span> ~/wordlists/critical_paths.txt \
+                            <span class="f">-mc</span> <span class="a">200,201,204,301,302,401,403</span> \
+                            <span class="f">-t</span> <span class="a">30</span> <span class="f">-silent</span> \
+                            | <span class="cmd">tee</span> <span class="f">-a</span> content/critical_all_subs.txt
+                            <span class="k">done</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">7.3 — Feroxbuster (Recursive, Rust-based)</div>
+                        <div class="step-meta"><span class="step-tool">feroxbuster</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Automatic recursive brute force — found
+                            directories ke andar bhi automatically brute force karta hai. APIs ke liye perfect.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div><code>sudo apt install feroxbuster -y</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Recursive content discovery</span>
+                            <span class="cmd">feroxbuster</span> \
+                            <span class="f">--url</span> <span class="s">"https://$TARGET"</span> \
+                            <span class="f">--wordlist</span>
+                            /usr/share/seclists/Discovery/Web-Content/raft-large-words.txt \
+                            <span class="f">--threads</span> <span class="a">50</span> <span class="f">--depth</span>
+                            <span class="a">3</span> \
+                            <span class="f">--extensions</span> php,asp,aspx,js,json,txt,bak,old \
+                            <span class="f">--filter-status</span> <span class="a">404,429</span> \
+                            <span class="f">--output</span> content/feroxbuster.txt
+
+                            <span class="c"># API endpoint specific</span>
+                            <span class="cmd">feroxbuster</span> \
+                            <span class="f">--url</span> <span class="s">"https://api.$TARGET"</span> \
+                            <span class="f">--wordlist</span>
+                            /usr/share/seclists/Discovery/Web-Content/api/api-endpoints.txt \
+                            <span class="f">--methods</span> GET,POST,PUT,DELETE \
+                            <span class="f">--threads</span> <span class="a">30</span> \
+                            <span class="f">--output</span> content/feroxbuster_api.txt
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 8 ═══════ -->
+        <div class="phase" id="p8">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">08</div>
+                <h2>URL Collection (Passive + Active Crawling)</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Historical URLs + live crawling se complete URL map banao. Filter karo: .env files, backup files,
+                        API endpoints, admin panels, parameters.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">8.1 — Waymore (Best Historical URL Collector)</div>
+                        <div class="step-meta"><span class="step-tool">waymore / gau / waybackurls</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Waymore = Wayback + URLScan + OTX +
+                            CommonCrawl = 3-4x more URLs than waybackurls alone. Historical URLs mein forgotten
+                            endpoints, backup files, debug pages milte hain.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>pip3 install waymore --break-system-packages && go install github.com/tomnomnom/waybackurls@latest && go install github.com/lc/gau/v2/cmd/gau@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Waymore — best tool, multiple sources</span>
+                            <span class="cmd">waymore</span> <span class="f">-i</span> <span class="a">$TARGET</span>
+                            <span class="f">-mode U -oU</span> urls/waymore_urls.txt
+
+                            <span class="c"># Waybackurls</span>
+                            <span class="cmd">waybackurls</span> <span class="a">$TARGET</span> | <span
+                                class="cmd">tee</span> urls/wayback_raw.txt
+                            <span class="cmd">cat</span> subdomains/resolved.txt | <span class="cmd">waybackurls</span>
+                            | <span class="cmd">anew</span> urls/wayback_raw.txt
+
+                            <span class="c"># GAU — GetAllUrls</span>
+                            <span class="cmd">gau</span> <span class="f">--providers</span>
+                            wayback,commoncrawl,otx,urlscan <span class="a">$TARGET</span> | <span
+                                class="cmd">tee</span> urls/gau_urls.txt
+
+                            <span class="c"># Combine everything</span>
+                            <span class="cmd">cat</span> urls/waymore_urls.txt urls/wayback_raw.txt urls/gau_urls.txt \
+                            | <span class="cmd">sort</span> <span class="f">-u</span> &gt; urls/all_passive_urls.txt
+                            <span class="cmd">echo</span> <span class="s">"[✅] Total URLs: $(wc -l &lt;
+                                urls/all_passive_urls.txt)"</span>
+
+                            <span class="c"># ── FILTER FOR HIGH-VALUE TARGETS ──────────────────</span>
+                            <span class="c"># Sensitive file extensions</span>
+                            <span class="cmd">grep</span> <span class="f">-E</span> <span
+                                class="s">"\.(php|asp|aspx|jsp|env|config|json|sql|bak|old|backup|zip|tar|gz|log|key|pem)"</span>
+                            \
+                            urls/all_passive_urls.txt | <span class="cmd">tee</span> urls/interesting_files.txt
+
+                            <span class="c"># API endpoints</span>
+                            <span class="cmd">grep</span> <span class="f">-E</span> <span
+                                class="s">"/api/|/v1/|/v2/|/v3/|/rest/|/graphql|/gql"</span> \
+                            urls/all_passive_urls.txt | <span class="cmd">tee</span> urls/api_endpoints.txt
+
+                            <span class="c"># URLs with parameters (for SQLi/XSS/IDOR)</span>
+                            <span class="cmd">grep</span> <span class="s">"?"</span> urls/all_passive_urls.txt | <span
+                                class="cmd">tee</span> urls/params_urls.txt
+
+                            <span class="c"># Admin panels</span>
+                            <span class="cmd">grep</span> <span class="f">-iE</span> <span
+                                class="s">"/admin|/dashboard|/manager|/panel|/backend|/portal"</span> \
+                            urls/all_passive_urls.txt | <span class="cmd">tee</span> urls/admin_panels.txt
+
+                            <span class="c"># JS files</span>
+                            <span class="cmd">grep</span> <span class="f">-E</span> <span class="s">"\.js(\?|$)"</span>
+                            urls/all_passive_urls.txt | <span class="cmd">grep</span> <span class="f">-v</span> <span
+                                class="s">".json"</span> | <span class="cmd">tee</span> js/js_from_passive.txt
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥🔥</span>
+                                <div class="scenario-text"><strong>.env or backup.zip URL mila</strong> Immediately:
+                                    curl https://target.com/.env → DB_PASSWORD, API_KEY, secrets. Direct P1 bug.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥🔥</span>
+                                <div class="scenario-text"><strong>.git/ directory URL mila</strong> Git repository
+                                    exposed → git-dumper se download karo → full source code, credentials, commit
+                                    history.</div>
+                            </div>
+                            <div class="scenario warn"><span class="scenario-icon">💡</span>
+                                <div class="scenario-text"><strong>?id=123 wale URLs mile</strong> IDOR testing ke liye
+                                    queue mein daalo. ID values note karo — sequential hain?</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">8.2 — Active Web Crawling (Katana + Hakrawler)</div>
+                        <div class="step-meta"><span class="step-tool">katana / hakrawler / gospider</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Live application ko crawl karo — forms, API
+                            calls, JS-rendered endpoints collect karo jo passive mein nahi milte.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install github.com/projectdiscovery/katana/cmd/katana@latest && go install github.com/hakluke/hakrawler@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Katana — full power crawl with JS execution</span>
+                            <span class="cmd">katana</span> \
+                            <span class="f">-u</span> https://<span class="a">$TARGET</span> \
+                            <span class="f">-depth</span> <span class="a">5</span> \
+                            <span class="f">-jc</span> \ <span class="c"># JS files crawl</span>
+                            <span class="f">-jsl</span> \ <span class="c"># JS links extract</span>
+                            <span class="f">-hl</span> \ <span class="c"># Headless browser</span>
+                            <span class="f">-ef</span> css,png,jpg,gif,woff \
+                            <span class="f">-silent</span> \
+                            <span class="f">-o</span> urls/katana_full.txt
+
+                            <span class="c"># Multiple hosts</span>
+                            <span class="cmd">katana</span> <span class="f">-list</span> live/httpx_results.txt <span
+                                class="f">-depth</span> <span class="a">3</span> <span class="f">-jc -silent -o</span>
+                            urls/katana_all.txt
+
+                            <span class="c"># Hakrawler</span>
+                            <span class="cmd">echo</span> <span class="s">"https://$TARGET"</span> | <span
+                                class="cmd">hakrawler</span> <span class="f">-depth</span> <span class="a">3</span>
+                            <span class="f">-plain -insecure</span> | <span class="cmd">tee</span> urls/hakrawler.txt
+
+                            <span class="c"># Master URL list — combine all</span>
+                            <span class="cmd">cat</span> urls/katana_full.txt urls/hakrawler.txt
+                            urls/all_passive_urls.txt \
+                            | <span class="cmd">sort</span> <span class="f">-u</span> &gt; urls/MASTER_URLS.txt
+                            <span class="cmd">echo</span> <span class="s">"[✅] MASTER: $(wc -l &lt;
+                                urls/MASTER_URLS.txt) URLs"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 9 ═══════ -->
+        <div class="phase" id="p9">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">09</div>
+                <h2>JavaScript Analysis</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>JS files = gold mine. Modern SPAs mein ALL routing logic, API endpoints, feature flags, role
+                        names, aur sometimes credentials hote hain. Ye sabse important recon step hai.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">9.1 — Collect + Download All JS Files</div>
+                        <div class="step-meta"><span class="step-tool">katana / grep / curl</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Saari JS files locally download karo — chunk
+                            files bhi (0.chunk.js, vendors~main.js) — ye React/Next.js bundles ka goldmine hain.</div>
+                        <div class="cb">
+                            <span class="c"># Collect JS files from all sources</span>
+                            <span class="cmd">katana</span> <span class="f">-u</span> https://<span
+                                class="a">$TARGET</span> <span class="f">-jc -d 5 -silent</span> \
+                            | <span class="cmd">grep</span> <span class="f">-E</span> <span class="s">"\.js$"</span> |
+                            <span class="cmd">grep</span> <span class="f">-v</span> <span class="s">".json"</span> |
+                            <span class="cmd">anew</span> js/all_js_files.txt
+
+                            <span class="cmd">cat</span> js/js_from_passive.txt | <span class="cmd">anew</span>
+                            js/all_js_files.txt
+
+                            <span class="cmd">echo</span> <span class="s">"[+] Total JS files: $(wc -l &lt;
+                                js/all_js_files.txt)"</span>
+
+                            <span class="c"># Download all JS files locally</span>
+                            <span class="cmd">mkdir</span> <span class="f">-p</span> js/downloaded/
+                            <span class="cmd">cat</span> js/all_js_files.txt | <span class="cmd">while</span> read url;
+                            <span class="k">do</span>
+                            filename=$(<span class="cmd">echo</span> $url | <span class="cmd">md5sum</span> | <span
+                                class="cmd">cut</span> <span class="f">-d' '</span> <span class="f">-f1</span>).js
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"$url"</span> <span
+                                class="f">-o</span> <span class="s">"js/downloaded/$filename"</span>
+                            <span class="cmd">echo</span> <span class="s">"$url → $filename"</span> &gt;&gt;
+                            js/js_url_map.txt
+                            <span class="k">done</span>
+
+                            <span class="c"># Source maps check — original source code exposed!</span>
+                            <span class="cmd">cat</span> js/all_js_files.txt | <span class="cmd">while</span> read url;
+                            <span class="k">do</span>
+                            mapurl=<span class="s">"${url}.map"</span>
+                            status=$(<span class="cmd">curl</span> <span class="f">-sk -o /dev/null -w
+                                "%{http_code}"</span> <span class="s">"$mapurl"</span>)
+                            if [ <span class="s">"$status"</span> = <span class="s">"200"</span> ]; <span
+                                class="k">then</span>
+                            <span class="cmd">echo</span> <span class="s">"[🔥🔥🔥] SOURCE MAP EXPOSED: $mapurl"</span>
+                            <span class="cmd">echo</span> $mapurl &gt;&gt; secrets/exposed_sourcemaps.txt
+                            fi
+                            <span class="k">done</span>
+
+                            <span class="c"># Extract source from .map file</span>
+                            <span class="c"># go install github.com/denandz/sourcemapper@latest</span>
+                            <span class="cmd">sourcemapper</span> <span class="f">-url</span> <span
+                                class="s">"https://$TARGET/static/js/main.js.map"</span> <span class="f">-output</span>
+                            ./js/src/
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">9.2 — LinkFinder + JSluice (Endpoint Extraction)</div>
+                        <div class="step-meta"><span class="step-tool">linkfinder / jsluice</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> JS files se API endpoints, routes, aur
+                            hidden paths extract karo automatically.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>git clone https://github.com/GerbenJavado/LinkFinder && pip3 install -r LinkFinder/requirements.txt && go install github.com/BishopFox/jsluice/cmd/jsluice@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># LinkFinder on all downloaded files</span>
+                            <span class="cmd">find</span> js/downloaded/ <span class="f">-name</span> <span
+                                class="s">"*.js"</span> | <span class="cmd">while</span> read f; <span
+                                class="k">do</span>
+                            <span class="cmd">python3</span> ~/tools/LinkFinder/linkfinder.py <span class="f">-i</span>
+                            $f <span class="f">-o</span> cli 2&gt;/dev/null
+                            <span class="k">done</span> | <span class="cmd">sort</span> <span class="f">-u</span> |
+                            <span class="cmd">tee</span> endpoints/linkfinder.txt
+
+                            <span class="c"># JSluice — URLs + secrets</span>
+                            <span class="cmd">cat</span> js/all_js_files.txt | <span class="cmd">while</span> read url;
+                            <span class="k">do</span>
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"$url"</span> |
+                            <span class="cmd">jsluice</span> urls
+                            <span class="k">done</span> | <span class="cmd">tee</span> endpoints/jsluice_urls.txt
+
+                            <span class="c"># Manual grep — API patterns</span>
+                            <span class="cmd">grep</span> <span class="f">-rE</span> <span
+                                class="s">"(fetch|axios|\.get\(|\.post\(|XMLHttpRequest)"</span> js/downloaded/ \
+                            | <span class="cmd">grep</span> <span class="f">-oE</span> <span
+                                class="s">"'[/a-zA-Z0-9_\-\?=&\.]+'"</span> | <span class="cmd">tr</span> <span
+                                class="f">-d</span> <span class="s">"'"</span> \
+                            | <span class="cmd">grep</span> <span class="s">"^/"</span> | <span class="cmd">sort</span>
+                            <span class="f">-u</span> | <span class="cmd">tee</span> endpoints/api_from_js.txt
+
+                            <span class="c"># Route definitions (React Router, Vue Router)</span>
+                            <span class="cmd">grep</span> <span class="f">-rE</span> <span
+                                class="s">"(path|route|to):\s*['\"][/a-zA-Z0-9_\-:]+['\"]"</span> js/downloaded/ \
+                            | <span class="cmd">grep</span> <span class="f">-oE</span> <span
+                                class="s">"['\"][/a-zA-Z0-9_\-:]+['\"]"</span> | <span class="cmd">tr</span> <span
+                                class="f">-d</span> <span class="s">"'"</span> \
+                            | <span class="cmd">sort</span> <span class="f">-u</span> | <span class="cmd">tee</span>
+                            endpoints/routes_from_js.txt
+
+                            <span class="c"># Feature flags + role names (for privilege escalation)</span>
+                            <span class="cmd">grep</span> <span class="f">-rE</span> <span
+                                class="s">"(role|permission|featureFlag|feature_flag)\s*[:=]\s*['\"]"</span>
+                            js/downloaded/ \
+                            | <span class="cmd">tee</span> endpoints/roles_flags.txt
+
+                            <span class="c"># Master endpoints combine</span>
+                            <span class="cmd">cat</span> endpoints/linkfinder.txt endpoints/jsluice_urls.txt \
+                            endpoints/api_from_js.txt endpoints/routes_from_js.txt \
+                            | <span class="cmd">sort</span> <span class="f">-u</span> &gt;
+                            endpoints/MASTER_ENDPOINTS.txt
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 10 ═══════ -->
+        <div class="phase" id="p10">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">10</div>
+                <h2>Secret Discovery</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>JS files, GitHub repos, aur configs mein hardcoded secrets dhundho — AWS keys, API tokens,
+                        passwords, JWT secrets, database connection strings.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">10.1 — Manual Grep for Secret Patterns</div>
+                        <div class="step-meta"><span class="step-tool">grep / trufflehog / gitleaks</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> JS files mein hardcoded credentials dhundho
+                            — AWS keys, API tokens, passwords, JWT secrets, DB strings, webhook URLs.</div>
+                        <div class="cb">
+                            <span class="c"># AWS Keys</span>
+                            <span class="cmd">grep</span> <span class="f">-rE</span> <span
+                                class="s">"AKIA[0-9A-Z]{16}"</span> js/downloaded/ | <span class="cmd">tee</span>
+                            secrets/aws_access_keys.txt
+                            <span class="cmd">grep</span> <span class="f">-rEi</span> <span
+                                class="s">"aws[_-]?secret"</span> js/downloaded/ &gt;&gt; secrets/aws_access_keys.txt
+
+                            <span class="c"># Google API Keys</span>
+                            <span class="cmd">grep</span> <span class="f">-rE</span> <span
+                                class="s">"AIza[0-9A-Za-z\-_]{35}"</span> js/downloaded/ | <span class="cmd">tee</span>
+                            secrets/google_keys.txt
+
+                            <span class="c"># Generic API Keys</span>
+                            <span class="cmd">grep</span> <span class="f">-rEi</span> <span
+                                class="s">"api[_-]?key['\"]?\s*[:=]\s*['\"][0-9a-zA-Z\-_]{20,}"</span> \
+                            js/downloaded/ | <span class="cmd">tee</span> secrets/api_keys.txt
+
+                            <span class="c"># JWT Tokens hardcoded</span>
+                            <span class="cmd">grep</span> <span class="f">-rE</span> <span
+                                class="s">"eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"</span> \
+                            js/downloaded/ | <span class="cmd">tee</span> secrets/jwt_tokens.txt
+
+                            <span class="c"># Passwords hardcoded</span>
+                            <span class="cmd">grep</span> <span class="f">-rEi</span> <span
+                                class="s">"password\s*[:=]\s*['\"][^'\"]{4,}"</span> js/downloaded/ | <span
+                                class="cmd">tee</span> secrets/passwords.txt
+
+                            <span class="c"># Internal URLs</span>
+                            <span class="cmd">grep</span> <span class="f">-rE</span> <span
+                                class="s">"https?://[a-zA-Z0-9\-\.]+\.(internal|local|corp|intranet)"</span> \
+                            js/downloaded/ | <span class="cmd">tee</span> secrets/internal_urls.txt
+
+                            <span class="c"># Database connection strings</span>
+                            <span class="cmd">grep</span> <span class="f">-rEi</span> <span
+                                class="s">"mongodb://|mysql://|postgresql://|redis://|jdbc:"</span> \
+                            js/downloaded/ | <span class="cmd">tee</span> secrets/db_strings.txt
+
+                            <span class="c"># Slack/Discord webhooks</span>
+                            <span class="cmd">grep</span> <span class="f">-rE</span> <span
+                                class="s">"hooks\.slack\.com|discord(app)?\.com/api/webhooks"</span> \
+                            js/downloaded/ | <span class="cmd">tee</span> secrets/webhooks.txt
+
+                            <span class="c"># Private Keys</span>
+                            <span class="cmd">grep</span> <span class="f">-rE</span> <span class="s">"BEGIN
+                                (RSA|EC|DSA|OPENSSH) PRIVATE KEY"</span> \
+                            js/downloaded/ | <span class="cmd">tee</span> secrets/private_keys.txt
+
+                            <span class="c"># Combine all secrets</span>
+                            <span class="cmd">cat</span> secrets/*.txt | <span class="cmd">sort</span> <span
+                                class="f">-u</span> &gt; secrets/ALL_SECRETS.txt
+                            <span class="cmd">echo</span> <span class="s">"[🔥] Total secrets: $(wc -l &lt;
+                                secrets/ALL_SECRETS.txt)"</span>
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥🔥</span>
+                                <div class="scenario-text"><strong>AWS Key AKIA... found</strong> IMMEDIATELY: aws
+                                    configure → aws sts get-caller-identity → agar valid then aws s3 ls. Critical P1 →
+                                    report ASAP.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥</span>
+                                <div class="scenario-text"><strong>Internal URL found</strong>
+                                    https://api.internal.target.com/admin/users → SSRF test karo via any URL parameter
+                                    in app.</div>
+                            </div>
+                            <div class="scenario warn"><span class="scenario-icon">💡</span>
+                                <div class="scenario-text"><strong>JWT token hardcoded</strong> jwt.io pe decode karo →
+                                    algorithm check karo (RS256 vs HS256) → None algorithm attack try karo.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">10.2 — GitHub Secret Hunting</div>
+                        <div class="step-meta"><span class="step-tool">gh CLI / trufflehog / gitleaks</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Developers accidentally commit secrets to
+                            GitHub. Company ke GitHub org + code search mein API keys, passwords, internal configs milte
+                            hain.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div><code>sudo apt install gh -y && gh auth login</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># GitHub CLI search</span>
+                            <span class="cmd">gh</span> search repos <span class="s">"$TARGET"</span> <span
+                                class="f">--limit</span> <span class="a">20</span>
+                            <span class="cmd">gh</span> search code <span class="s">"$TARGET"</span> <span
+                                class="f">--limit</span> <span class="a">50</span> | <span class="cmd">tee</span>
+                            notes/github_results.txt
+
+                            <span class="c"># Browser dorks (github.com search bar):</span>
+                            <span class="c"># "$TARGET" "api_key"</span>
+                            <span class="c"># "$TARGET" "password"</span>
+                            <span class="c"># "$TARGET" extension:env</span>
+                            <span class="c"># "$TARGET" "Authorization: Bearer"</span>
+                            <span class="c"># "$TARGET" "DB_PASSWORD"</span>
+                            <span class="c"># org:TargetCompany ← company GitHub org</span>
+                            <span class="c"># org:TargetCompany secret</span>
+                            <span class="c"># org:TargetCompany password</span>
+
+                            <span class="c"># Trufflehog — scan GitHub org</span>
+                            <span class="cmd">trufflehog</span> github <span class="f">--org</span> TargetCompany <span
+                                class="f">--only-verified</span> \
+                            | <span class="cmd">tee</span> secrets/trufflehog_github.txt
+
+                            <span class="c"># Gitleaks on cloned repo</span>
+                            <span class="cmd">git</span> clone https://github.com/TargetCompany/repo ./tmp/repo
+                            <span class="cmd">gitleaks</span> detect <span class="f">--source</span> ./tmp/repo <span
+                                class="f">--report-path</span> secrets/gitleaks_report.json
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 11 ═══════ -->
+        <div class="phase" id="p11">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">11</div>
+                <h2>Parameter Discovery</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Hidden parameters dhundho — debug params, admin flags, user ID params. Debug params jo security
+                        checks disable karte hain ya verbose output dete hain.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">11.1 — Arjun (Hidden Parameter Discovery)</div>
+                        <div class="step-meta"><span class="step-tool">arjun / x8 / paramspider</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Har API endpoint pe hidden GET/POST
+                            parameters test karo. Developers production mein debug params leave karte hain — ye security
+                            bypass kar sakte hain.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>pip3 install arjun --break-system-packages</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Arjun — hidden parameter discovery</span>
+                            <span class="cmd">arjun</span> <span class="f">-u</span> <span
+                                class="s">"https://$TARGET/api/users"</span> <span class="f">-m GET -o</span>
+                            params/arjun_get.json
+                            <span class="cmd">arjun</span> <span class="f">-u</span> <span
+                                class="s">"https://$TARGET/api/users"</span> <span class="f">-m POST -o</span>
+                            params/arjun_post.json
+
+                            <span class="c"># Bulk URLs</span>
+                            <span class="cmd">arjun</span> <span class="f">--import</span> urls/api_endpoints.txt <span
+                                class="f">-t</span> <span class="a">10</span> <span class="f">-o</span>
+                            params/arjun_bulk.json
+
+                            <span class="c"># Extract unique params from all found URLs</span>
+                            <span class="cmd">cat</span> urls/MASTER_URLS.txt | <span class="cmd">grep</span> <span
+                                class="s">"?"</span> \
+                            | <span class="cmd">grep</span> <span class="f">-oE</span> <span
+                                class="s">"[?&][a-zA-Z_][a-zA-Z0-9_]*="</span> \
+                            | <span class="cmd">tr</span> <span class="f">-d</span> <span class="s">'?&='</span> | <span
+                                class="cmd">sort</span> <span class="f">-u</span> | <span class="cmd">tee</span>
+                            params/discovered_params.txt
+
+                            <span class="cmd">echo</span> <span class="s">"[+] Unique params: $(wc -l &lt;
+                                params/discovered_params.txt)"</span>
+                        </div>
+                        <div class="warn-box">
+                            <strong>High-value parameters to always test:</strong> debug=true, verbose=1, admin=1,
+                            test=1, role=admin, format=internal, include_internal=true, user_id=[other_user],
+                            redirect=https://evil.com, url=http://169.254.169.254
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 12 ═══════ -->
+        <div class="phase" id="p12">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">12</div>
+                <h2>API &amp; GraphQL Recon</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>API documentation dhundho (Swagger/OpenAPI), GraphQL schema leak karo, aur saare API endpoints
+                        test karo — unauthenticated access, IDOR, mass assignment.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">12.1 — API Documentation Hunt</div>
+                        <div class="step-meta"><span class="step-tool">curl / ffuf</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Swagger/OpenAPI documentation exposed = full
+                            API map ek click mein. Developer ne documentation rakhi aur security ne block karna bhool
+                            gayi.</div>
+                        <div class="cb">
+                            <span class="c"># Check all common API doc paths</span>
+                            <span class="cmd">for</span> path <span class="k">in</span> /swagger /swagger-ui
+                            /swagger-ui.html /api-docs /api/docs \
+                            /v1/api-docs /v2/api-docs /openapi.json /openapi.yaml \
+                            /api/swagger.json /api/openapi.json /graphql /graphiql \
+                            /__graphql /api/graphql /altair /playground; <span class="k">do</span>
+                            status=$(<span class="cmd">curl</span> <span class="f">-sk -o /dev/null -w
+                                "%{http_code}"</span> <span class="s">"https://$TARGET$path"</span>)
+                            if [[ <span class="s">"$status"</span> =~ ^(200|301|302|401|403)$ ]]; <span
+                                class="k">then</span>
+                            <span class="cmd">echo</span> <span class="s">"[$status] https://$TARGET$path"</span>
+                            <span class="cmd">echo</span> <span class="s">"$status https://$TARGET$path"</span> &gt;&gt;
+                            endpoints/api_docs_found.txt
+                            fi
+                            <span class="k">done</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">12.2 — GraphQL Introspection + Exploitation</div>
+                        <div class="step-meta"><span class="step-tool">curl / InQL / graphql-voyager</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> GraphQL introspection enabled hone par full
+                            schema mil jata hai — saare types, queries, mutations, fields. Hidden data aur operations
+                            reveal ho jaati hain.</div>
+                        <div class="cb">
+                            <span class="c"># GraphQL introspection query</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -X POST</span> <span
+                                class="s">"https://$TARGET/graphql"</span> \
+                            <span class="f">-H</span> <span class="s">"Content-Type: application/json"</span> \
+                            <span class="f">-d</span> <span class="s">'{"query":"{__schema{types{name
+                                fields{name}}}}"}'</span> \
+                            | <span class="cmd">python3</span> <span class="f">-m</span> json.tool | <span
+                                class="cmd">tee</span> endpoints/graphql_schema.txt
+
+                            <span class="c"># Common GraphQL queries to test</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -X POST</span> <span
+                                class="s">"https://$TARGET/graphql"</span> \
+                            <span class="f">-H</span> <span class="s">"Content-Type: application/json"</span> \
+                            <span class="f">-d</span> <span class="s">'{"query":"{users{id email password
+                                role}}"}'</span>
+
+                            <span class="c"># graphql-voyager.netlify.app → paste schema → visualize</span>
+
+                            <span class="c"># Test for IDOR via GraphQL</span>
+                            <span class="c"># {"query":"{user(id:1){email phone ssn}"}</span>
+                            <span class="c"># {"query":"{user(id:2){email phone ssn}"} ← change id</span>
+
+                            <span class="c"># Nuclei GraphQL templates</span>
+                            <span class="cmd">nuclei</span> <span class="f">-l</span> live/httpx_results.txt \
+                            <span class="f">-t</span> ~/nuclei-templates/technologies/graphql/ \
+                            <span class="f">-silent -o</span> notes/graphql_nuclei.txt
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 13 ═══════ -->
+        <div class="phase" id="p13">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">13</div>
+                <h2>Cloud &amp; Infrastructure Mapping</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>CDN origin IPs dhundho, cloud buckets enumerate karo, Docker Hub check karo, aur GitHub org
+                        source code leaks dhundho.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">13.1 — CDN Origin IP Discovery</div>
+                        <div class="step-meta"><span class="step-tool">curl / SecurityTrails / Shodan</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> CDN bypass karke real origin IP dhundho —
+                            firewalls aur WAFs CDN pe hote hain, origin server pe nahi. Direct IP pe WAF rules apply
+                            nahi hoti.</div>
+                        <div class="cb">
+                            <span class="c"># Check CDN headers</span>
+                            <span class="cmd">curl</span> <span class="f">-sI</span> https://<span
+                                class="a">$TARGET</span> | <span class="cmd">grep</span> <span class="f">-Ei</span>
+                            <span class="s">"cf-ray|x-cache|x-served-by|x-amz|via|fastly"</span>
+
+                            <span class="c"># Methods to find origin IP:</span>
+                            <span class="c"># 1. SecurityTrails historical DNS — old A records before CDN</span>
+                            <span class="c"># 2. Shodan SSL cert search: ssl.cert.subject.cn:target.com</span>
+                            <span class="c"># 3. Censys: parsed.names:target.com</span>
+                            <span class="c"># 4. Old DNS records via ViewDNS</span>
+
+                            <span class="c"># Test origin IP directly (bypasses CDN/WAF)</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span class="s">"Host:
+                                $TARGET"</span> https://ORIGIN_IP/
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">13.2 — Cloud Bucket Enumeration</div>
+                        <div class="step-meta"><span class="step-tool">s3scanner / gcpbucketbrute /
+                                cloud_enum</span><span class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Misconfigured cloud buckets = public file
+                            access, credential leaks, source code. Company name se bucket names guess karo.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>pip3 install s3scanner cloud-enum --break-system-packages</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># S3 bucket enumeration</span>
+                            <span class="cmd">s3scanner</span> scan <span class="f">--bucket</span> <span
+                                class="a">$TARGET</span>
+                            <span class="cmd">s3scanner</span> scan <span class="f">--bucket</span> <span
+                                class="s">"$TARGET-backup"</span>
+                            <span class="cmd">s3scanner</span> scan <span class="f">--bucket</span> <span
+                                class="s">"$TARGET-dev"</span>
+                            <span class="cmd">s3scanner</span> scan <span class="f">--bucket</span> <span
+                                class="s">"$TARGET-prod"</span>
+                            <span class="cmd">s3scanner</span> scan <span class="f">--bucket</span> <span
+                                class="s">"$TARGET-static"</span>
+                            <span class="cmd">s3scanner</span> scan <span class="f">--bucket</span> <span
+                                class="s">"$TARGET-assets"</span>
+
+                            <span class="c"># Cloud enum — AWS, GCP, Azure at once</span>
+                            <span class="cmd">cloud_enum</span> <span class="f">-k</span> <span class="a">$TARGET</span>
+                            <span class="f">-l</span> notes/cloud_enum.txt
+
+                            <span class="c"># Manual S3 check</span>
+                            <span class="cmd">curl</span> <span class="f">-s</span> https://<span
+                                class="a">$TARGET</span>.s3.amazonaws.com/
+                            <span class="cmd">aws</span> s3 ls s3://<span class="a">$TARGET</span> <span
+                                class="f">--no-sign-request</span>
+
+                            <span class="c"># Docker Hub</span>
+                            <span class="c"># hub.docker.com → search company name → analyze image layers</span>
+                            <span class="cmd">docker</span> pull targetcompany/appname
+                            <span class="cmd">docker</span> history targetcompany/appname <span class="c"># view
+                                layers</span>
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥🔥</span>
+                                <div class="scenario-text"><strong>S3 bucket publicly listable</strong> aws s3 ls
+                                    s3://target-bucket --no-sign-request → download files → source code, backups, PII.
+                                    Critical P1.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 14 ═══════ -->
+        <div class="phase" id="p14">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">14</div>
+                <h2>Subdomain Takeover Detection</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Orphaned DNS records dhundho jahan CNAME points to unclaimed third-party services. Claim karo →
+                        full control over subdomain → cookie stealing, phishing, XSS.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">14.1 — Nuclei + Subjack Takeover Check</div>
+                        <div class="step-meta"><span class="step-tool">nuclei / subjack / subzy</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> CNAME pointing to unclaimed service =
+                            subdomain takeover. Agar company.github.io repository exist nahi karta → claim karo → full
+                            subdomain control.</div>
+                        <div class="install-block">
+                            <div class="install-label">Install</div>
+                            <code>go install github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest && go install github.com/haccer/subjack@latest</code>
+                        </div>
+                        <div class="cb">
+                            <span class="c"># Nuclei takeover templates (best method)</span>
+                            <span class="cmd">nuclei</span> <span class="f">-l</span> subdomains/resolved.txt \
+                            <span class="f">-t</span> ~/nuclei-templates/takeovers/ \
+                            <span class="f">-silent -o</span> notes/takeovers.txt
+
+                            <span class="c"># Subjack</span>
+                            <span class="cmd">subjack</span> <span class="f">-w</span> subdomains/resolved.txt \
+                            <span class="f">-t</span> <span class="a">100</span> <span class="f">-timeout</span> <span
+                                class="a">30</span> <span class="f">-o</span> notes/subjack.txt <span
+                                class="f">-ssl</span>
+
+                            <span class="c"># Manual check — look for these CNAME fingerprints:</span>
+                            <span class="c"># GitHub Pages: → "There isn't a GitHub Pages site here"</span>
+                            <span class="c"># Heroku: → "No such app"</span>
+                            <span class="c"># Shopify: → "Sorry, this shop is currently unavailable"</span>
+                            <span class="c"># Fastly: → "Fastly error: unknown domain"</span>
+                            <span class="c"># AWS S3: → "NoSuchBucket"</span>
+                            <span class="c"># Azure: → "404 Web Site not found"</span>
+                            <span class="c"># Zendesk: → "Help Center Closed"</span>
+
+                            <span class="c"># Verify CNAME then check if claimable</span>
+                            <span class="cmd">dig</span> CNAME subdomain.<span class="a">$TARGET</span>
+                            <span class="cmd">curl</span> <span class="f">-s</span> https://subdomain.<span
+                                class="a">$TARGET</span> | <span class="cmd">grep</span> <span class="f">-i</span> <span
+                                class="s">"no such\|not found\|unavailable"</span>
+                        </div>
+                        <div class="crit-box">Subdomain takeover = P1 bug on most programs. GitHub Pages takeover: CNAME
+                            points to username.github.io → create that repo → upload HTML → full control. Bounty:
+                            $500-$3000+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 15 ═══════ -->
+        <div class="phase" id="p15">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">15</div>
+                <h2>403 Forbidden Bypass Techniques</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>403 response = resource exists but blocked. Headers, path obfuscation, aur HTTP methods se bypass
+                        karo — yahan hidden admin panels, APIs, aur restricted content milte hain.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">15.1 — Complete 403 Bypass Toolkit</div>
+                        <div class="step-meta"><span class="step-tool">curl / ffuf / bypass-403</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Server-side vs WAF 403 farq karta hai. Ek
+                            technique se nahi mila toh dusri try karo. Combination often works.</div>
+                        <div class="cb">
+                            <span class="c"># Helper function</span>
+                            <span class="a">URL</span>=<span class="s">"https://$TARGET/admin"</span>
+
+                            <span class="c"># ── PATH MANIPULATION ──────────────────────────────</span>
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"$URL"</span> <span
+                                class="c"># baseline 403</span>
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"$URL/"</span>
+                            <span class="c"># trailing slash</span>
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"${URL}///"</span>
+                            <span class="c"># multiple slashes</span>
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"${URL};/"</span>
+                            <span class="c"># semicolon bypass</span>
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"${URL}%2e/"</span>
+                            <span class="c"># URL encoding</span>
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"${URL}%20"</span>
+                            <span class="c"># space encoding</span>
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"${URL}..;/"</span>
+                            <span class="c"># path traversal</span>
+                            <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"${URL}/./"</span>
+                            <span class="c"># dot bypass</span>
+
+                            <span class="c"># ── IP HEADERS (CDN/WAF bypass) ────────────────────</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span
+                                class="s">"X-Forwarded-For: 127.0.0.1"</span> <span class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span class="s">"X-Real-IP:
+                                127.0.0.1"</span> <span class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span
+                                class="s">"X-Originating-IP: 127.0.0.1"</span> <span class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span class="s">"X-Remote-IP:
+                                127.0.0.1"</span> <span class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span class="s">"X-Client-IP:
+                                127.0.0.1"</span> <span class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span class="s">"True-Client-IP:
+                                127.0.0.1"</span> <span class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span
+                                class="s">"X-Custom-IP-Authorization: 127.0.0.1"</span> <span class="s">"$URL"</span>
+
+                            <span class="c"># ── HOST HEADER MANIPULATION ──────────────────────</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span class="s">"Host:
+                                localhost"</span> <span class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span class="s">"Host:
+                                internal"</span> <span class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span class="s">"Host:
+                                127.0.0.1"</span> <span class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -H</span> <span
+                                class="s">"X-Forwarded-Host: localhost"</span> <span class="s">"$URL"</span>
+
+                            <span class="c"># ── HTTP METHOD SWITCHING ─────────────────────────</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -X POST</span> <span
+                                class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -X PUT</span> <span
+                                class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -X PATCH</span> <span
+                                class="s">"$URL"</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -X HEAD</span> <span
+                                class="s">"$URL"</span> <span class="c"># HEAD response code may differ</span>
+                            <span class="cmd">curl</span> <span class="f">-sk -X</span> <span class="s">"GET /"</span>
+                            <span class="f">-H</span> <span class="s">"X-HTTP-Method-Override: GET"</span> <span
+                                class="s">"$URL"</span>
+
+                            <span class="c"># ── AUTOMATED BYPASS TOOL ─────────────────────────</span>
+                            <span class="cmd">go</span> install github.com/iamj0ker/bypass-403@latest
+                            <span class="cmd">bypass-403</span> <span class="f">-u</span> <span class="s">"$URL"</span>
+                            <span class="f">-d</span> admin
+                        </div>
+                        <div class="scenarios">
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥🔥</span>
+                                <div class="scenario-text"><strong>X-Forwarded-For: 127.0.0.1 → 200</strong> IP-based
+                                    access control bypass! Server sirf local requests allow kar raha tha. Admin panel
+                                    access mila.</div>
+                            </div>
+                            <div class="scenario fire"><span class="scenario-icon">🔥🔥</span>
+                                <div class="scenario-text"><strong>Path /admin%2e/ → 200</strong> WAF pattern matching
+                                    bypass. URL encoding ne WAF ko fool kar diya while backend normalize karta aur
+                                    process kiya.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 16 ═══════ -->
+        <div class="phase" id="p16">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">16</div>
+                <h2>Vulnerability Hunting Preparation</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Recon se jo information mili hai usse organize karo aur har vulnerability type ke liye specific
+                        targets identify karo. Automation se detect hone wali vulnerabilities pehle scan karo.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">16.1 — Nuclei Full Scan</div>
+                        <div class="step-meta"><span class="step-tool">nuclei</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> 7000+ templates se known vulnerabilities,
+                            misconfigurations, exposed panels automatically detect karo. Fast wins pehle uthao.</div>
+                        <div class="cb">
+                            <span class="c"># Update templates</span>
+                            <span class="cmd">nuclei</span> <span class="f">-ut</span>
+
+                            <span class="c"># Critical + High severity only (fast)</span>
+                            <span class="cmd">nuclei</span> <span class="f">-l</span> live/httpx_results.txt \
+                            <span class="f">-s</span> critical,high \
+                            <span class="f">-silent -c</span> <span class="a">50</span> \
+                            <span class="f">-o</span> notes/nuclei_crithigh.txt
+
+                            <span class="c"># Full scan — all templates</span>
+                            <span class="cmd">nuclei</span> <span class="f">-l</span> live/httpx_results.txt \
+                            <span class="f">-silent -c</span> <span class="a">50</span> \
+                            <span class="f">-o</span> notes/nuclei_full.txt
+
+                            <span class="c"># Specific template categories</span>
+                            <span class="cmd">nuclei</span> <span class="f">-l</span> live/httpx_results.txt <span
+                                class="f">-t</span> ~/nuclei-templates/exposures/ <span class="f">-silent</span>
+                            <span class="cmd">nuclei</span> <span class="f">-l</span> live/httpx_results.txt <span
+                                class="f">-t</span> ~/nuclei-templates/misconfiguration/ <span class="f">-silent</span>
+                            <span class="cmd">nuclei</span> <span class="f">-l</span> live/httpx_results.txt <span
+                                class="f">-t</span> ~/nuclei-templates/takeovers/ <span class="f">-silent</span>
+                            <span class="cmd">nuclei</span> <span class="f">-l</span> live/httpx_results.txt <span
+                                class="f">-t</span> ~/nuclei-templates/vulnerabilities/ <span class="f">-silent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">16.2 — Vulnerability-Specific Target Lists</div>
+                        <div class="step-meta"><span class="step-tool">grep / manual</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Har vulnerability type ke liye specific URLs
+                            filter karo — XSS ke liye reflection points, SQLi ke liye numeric IDs, SSRF ke liye URL
+                            params.</div>
+                        <div class="cb">
+                            <span class="c"># XSS candidates — reflected params</span>
+                            <span class="cmd">grep</span> <span class="f">-E</span> <span
+                                class="s">"[?&](q|search|query|keyword|s|name|input|data|msg|error|redirect)="</span> \
+                            urls/MASTER_URLS.txt | <span class="cmd">sort</span> <span class="f">-u</span> &gt;
+                            params/xss_candidates.txt
+
+                            <span class="c"># SQLi candidates — numeric IDs</span>
+                            <span class="cmd">grep</span> <span class="f">-E</span> <span
+                                class="s">"[?&](id|user_id|product_id|item_id|post_id|page|offset|limit|pid|uid)=[0-9]"</span>
+                            \
+                            urls/MASTER_URLS.txt | <span class="cmd">sort</span> <span class="f">-u</span> &gt;
+                            params/sqli_candidates.txt
+
+                            <span class="c"># SSRF candidates — URL-type params</span>
+                            <span class="cmd">grep</span> <span class="f">-E</span> <span
+                                class="s">"[?&](url|link|redirect|next|target|dest|callback|path|domain|host|proxy|ref|return|returnto|return_url|go|r|u|feed|img|image|open|source|original)="</span>
+                            \
+                            urls/MASTER_URLS.txt | <span class="cmd">sort</span> <span class="f">-u</span> &gt;
+                            params/ssrf_candidates.txt
+
+                            <span class="c"># IDOR candidates — owned resource IDs</span>
+                            <span class="cmd">grep</span> <span class="f">-E</span> <span
+                                class="s">"/api/(user|account|profile|order|invoice|document|file)/[0-9a-f-]+"</span> \
+                            urls/MASTER_URLS.txt | <span class="cmd">sort</span> <span class="f">-u</span> &gt;
+                            params/idor_candidates.txt
+
+                            <span class="c"># Open Redirect candidates</span>
+                            <span class="cmd">grep</span> <span class="f">-E</span> <span
+                                class="s">"[?&](redirect|next|return|url|to|goto|location|continue|rurl|destination)="</span>
+                            \
+                            urls/MASTER_URLS.txt | <span class="cmd">sort</span> <span class="f">-u</span> &gt;
+                            params/redirect_candidates.txt
+
+                            <span class="c"># Summary</span>
+                            <span class="cmd">echo</span> <span class="s">"XSS targets: $(wc -l &lt;
+                                params/xss_candidates.txt)"</span>
+                            <span class="cmd">echo</span> <span class="s">"SQLi targets: $(wc -l &lt;
+                                params/sqli_candidates.txt)"</span>
+                            <span class="cmd">echo</span> <span class="s">"SSRF targets: $(wc -l &lt;
+                                params/ssrf_candidates.txt)"</span>
+                            <span class="cmd">echo</span> <span class="s">"IDOR targets: $(wc -l &lt;
+                                params/idor_candidates.txt)"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ PHASE 17 ═══════ -->
+        <div class="phase" id="p17">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">17</div>
+                <h2>Manual Deep Dive</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Goal</h3>
+                    <p>Automation jo nahi dhundh sakta — business logic flaws, chained vulnerabilities, aur
+                        context-based bugs — manually explore karo. Ye step sabse bade bounties deta hai.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">17.1 — Burp Suite Complete Auth Flow Analysis</div>
+                        <div class="step-meta"><span class="step-tool">Burp Suite Pro</span><span
+                                class="badge badge-crit">CRITICAL</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Burp proxy se saare requests capture karo —
+                            auth flow, API calls, headers, cookies. Manually test karo: IDOR, auth bypass, privilege
+                            escalation, business logic.</div>
+                        <div class="cb">
+                            <span class="c"># Burp Suite checklist (manual steps)</span>
+                            1. Proxy pe sab traffic capture karo
+                            2. Site map build karo — Target → Scope add karo
+                            3. Authentication flow:
+                            - Registration → Login → Forgot Password
+                            - OAuth flows → state parameter check karo
+                            - JWT tokens → decode on jwt.io
+
+                            4. Role-based access test:
+                            - User A ka token leke User B ka resource access karo
+                            - Ek low-priv account se high-priv endpoints hit karo
+                            - Har admin endpoint ko user token se hit karo
+
+                            5. API testing:
+                            - Swagger documentation se saare endpoints list
+                            - Har endpoint pe authentication check karo
+                            - HTTP methods change karo (GET→POST→PUT→DELETE)
+                            - Version change karo (/api/v2 → /api/v1)
+
+                            6. Business logic:
+                            - Price manipulation (negative values, floating point)
+                            - Quantity overflow (999999999, -1)
+                            - Coupon/voucher reuse
+                            - Race conditions (concurrent requests)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header" onclick="toggleStep(this)">
+                        <div class="step-check" onclick="toggleCheck(event,this)"></div>
+                        <div class="step-title">17.2 — Final Recon Notes Document</div>
+                        <div class="step-meta"><span class="step-tool">Manual</span><span
+                                class="badge badge-hi">HIGH</span></div>
+                        <span class="step-expand">▼</span>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-purpose"><strong>Purpose:</strong> Har finding note karo — interesting
+                            subdomains, exposed endpoints, secret finds, potential vulnerabilities. Yahi notes report
+                            mein kaam aayenge.</div>
+                        <div class="cb yellow">
+                            <span class="c"># Final notes template</span>
+                            <span class="cmd">cat</span> &gt; notes/FINAL_FINDINGS.md <span class="s">&lt;&lt;
+                                'EOF'</span>
+                            # Recon Summary: $TARGET
+
+                            ## Priority Targets (Manual Testing Needed)
+                            - [ ] admin.target.com [200] — admin panel no auth
+                            - [ ] dev.target.com [200] — dev server, PHP/7.4 outdated
+                            - [ ] api.target.com/v1/users [200 unauthenticated] — user list
+
+                            ## Exposed Secrets
+                            - [ ] AWS Key found in main.js (AKIA...)
+                            - [ ] DB password in .env file at /apps/.env
+
+                            ## Subdomains of Interest
+                            - [ ] staging.target.com — real prod data
+                            - [ ] vpn.target.com — Cisco AnyConnect 4.8 (CVE exists)
+
+                            ## Parameters (Vuln Testing Queue)
+                            - [ ] /search?q= → XSS candidate
+                            - [ ] /api/users?id= → IDOR candidate
+                            - [ ] /redirect?url= → Open Redirect candidate
+
+                            ## Quick Wins Attempted
+                            - [ ] Nuclei scan complete
+                            - [ ] GitDumper on .git/ exposed
+                            - [ ] GraphQL introspection returned full schema
+                            <span class="s">EOF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ MASTER PIPELINE ═══════ -->
+        <div class="phase" id="pipeline">
+            <div class="phase-header" onclick="togglePhase(this)">
+                <div class="phase-num">🚀</div>
+                <h2>Master Automation Pipeline — One Script to Rule All</h2>
+                <span class="phase-toggle open">▼</span>
+            </div>
+            <div class="phase-body">
+                <div class="phase-summary">
+                    <h3>Complete Automation</h3>
+                    <p>Ye script saare passive + active recon steps automatically run karta hai. Target set karo aur
+                        chhod do — kuch minutes mein complete attack surface map ready.</p>
+                </div>
+                <div class="pipeline">
+                    <div class="pipeline-label">master_recon.sh — Full Automation Pipeline</div>
+                    <div class="cb blue">
+                        <span class="c">#!/bin/bash
+                            # ═══════════════════════════════════════════════════
+                            # MASTER RECON PIPELINE — by Elite Bug Bounty Hunter
+                            # Usage: ./master_recon.sh target.com
+                            # ═══════════════════════════════════════════════════</span>
+                        <span class="k">export</span> <span class="a">TARGET</span>=<span class="s">"$1"</span>
+                        <span class="cmd">mkdir</span> <span class="f">-p</span> ~/recon/<span
+                            class="a">$TARGET</span>/{subdomains,live,ports,urls,js,params,endpoints,secrets,screenshots,content,notes}
+                        <span class="cmd">cd</span> ~/recon/<span class="a">$TARGET</span>
+                        <span class="cmd">echo</span> <span class="s">"[*] Starting recon for: $TARGET"</span>
+
+                        <span class="c"># ── PHASE 1: PASSIVE SUBDOMAIN ENUM ────────────────</span>
+                        <span class="cmd">echo</span> <span class="s">"[*] Phase 1: Passive subdomain enum..."</span>
+                        <span class="cmd">subfinder</span> <span class="f">-d</span> <span class="a">$TARGET</span>
+                        <span class="f">-all -silent -o</span> subdomains/subfinder.txt &amp;
+                        <span class="cmd">amass</span> enum <span class="f">-passive -d</span> <span
+                            class="a">$TARGET</span> <span class="f">-o</span> subdomains/amass.txt &amp;
+                        <span class="cmd">assetfinder</span> <span class="f">--subs-only</span> <span
+                            class="a">$TARGET</span> &gt; subdomains/assetfinder.txt &amp;
+                        <span class="cmd">curl</span> <span class="f">-s</span> <span
+                            class="s">"https://crt.sh/?q=%25.$TARGET&amp;output=json"</span> \
+                        | <span class="cmd">python3</span> <span class="f">-c</span> <span class="s">"import
+                            json,sys;[print(n.strip().lstrip('*.')) for c in json.load(sys.stdin) for n in
+                            c['name_value'].split('\n') if '$TARGET' in n]"</span> \
+                        | <span class="cmd">sort</span> <span class="f">-u</span> &gt; subdomains/crtsh.txt &amp;
+                        <span class="k">wait</span>
+                        <span class="cmd">cat</span> subdomains/*.txt | <span class="cmd">sort</span> <span
+                            class="f">-u</span> &gt; subdomains/all_passive.txt
+                        <span class="cmd">echo</span> <span class="s">"[+] Passive: $(wc -l &lt;
+                            subdomains/all_passive.txt) subdomains"</span>
+
+                        <span class="c"># ── PHASE 2: ACTIVE SUBDOMAIN ENUM ─────────────────</span>
+                        <span class="cmd">echo</span> <span class="s">"[*] Phase 2: Brute force +
+                            permutations..."</span>
+                        <span class="cmd">puredns</span> bruteforce ~/wordlists/jhaddix_all.txt <span
+                            class="a">$TARGET</span> \
+                        <span class="f">-r</span> ~/wordlists/resolvers.txt <span class="f">-o</span>
+                        subdomains/puredns.txt
+                        <span class="cmd">cat</span> subdomains/all_passive.txt | <span class="cmd">alterx</span> |
+                        <span class="cmd">puredns</span> resolve \
+                        <span class="f">-r</span> ~/wordlists/resolvers.txt <span class="f">-o</span>
+                        subdomains/alterx.txt
+                        <span class="cmd">cat</span> subdomains/all_passive.txt subdomains/puredns.txt
+                        subdomains/alterx.txt \
+                        | <span class="cmd">sort</span> <span class="f">-u</span> &gt; subdomains/all_combined.txt
+                        <span class="cmd">echo</span> <span class="s">"[+] Combined: $(wc -l &lt;
+                            subdomains/all_combined.txt) subdomains"</span>
+
+                        <span class="c"># ── PHASE 3: DNS RESOLUTION + LIVE PROBING ─────────</span>
+                        <span class="cmd">echo</span> <span class="s">"[*] Phase 3: DNS resolution + HTTP
+                            probing..."</span>
+                        <span class="cmd">dnsx</span> <span class="f">-l</span> subdomains/all_combined.txt <span
+                            class="f">-silent -a -cname -o</span> subdomains/resolved.txt
+                        <span class="cmd">httpx</span> <span class="f">-l</span> subdomains/resolved.txt \
+                        <span class="f">-title -status-code -tech-detect -content-length -web-server -follow-redirects
+                            -threads</span> <span class="a">50</span> \
+                        <span class="f">-o</span> live/httpx_results.txt
+                        <span class="cmd">cat</span> live/httpx_results.txt | <span class="cmd">cut</span> <span
+                            class="f">-d' '</span> <span class="f">-f1</span> &gt; live/live_urls.txt
+                        <span class="cmd">echo</span> <span class="s">"[+] Live hosts: $(wc -l &lt;
+                            live/live_urls.txt)"</span>
+
+                        <span class="c"># ── PHASE 4: PORT SCAN ──────────────────────────────</span>
+                        <span class="cmd">echo</span> <span class="s">"[*] Phase 4: Port scanning..."</span>
+                        <span class="cmd">cat</span> live/httpx_results.txt | <span class="cmd">sed</span> <span
+                            class="s">'s|https\?://||'</span> | <span class="cmd">cut</span> <span class="f">-d/</span>
+                        <span class="f">-f1</span> | <span class="cmd">sort</span> <span class="f">-u</span> &gt;
+                        live/hosts_only.txt
+                        <span class="cmd">naabu</span> <span class="f">-l</span> live/hosts_only.txt \
+                        <span class="f">-p</span> <span
+                            class="a">80,443,8080,8443,8888,8000,9000,9090,3000,5000,4443,6443,2375,9200,5601,3306,5432,6379</span>
+                        \
+                        <span class="f">-silent -o</span> ports/naabu.txt
+
+                        <span class="c"># ── PHASE 5: CONTENT DISCOVERY ──────────────────────</span>
+                        <span class="cmd">echo</span> <span class="s">"[*] Phase 5: Content discovery..."</span>
+                        <span class="cmd">ffuf</span> <span class="f">-u</span> <span
+                            class="s">"https://$TARGET/FUZZ"</span> \
+                        <span class="f">-w</span> ~/wordlists/critical_paths.txt \
+                        <span class="f">-mc</span> <span class="a">200,201,204,301,302,401,403</span> <span
+                            class="f">-t</span> <span class="a">50</span> <span class="f">-silent -o</span>
+                        content/ffuf.json <span class="f">-of</span> json
+
+                        <span class="c"># ── PHASE 6: URL COLLECTION ─────────────────────────</span>
+                        <span class="cmd">echo</span> <span class="s">"[*] Phase 6: URL collection..."</span>
+                        <span class="cmd">waymore</span> <span class="f">-i</span> <span class="a">$TARGET</span> <span
+                            class="f">-mode U -oU</span> urls/waymore.txt 2&gt;/dev/null
+                        <span class="cmd">katana</span> <span class="f">-u</span> https://<span class="a">$TARGET</span>
+                        <span class="f">-depth</span> <span class="a">3</span> <span class="f">-jc -silent -o</span>
+                        urls/katana.txt
+                        <span class="cmd">cat</span> urls/waymore.txt urls/katana.txt | <span class="cmd">sort</span>
+                        <span class="f">-u</span> &gt; urls/MASTER_URLS.txt
+                        <span class="cmd">echo</span> <span class="s">"[+] URLs: $(wc -l &lt;
+                            urls/MASTER_URLS.txt)"</span>
+
+                        <span class="c"># ── PHASE 7: JS ANALYSIS ────────────────────────────</span>
+                        <span class="cmd">echo</span> <span class="s">"[*] Phase 7: JS analysis..."</span>
+                        <span class="cmd">grep</span> <span class="f">-E</span> <span class="s">"\.js$"</span>
+                        urls/MASTER_URLS.txt | <span class="cmd">grep</span> <span class="f">-v</span> <span
+                            class="s">".json"</span> &gt; js/all_js.txt
+                        <span class="cmd">cat</span> js/all_js.txt | <span class="cmd">while</span> read url; <span
+                            class="k">do</span>
+                        <span class="cmd">curl</span> <span class="f">-sk</span> <span class="s">"$url"</span> | <span
+                            class="cmd">jsluice</span> urls 2&gt;/dev/null
+                        <span class="k">done</span> | <span class="cmd">sort</span> <span class="f">-u</span> &gt;
+                        endpoints/js_endpoints.txt
+                        <span class="cmd">grep</span> <span class="f">-rE</span> <span
+                            class="s">"AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{35}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+"</span>
+                        \
+                        js/ &gt; secrets/js_secrets.txt
+
+                        <span class="c"># ── PHASE 8: NUCLEI SCAN ────────────────────────────</span>
+                        <span class="cmd">echo</span> <span class="s">"[*] Phase 8: Nuclei scan..."</span>
+                        <span class="cmd">nuclei</span> <span class="f">-l</span> live/live_urls.txt <span
+                            class="f">-s</span> critical,high <span class="f">-silent -o</span>
+                        notes/nuclei_crithigh.txt
+
+                        <span class="c"># ── DONE ────────────────────────────────────────────</span>
+                        <span class="cmd">echo</span> <span class="s">"[✅] RECON COMPLETE FOR: $TARGET"</span>
+                        <span class="cmd">echo</span> <span
+                            class="s">"──────────────────────────────────────────"</span>
+                        <span class="cmd">echo</span> <span class="s">"Subdomains: $(wc -l &lt;
+                            subdomains/all_combined.txt)"</span>
+                        <span class="cmd">echo</span> <span class="s">"Live hosts: $(wc -l &lt;
+                            live/live_urls.txt)"</span>
+                        <span class="cmd">echo</span> <span class="s">"Total URLs: $(wc -l &lt;
+                            urls/MASTER_URLS.txt)"</span>
+                        <span class="cmd">echo</span> <span class="s">"Endpoints: $(wc -l &lt;
+                            endpoints/js_endpoints.txt)"</span>
+                        <span class="cmd">echo</span> <span class="s">"Secrets: $(wc -l &lt;
+                            secrets/js_secrets.txt)"</span>
+                        <span class="cmd">echo</span> <span class="s">"Nuclei hits: $(wc -l &lt;
+                            notes/nuclei_crithigh.txt)"</span>
+                        <span class="cmd">echo</span> <span
+                            class="s">"──────────────────────────────────────────"</span>
+                    </div>
+                </div>
+                <div class="insight">Save this as <code>master_recon.sh</code> → <code>chmod +x master_recon.sh</code> →
+                    <code>./master_recon.sh target.com</code> — Ek command mein complete Phase 1-8 automated. Manual
+                    phases (9-17) ke liye output files use karo.</div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Toggle phase collapse
+        function togglePhase(header) {
+            const body = header.nextElementSibling;
+            const toggle = header.querySelector('.phase-toggle');
+            if (body.classList.contains('collapsed')) { body.classList.remove('collapsed'); toggle.classList.add('open'); }
+            else { body.classList.add('collapsed'); toggle.classList.remove('open'); }
+        }
+        // Toggle step body
+        function toggleStep(header) {
+            const body = header.nextElementSibling;
+            const expand = header.querySelector('.step-expand');
+            body.classList.toggle('open');
+            expand.classList.toggle('open');
+        }
+        // Toggle checkbox
+        function toggleCheck(e, box) {
+            e.stopPropagation();
+            box.classList.toggle('done');
+            updateProgress();
+        }
+        // Mini checkboxes
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('mc-box')) {
+                e.target.classList.toggle('done');
+                if (e.target.classList.contains('done')) e.target.textContent = '✓';
+                else e.target.textContent = '';
+                updateProgress();
+            }
+        });
+        // Progress calculation
+        function updateProgress() {
+            const all = document.querySelectorAll('.step-check');
+            const done = document.querySelectorAll('.step-check.done');
+            const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
+            document.getElementById('prog-pct').textContent = pct + '%';
+            document.getElementById('prog-fill').style.width = pct + '%';
+        }
+        // Sidebar active link highlight
+        window.addEventListener('scroll', function () {
+            const phases = document.querySelectorAll('.phase');
+            const links = document.querySelectorAll('nav a');
+            let current = '';
+            phases.forEach(p => { if (window.scrollY >= p.offsetTop - 80) current = '#' + p.id; });
+            links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === current); });
+        });
+    </script>
+</body>
+
+</html>

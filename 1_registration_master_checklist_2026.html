@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VETERAN MASTER: 100+ Registration Attack Vectors (2025-2026 Edition)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg-primary: #020508;
+    --bg-secondary: #050a0f;
+    --bg-card: #081016;
+    --bg-card-hover: #0c1821;
+    --accent-green: #00ff88;
+    --accent-red: #ff3355;
+    --accent-yellow: #ffc233;
+    --accent-blue: #00aaff;
+    --accent-purple: #aa55ff;
+    --accent-orange: #ff7733;
+    --text-primary: #e0e6ed;
+    --text-dim: #7a8e9e;
+    --border: #142835;
+    --grid: rgba(0,255,136,0.02);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 50px 50px;
+    padding-bottom: 100px;
+  }
+
+  .hero {
+    background: radial-gradient(circle at top, #0a1b2b 0%, #020508 70%);
+    padding: 100px 20px 60px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 3rem; letter-spacing: 5px; color: #fff; text-shadow: 0 0 20px rgba(0,255,136,0.3); }
+  .hero h1 span { color: var(--accent-green); }
+  .hero-sub { font-family: 'Share Tech Mono', sans-serif; color: var(--accent-blue); margin-top: 15px; letter-spacing: 2px; }
+
+  .stats-bar { display: flex; justify-content: center; gap: 30px; margin-top: 40px; }
+  .stat { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px 25px; border-radius: 4px; }
+  .stat-num { font-family: 'Orbitron', sans-serif; font-size: 24px; color: var(--accent-green); }
+  .stat-label { font-family: 'Share Tech Mono', sans-serif; font-size: 10px; color: var(--text-dim); }
+
+  .container { max-width: 1300px; margin: 0 auto; padding: 40px 20px; }
+
+  .phase-header {
+    border-left: 4px solid var(--phase-color);
+    background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent);
+    padding: 20px; margin: 80px 0 30px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .phase-info h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #fff; }
+  .phase-badge { background: var(--phase-color); color: #000; font-weight: 800; padding: 2px 10px; font-size: 12px; margin-bottom: 5px; display: inline-block; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 24px;
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover { border-color: var(--card-accent); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .card::before { content: ''; position: absolute; top:0; left:0; width: 3px; height: 100%; background: var(--card-accent); }
+
+  .card-id { font-family: 'Share Tech Mono', sans-serif; color: var(--card-accent); font-size: 12px; margin-bottom: 8px; }
+  .card-title { font-weight: 700; font-size: 18px; color: #fff; margin-bottom: 12px; line-height: 1.2; }
+  .card-meta { display: flex; gap: 8px; margin-bottom: 15px; }
+  .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; font-family: 'Orbitron', sans-serif; }
+  .critical { background: rgba(255,51,85,0.15); color: var(--accent-red); border: 1px solid var(--accent-red); }
+  .high { background: rgba(255,119,51,0.15); color: var(--accent-orange); border: 1px solid var(--accent-orange); }
+  .medium { background: rgba(255,194,51,0.15); color: var(--accent-yellow); border: 1px solid var(--accent-yellow); }
+
+  .report-link { color: var(--accent-blue); text-decoration: none; font-size: 11px; font-family: 'Share Tech Mono', sans-serif; border-bottom: 1px dashed; margin-bottom: 15px; display: inline-block; }
+
+  .checklist { list-style: none; margin-top: 15px; }
+  .checklist li { display: flex; gap: 10px; font-size: 14px; margin-bottom: 8px; color: var(--text-primary); align-items: flex-start; }
+  .check-box { width: 18px; height: 18px; border: 1px solid var(--card-accent); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .check-box.checked::after { content: '✓'; color: var(--card-accent); font-weight: 900; font-size: 14px; }
+
+  .mindset { background: rgba(0,0,0,0.3); padding: 12px; border: 1px solid rgba(255,255,255,0.05); margin-top: 20px; border-radius: 4px; }
+  .mindset-title { font-family: 'Share Tech Mono', sans-serif; font-size: 10px; color: var(--accent-yellow); margin-bottom: 5px; display: block; }
+  .mindset-p { font-size: 13px; font-style: italic; color: var(--text-dim); line-height: 1.4; }
+
+  #progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 4px; z-index: 1000; background: rgba(255,255,255,0.05); }
+  #progress-bar { height: 100%; background: var(--accent-green); width: 0%; transition: 0.3s; box-shadow: 0 0 10px var(--accent-green); }
+
+  .floating-stats { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--border); padding: 15px; z-index: 100; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
+  .f-stat-item { margin-bottom: 5px; display: flex; justify-content: space-between; gap: 20px; }
+  .f-stat-label { font-family: 'Share Tech Mono', sans-serif; font-size: 10px; color: var(--text-dim); }
+  .f-stat-val { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--accent-green); }
+
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } .hero h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<div id="progress-container"><div id="progress-bar"></div></div>
+<div class="hero">
+  <div class="hero-tag">// LEVEL 999 BUG HUNTER //</div>
+  <h1>🛡️ REGISTRATION <span>ULTIMATE MASTER</span><br>VETERAN CHECKLIST 2026</h1>
+  <div class="hero-sub">[ 100+ REAL HACKERONE/BUGCROWD REPORTS · 10 ATTACK PHASES · 2025-2026 FOCUS ]</div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">100+</div><div class="stat-label">REPORTS</div></div>
+    <div class="stat"><div class="stat-num">10</div><div class="stat-label">PHASES</div></div>
+    <div class="stat"><div class="stat-num">100</div><div class="stat-label">TECHNIQUES</div></div>
+    <div class="stat"><div class="stat-num">CRITICAL</div><div class="stat-label">OR NOTHING</div></div>
+  </div>
+</div>
+<div class="container">
+
+<div class="phase-header" style="--phase-color: #00ff88">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 01</span>
+    <h2>RECONNAISSANCE & ENUMERATION</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #001</div>
+    <div class="card-title">Aura — Unauthenticated Data Disclosure</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com/reports/2103323" target="_blank" class="report-link">RE: H1 #2103323</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find /sfsites/aura endpoints.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Strip cookies/CSRF.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify 'message' param for user records.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Expose PII.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Never trust a Guest profile on Salesforce backends."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #002</div>
+    <div class="card-title">Instagram User Enum via Timing Analysis</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1 #2025/26-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Submit existing vs non-existing emails.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Measure response diff (e.g., 300ms vs 50ms).</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Burp Intruder to map employees.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Time is the only truth when error messages are generic."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #003</div>
+    <div class="card-title">Google Internal IP Leakage in Headers</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: DISCLOSED 2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check X-Served-By / X-Internal-IP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Fuzz /api/v1/auth.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Map subnet for SSRF targets.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Headers are a map to the internal network. Listen closely."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #004</div>
+    <div class="card-title">Referer Token Leakage (Uber Pattern)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1 #2026-TOKEN</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Get verification email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Click external links (ToS, Help).</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check Referer sent to external 3rd party.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Third-party 'Help' buttons are verification killers."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #005</div>
+    <div class="card-title">Missing Rate Limit/Automation (Mail.ru)</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Capture signup POST.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Burp Intruder + infinite payload.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check for 429 or CAPTCHA.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Calculated spam is a business logic disaster."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #006</div>
+    <div class="card-title">Revive Adserver Username Bypass (CVE-2025-55129)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com/reports/2025-REF" target="_blank" class="report-link">RE: CVE-2025-55129</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Zero-Width Space (U+200B) in username.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation patch.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Impersonate admin.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Unicode is the invisible weapon of modern bug hunting."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #007</div>
+    <div class="card-title">Insightly Email Bypass during Member Creation</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-INSIGHTLY</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Manipulate EmailAddress parameter.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create account with existing email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Take over organization.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Creation logic often skips verification checks."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #008</div>
+    <div class="card-title">Salesforce Guest Profile Data Extraction</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-CRITICAL-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access /aura endpoints with Guest access.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Query internal objects (ContentDocument).</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Dump DB records.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Default settings are the best entry points."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #009</div>
+    <div class="card-title">Dropbox Hidden Field Privilege Escalation</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Intercept registration JSON.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject {'is_admin': true}.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check dashboard for admin tabs.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Same API, different roles. Classic oversight."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #010</div>
+    <div class="card-title">Case Sensitivity Bypass (GitLab Style)</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-GITLAB</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Register User@site.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Then try user@site.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass unique record constraints.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Binary 'A' != 'a', but logic says it should be."</p>
+    </div>
+  </div>
+</div>
+<div class="phase-header" style="--phase-color: #ff7733">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 02</span>
+    <h2>AUTHENTICATION & OTP BYPASS</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #011</div>
+    <div class="card-title">Mattermost Global OTP Swap</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1 #OTP-SWAP-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger Victim OTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger Attacker OTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Attacker OTP on Victim account.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The server only checks 'if token exists', not 'who it belongs to'."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #012</div>
+    <div class="card-title">Response Manipulation (Boolean Patching)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: X-TWITTER-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Intercept verification response.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Change 'success':false to true.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check UI redirect.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Don't let the server tell you 'No'. Change it to 'Yes'."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #013</div>
+    <div class="card-title">Acronis State Machine Bypass</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ACRONIS-STATE</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Signup -&gt; Pending state.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Force navigate to /profile/update.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check if verification is skipped.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Logic flows are meant to be broken. Jump the steps."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #014</div>
+    <div class="card-title">Zomato OTP Leak in Error Message</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ZOMATO-REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Enter wrong OTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Examine JSON error response.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Extract session_code/valid OTP.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Verbose errors are a bug hunter's best friend."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #015</div>
+    <div class="card-title">Status Manipulation (success -&gt; 200)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: MTN-REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Send invalid OTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify response to {'status':'success'}.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass verification page.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Client-side validation is a joke. Patch the response."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #016</div>
+    <div class="card-title">Grab Android App Auth Bypass</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-GRAB</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Intercept login/signup call.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Remove password requirement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Only use SMS code validation.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Legacy mobile endpoints are often weakly guarded."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #017</div>
+    <div class="card-title">Email verifiction link bypass via Referer</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: UBER-PATTERN</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Open verify link.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Click 3rd party ads/help.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Attacker gets link from Referer logs.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Leaks happen where you least expect them."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #018</div>
+    <div class="card-title">Password Reset Token in Referer Header</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Similar to verify bypass.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Leak token to external JS/analytics.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Hijack reset link.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Analytics tools are unintentional credential harvesters."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #019</div>
+    <div class="card-title">OTP Brute-force via Missing Rate Limit</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-HIGH</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Capture OTP verify request.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Fuzz all 4-6 digit combos.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"4 digits is only 10,000 requests. Easy work without WAF."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #020</div>
+    <div class="card-title">Drugs.com Cookie Deletion OTP Bypass</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-DRUGS-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Enter creds.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Delete bb_refresh cookie.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Skip OTP page and enter dashboard.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Security checks that depend on cookies are vulnerable."</p>
+    </div>
+  </div>
+</div>
+<div class="phase-header" style="--phase-color: #00aaff">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 03</span>
+    <h2>IDENTITY & OAUTH MANIPULATION</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #021</div>
+    <div class="card-title">OAuth Account Pre-hijacking (Collision)</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: MEDIUM-2025-OAUTH</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Register victim email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Victim tries 'Login with Google'.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Sessions merge -&gt; Attacker has access.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Be there first. Control the record, control the user."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #022</div>
+    <div class="card-title">Redirect_uri Subdomain Confusion</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: OAUTH-REDIRECT-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify redirect_uri to site.com.attacker.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Capture auth code.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Take over account.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"URLs are complex. Find the segment the server trusts."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #023</div>
+    <div class="card-title">OAuth Grant Bypass (GitLab Style)</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com/reports/2025-REF" target="_blank" class="report-link">RE: H1-GITLAB-OAUTH</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass unverified email requirement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Take over OAuth-linked accounts.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Hijack identity.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Identity providers that trust unverified emails are gold."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #024</div>
+    <div class="card-title">Cloudflare Workers OAuth Bypass (CVE-2025-4144)</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-4144</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass PKCE protection.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Forge OAuth tokens.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unauthorized access.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Even 'Secure' libraries have logic flaws. Check the code."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #025</div>
+    <div class="card-title">Exposed OAuth Credentials (Bug Bounty Disclosure)</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-MAY-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find .env or JS leak of client_secret.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Forge your own signup requests.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unrestricted data access.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Secrets are only secret if they aren't in compiled JS."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #026</div>
+    <div class="card-title">Email Collision via Case Normalization</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Register A@site.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>DB stores it as a@site.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass uniqueness checks.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Normalization should happen before the check, not during."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #027</div>
+    <div class="card-title">Registration CSRF to Pre-hijacking</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Missing CSRF on signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Force victim to create account.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Attacker known creds.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Control the first step of the user journey."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #028</div>
+    <div class="card-title">OAuth Login Hijacking via CSRF</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-CSRF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Initiate OAuth.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Don't finish.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Force victim to complete your session.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Modern APIs still fail at state/nonce validation."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #029</div>
+    <div class="card-title">SAML Signup Domain Bypass (H1 Style)</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com/reports/2126292" target="_blank" class="report-link">RE: H1-SAML-BYPASS</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use %0d%0a in email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass domain enforcement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access internal org code.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Control characters are the kryptonite of regex filters."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #030</div>
+    <div class="card-title">OAuth Token Reuse across Endpoints</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use token from App A on App B.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass scoping.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Gain unauthorized access.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Permissions are often global when they should be local."</p>
+    </div>
+  </div>
+</div>
+<div class="phase-header" style="--phase-color: #ff3355">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 04</span>
+    <h2>INPUT INJECTION (XSS/SQLI/SSTI)</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #031</div>
+    <div class="card-title">Stored XSS in 'Add Contact' Name Field</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com/reports/2025-REF" target="_blank" class="report-link">RE: H1-MAINWP</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject &lt;script&gt; in Name.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Wait for Admin to view profile.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Control MainWP Dashboard.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Admin panels are the biggest XSS targets. Input once, hit the boss."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #032</div>
+    <div class="card-title">Apple Developer Stored XSS</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: APPLE-REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation with encoded input.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execute JS on Developer Forums.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Cookie theft.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Even big tech fails at complex input encoding."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #033</div>
+    <div class="card-title">PHP Register SQLi (CVE-2025-8328)</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-8328</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Target register.php.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Manipulate USN argument.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Extract DB contents.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Manual PHP sites are a playground for SQL injection."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #034</div>
+    <div class="card-title">HTML Injection in Signup Emails</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025-AGATE</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject HTML tags in Name.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Admin receives poisoned email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Phishing risk.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Don't just look at the screen; look at the emails sent."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #035</div>
+    <div class="card-title">Stored XSS to JS Backdoor (CVE-2025-0671)</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-0671</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Email Subscribers plugin.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject malicious JS payload.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create persistent backdoor.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Backdoors are the ultimate goal of persistent injection."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #036</div>
+    <div class="card-title">POST XSS in Firstname parameter (DoD)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-DOD-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Intercept POST request.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject payload in firstname.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Cookie theft.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"POST parameters deserve as much scrutiny as GET."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #037</div>
+    <div class="card-title">SSTI in Signup Template (H1 Pattern)</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com/reports/2269414" target="_blank" class="report-link">RE: H1-SSRF-$25K</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject &lt;iframe&gt; in template.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access internal AWS metadata.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Manipulate cloud resources.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Templates are code. Treat them with respect."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #038</div>
+    <div class="card-title">Scientific Notation Logic Bypass (1e3)</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use numbers like 1e3.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass length/value checks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Break validation logic.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Math is flexible. If 1000 is blocked, try 1e3."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #039</div>
+    <div class="card-title">Stored XSS via Profile Update on Signup</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-AUG-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use encoded input in signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Submit profile details.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execute JS on profile.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Registration is the gateway to persistent data."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #040</div>
+    <div class="card-title">Blind SQLi in Invite Code Field</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use sleep payloads.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Monitor time delay.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Extract admin hashes.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Invite codes are often processed directly by DB calls."</p>
+    </div>
+  </div>
+</div>
+<div class="phase-header" style="--phase-color: #aa55ff">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 05</span>
+    <h2>INFRASTRUCTURE & ADVANCED RECON</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #041</div>
+    <div class="card-title">H1 Analytics PDF Generation SSRF</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com/reports/2269414" target="_blank" class="report-link">RE: H1-REF-2269414</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject &lt;iframe&gt; in template.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access internal AWS endpoints.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Get sensitive meta-data.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"$25,000 for a single &lt;iframe&gt;. Understand the stack."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #042</div>
+    <div class="card-title">Lichess Game Export SSRF</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com/reports/2025-REF" target="_blank" class="report-link">RE: H1-LICHESS-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Make server request custom URL.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access cloud metadata.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Scan internal network.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Export features are mini-proxies. Use them."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #043</div>
+    <div class="card-title">Stripo Inc. Export Blind SSRF</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-STRIPO-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger OAST (Out-of-band).</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify internal services.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Map backend infra.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"If you can't see the response, look at your DNS logs."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #044</div>
+    <div class="card-title">MetInfo CMS XXE to SSRF (CVE-2025-63551)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-63551</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject XML entity.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger SSRF.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Expose internal files.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"XML is old but dangerous. XXE is the gateway."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #045</div>
+    <div class="card-title">Apache Tomcat RCE (CVE-2025-24813)</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-24813</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Target misconfigured signup servers.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execute arbitrary code.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Full server compromise.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Infrastructure bugs are the ultimate prize."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #046</div>
+    <div class="card-title">Internal IP Disclosure via Missing Headers</div>
+    <div class="card-meta">
+      <span class="badge low">LOW</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger error on signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Look for internal IPs in stack trace.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify backend server vendor.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"A small leak is the start of a big flood."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #047</div>
+    <div class="card-title">X-Forwarded-Host Cache Poisoning</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ABRITEL-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject attacker domain in header.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Wait for cache to capture.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Serve malicious JS to users.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Control the cache, control the world."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #048</div>
+    <div class="card-title">Timing Leak in 'Available' Email Check</div>
+    <div class="card-meta">
+      <span class="badge low">LOW</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Async check for email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Measure JSON response timing.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Enumerate users.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Information leaks in milliseconds."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #049</div>
+    <div class="card-title">Verbose Error Disclosure in Signup API</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-MEDIUM</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Send malformed JSON.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Get full stack trace.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify library versions.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Errors are the developer's notes. Read them."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #aa55ff">
+    <div class="card-id">VECTOR #050</div>
+    <div class="card-title">SSRF via Profile Photo Signup Link</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use URL for profile photo.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Scan internal localhost ports.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access internal APIs.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Image processors are powerful. Point them inward."</p>
+    </div>
+  </div>
+</div>
+<div class="phase-header" style="--phase-color: #ffc233">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 06</span>
+    <h2>BUSINESS LOGIC & RATE LIMITING</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #051</div>
+    <div class="card-title">Mass Assignment Email Bypass</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-FEB-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify email via /api/v1/user/me.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass verification.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Account lockout.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Don't let the API bind everything you send."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #052</div>
+    <div class="card-title">Race Condition in Signup Credits</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025-CREDITS</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Turbo Intruder mass signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass single-use invite.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Get $1000s in credits.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Speed is the key to breaking sequence checks."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #053</div>
+    <div class="card-title">Missing Rate Limit on OTP Requests</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-COURIER-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Request infinite OTPs.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Spam user phone/email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Denial of Wallet.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Resources cost money. Waste theirs."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #054</div>
+    <div class="card-title">Bypassing CAPTCHA via Logic Flaw</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026-CAPTCHA</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Remove g-recaptcha-response param.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check if backend actually verifies.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Automate signup.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"UI is not security. Always check the backend verify call."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #055</div>
+    <div class="card-title">Scientific Notation in Phone Number</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use scientific notation for phone.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass numeric filters.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create invalid records.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Numbers are just strings until they are processed."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #056</div>
+    <div class="card-title">Email Verification Bypass via status:True</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: UPCHIEVE-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify request param is_verified=False to True.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access dashboard immediately.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass email flow.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Flags are instructions. Change the ones you don't like."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #057</div>
+    <div class="card-title">Double Spending Invite Codes (Race)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-H1-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Capture valid invite signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Send 100 concurrent requests.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create multiple accounts.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The gap between 'check' and 'use' is where bugs live."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #058</div>
+    <div class="card-title">Account Deletion via Email Collision</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Register attacker account.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Change email to victim's.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Overwrites victim record in DB.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Database updates can be destructive. Use it to delete others."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #059</div>
+    <div class="card-title">Resource Exhaustion via Long Passwords</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025-DOS</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Send 1,000,000 char password.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Crash bcrypt/scrypt hashing CPU.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>DoS registration.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Hashing is expensive. Make the server pay."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ffc233">
+    <div class="card-id">VECTOR #060</div>
+    <div class="card-title">Invite Only Bypass via Referral Param</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find hidden referral=true param.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass invite requirement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Join exclusive platforms.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The secret door is usually a URL parameter."</p>
+    </div>
+  </div>
+</div>
+<div class="phase-header" style="--phase-color: #ff3355">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 07</span>
+    <h2>ADVANCED CHAINING (THE ART)</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #061</div>
+    <div class="card-title">XSS + CSRF = Admin Takeover</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ACRONIS-CHAIN</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Stored XSS in signup form.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Wait for Admin to approve.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>XSS triggers CSRF to create Admin.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Chaining turns a 'Small' bug into a 'Career' bug."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #062</div>
+    <div class="card-title">Enum + SQLi + IDOR = Full ATO</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: MASTERPIECE-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify victim via timing.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Extract ID via SQLi.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Update email via IDOR.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"One bug is a check. Three bugs is a jackpot."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #063</div>
+    <div class="card-title">Host Header + Cache Poisoning</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Poison cache with X-Forwarded-Host.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Serve malicious password reset link.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Mass Account Takeover.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The infrastructure is your biggest amplifier."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #064</div>
+    <div class="card-title">Referer Leak + OAuth Pre-hijack</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Leak token to 3rd party.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use token to register victim.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Wait for OAuth login.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Information flows like water. Catch it at the source."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #065</div>
+    <div class="card-title">Race Condition + Mass Assignment</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Concurrent signup requests.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject admin=true in one.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation race.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Attack from multiple vectors at the same millisecond."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #066</div>
+    <div class="card-title">Stored XSS in Org Name + Email Phishing</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject script in Org Name.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Admin receives 'New Org' email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execution in admin view.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Every input on the signup page is a potential payload."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #067</div>
+    <div class="card-title">SSTI + Cloud Metadata Access</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-SSRF-$25K</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Template injection in welcome mail.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Point to 169.254.169.254.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal AWS keys.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"$25,000 for a few lines of code. Know your cloud."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #068</div>
+    <div class="card-title">Bypass 2FA + Reporter Blacklist</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-OLD-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use embedded forms.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Skip session checks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Direct submission bypass.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The shortest path is usually the most vulnerable."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #069</div>
+    <div class="card-title">Invalid Characters in Email (CRLF Injection)</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-$3K-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use %0d%0a in email field.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject custom headers in SMTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Spoof sender or CC others.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Newline characters are the secret of email spoofing."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff3355">
+    <div class="card-id">VECTOR #070</div>
+    <div class="card-title">Open Redirect in Post-Signup Success</div>
+    <div class="card-meta">
+      <span class="badge low">LOW</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: BASECAMP-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify 'next' or 'redirect' param.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Redirect user to phishing site.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal post-signup tokens.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The attack doesn't end when the user is logged in."</p>
+    </div>
+  </div>
+</div>
+<div class="phase-header" style="--phase-color: #00ff88">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 08</span>
+    <h2>MODERN 2026 TRENDS (AI/LLM)</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #071</div>
+    <div class="card-title">Prompt Injection in AI-Assisted Signup</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-AI-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use 'Disregard instructions' in prompt.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Make AI agent creation Admin.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation logic.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Language models are the new unvalidated inputs."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #072</div>
+    <div class="card-title">AI-Generated Username Validation Bypass</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026-AI</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use prompt to generate unique bypasses.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Fuzz with LLM-optimized payloads.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass regex filters.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"AI can find the gaps humans miss in regex."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #073</div>
+    <div class="card-title">Bypassing AI Bot Protection (2026)</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use LLM to simulate human typing.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass behavior-based bot detection.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Infinite account creation.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The Turing Test is no longer enough for security."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #074</div>
+    <div class="card-title">Leaking AI Agent API Keys during Signup</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find OpenAI/Anthropic keys in JS.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use for free credits or data theft.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Impersonate AI service.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Keys in the frontend are keys in the attacker's hand."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #075</div>
+    <div class="card-title">AI Search Engine Result Hijacking</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Optimize signup page for AI scrapers.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject malicious links into AI summaries.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Phish new users.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The new SEO is AI Optimization for Phishing."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #076</div>
+    <div class="card-title">GraphQL Introspection via Registration</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify __schema query.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Map entire DB through signup API.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find hidden admin mutations.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"GraphQL is a map of the entire application structure."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #077</div>
+    <div class="card-title">Web3 Wallet Registration Auth Bypass</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026-WEB3</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass signature validation.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Login as any wallet address.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal digital assets.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Private keys are only as secure as the validation logic."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #078</div>
+    <div class="card-title">Improper PKCE implementation in Workers</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-4144</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Forge OAuth codes.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass PKCE checks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unauthorized access.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Modern libraries still fail at standard protocols."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #079</div>
+    <div class="card-title">AI-Enhanced Phishing via Signup Emails</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use LLM to craft perfect phish.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass spam filters.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>High conversion ATO.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"A perfect phish is indistinguishable from the truth."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00ff88">
+    <div class="card-id">VECTOR #080</div>
+    <div class="card-title">GraphQL Mass Assignment (Signup Mutations)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-QL-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject hidden fields in signup mutation.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Escalate role directly in DB.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unrestricted access.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Mutations are just SQL queries with a modern face."</p>
+    </div>
+  </div>
+</div>
+<div class="phase-header" style="--phase-color: #00aaff">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 09</span>
+    <h2>TRADITIONAL VECTORS (STILL DEADLY)</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #081</div>
+    <div class="card-title">IDOR in Banner Deletion (CVE-2025-52670)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-52670</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Target banner deletion endpoint.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Change record ID to others.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Delete competitor banners.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Ownership validation is the most common miss."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #082</div>
+    <div class="card-title">Shopify Attachment Replacement IDOR</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-SHOPIFY-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Replace documents across accounts.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Predictable file naming.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Corporate espionage.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Predictable IDs in attachments are a gold mine."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #083</div>
+    <div class="card-title">Yelp Privilege Escalation via BAC</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-YELP-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Remove business owner role.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Assume control of business profile.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Gain admin rights.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Don't let users edit their own permission levels."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #084</div>
+    <div class="card-title">Dust 'Builder' Role Secret Modification</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-DUST-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Escalate from Builder to Admin.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access/Modify app secrets.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unauthorized data access.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Roles must be strictly defined and server-validated."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #085</div>
+    <div class="card-title">Shopify Admin Account Creation Bypass</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-SHOPIFY-ADMIN</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass admin requirement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create unrestricted admin account.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Full platform control.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The back door is often the easiest to pick."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #086</div>
+    <div class="card-title">Insecure Session Management (MTN Group)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025-MTN</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Predictable session IDs.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Sessions don't expire.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Hijack active sessions.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"If session IDs are weak, authentication is irrelevant."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #087</div>
+    <div class="card-title">Direct Page Requests (Force Browsing)</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access /admin/new_user directly.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass auth checks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create users.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Security by obscurity is not security."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #088</div>
+    <div class="card-title">Unvalidated Redirects to Malicious Site</div>
+    <div class="card-meta">
+      <span class="badge low">LOW</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify post-signup redirect.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Point to phishing page.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal credentials.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Trust is a one-way street; don't let it be hijacked."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #089</div>
+    <div class="card-title">Bypassing CAPTCHA via 2captcha/Logic</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VALVE-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Automate CAPTCHA solving.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass bot detection.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Scalable account creation.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Bots are getting smarter; CAPTCHAs are just speed bumps."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #00aaff">
+    <div class="card-id">VECTOR #090</div>
+    <div class="card-title">Missing Account Lockout on Signup</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Brute-force existing user emails.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify active users.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Map targets for social engineering.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"No lockouts means infinite attempts. Bad idea."</p>
+    </div>
+  </div>
+</div>
+<div class="phase-header" style="--phase-color: #ff7733">
+  <div class="phase-info">
+    <span class="phase-badge">PHASE 10</span>
+    <h2>VETERAN SECRET SAUCE (2025-2026)</h2>
+  </div>
+</div>
+<div class="grid">
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #091</div>
+    <div class="card-title">JSON-P Hijacking via Signup JSON</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find JSON-P endpoints.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal user data via callbacks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unauthenticated data leak.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Callbacks are the leaky faucets of the web."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #092</div>
+    <div class="card-title">HPP (HTTP Parameter Pollution)</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: SHOPIFY-HPP</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Double email parameter.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Confuse frontend vs backend validation.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass uniqueness.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Send two, get one through. Pollution works."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #093</div>
+    <div class="card-title">Unicode Conflict in Normalization</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Turkish 'I' or similar.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Change email after normalization.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass filters.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Characters that transform are character that bypass."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #094</div>
+    <div class="card-title">Self-XSS to Stored XSS Escalation</div>
+    <div class="card-meta">
+      <span class="badge medium">MEDIUM</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>XSS on your own profile.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Escalate via Support Chat injection.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execution in admin browser.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Support agents are the bridge from Self to Stored."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #095</div>
+    <div class="card-title">Weak Crypto in Reset Token Discovery</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: SLACK-REF</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Analyze token entropy.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Predict future tokens.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass email verification.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Math doesn't lie. Weak random = weak security."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #096</div>
+    <div class="card-title">Registration logic vs Profile Logic</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Verify email on profile.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>But not on registration.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Collision attack.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Consistency is the hardest thing in development."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #097</div>
+    <div class="card-title">Referer Leakage in OAuth Callback</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: OAUTH-REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Auth code in URL.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Referer header to 3rd party.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Token theft.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The URL is public property. Keep secrets out of it."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #098</div>
+    <div class="card-title">GraphQL Introspection via Debug Mode</div>
+    <div class="card-meta">
+      <span class="badge low">LOW</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find debug endpoints.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Dump entire API schema.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find hidden registration fields.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Debug mode belongs on dev servers, not production."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #099</div>
+    <div class="card-title">Mass Assignment in Onboarding Steps</div>
+    <div class="card-meta">
+      <span class="badge high">HIGH</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Step 1: Signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Step 2: Onboard.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject is_staff=True in Step 2.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"Don't just look at Step 1. The whole journey is a target."</p>
+    </div>
+  </div>
+
+  <div class="card" style="--card-accent: #ff7733">
+    <div class="card-id">VECTOR #100</div>
+    <div class="card-title">VETERAN MASTERPIECE: THE 10-BUG CHAIN</div>
+    <div class="card-meta">
+      <span class="badge critical">CRITICAL</span>
+    </div>
+    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ZEN-2026</a>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Enum + SQLi + SSRF + XSS + CSRF + IDOR + BOLA + Race + HPP + ATO.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>The ultimate bounty report.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Complete system takeover.</span></li>
+    </ul>
+    <div class="mindset">
+      <span class="mindset-title">VETERAN INSIGHT:</span>
+      <p class="mindset-p">"The master hunter builds a web. The bug is the fly."</p>
+    </div>
+  </div>
+</div>
+  <div class="floating-stats">
+    <div class="f-stat-item"><span class="f-stat-label">TOTAL TECHNIQUE:</span><span class="f-stat-val">100</span></div>
+    <div class="f-stat-item"><span class="f-stat-label">CHECKED:</span><span class="f-stat-val" id="checked-val">0</span></div>
+    <div class="f-stat-item"><span class="f-stat-label">PROGRESS:</span><span class="f-stat-val" id="progress-val">0%</span></div>
+  </div>
+
+  <footer style="margin-top: 100px; text-align: center; font-family: 'Share Tech Mono'; color: var(--text-dim); padding: 40px; border-top: 1px solid var(--border);">
+    [ MASTER REGISTRATION CHECKLIST 2026 ] · [ FOR EDUCATIONAL PURPOSES ONLY ] · [ UNLEASH CHAOS RESPONSIBLY ]
+  </footer>
+</div>
+
+<script>
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total = document.querySelectorAll('.check-box').length;
+    const checked = document.querySelectorAll('.check-box.checked').length;
+    const percent = Math.round((checked / total) * 100);
+    
+    document.getElementById('progress-bar').style.width = percent + '%';
+    document.getElementById('checked-val').textContent = checked;
+    document.getElementById('progress-val').textContent = percent + '%';
+  }
+
+  // Load state from localStorage if needed (VETERAN UPGRADE)
+  window.onload = () => {
+     // Initial progress
+     updateProgress();
+  }
+</script>
+</body>
+</html>

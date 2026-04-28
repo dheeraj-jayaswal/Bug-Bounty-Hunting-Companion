@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite OTP/MFA Bypass Bug Hunter's Master Checklist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+  :root{--bg-primary:#050a0e;--bg-secondary:#090f14;--bg-card:#0c1419;--bg-card-hover:#101c24;--accent-green:#00ff88;--accent-red:#ff3355;--accent-yellow:#ffc233;--accent-blue:#00aaff;--accent-purple:#aa55ff;--accent-orange:#ff7733;--accent-cyan:#00ffee;--text-primary:#c8d8e4;--text-dim:#6a8499;--border:#1a2e3a;--grid:rgba(0,255,136,0.03)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg-primary);color:var(--text-primary);font-family:'Rajdhani',sans-serif;font-size:15px;line-height:1.6;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px;min-height:100vh}
+  .hero{background:linear-gradient(135deg,#050a0e 0%,#0a0f1a 50%,#050a0e 100%);border-bottom:1px solid var(--border);padding:60px 20px 50px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,170,255,0.06) 0%,transparent 70%);pointer-events:none}
+  .hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-blue),transparent)}
+  .hero-tag{display:inline-block;background:rgba(0,170,255,0.1);border:1px solid rgba(0,170,255,0.35);color:var(--accent-blue);font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 14px;letter-spacing:3px;margin-bottom:20px;animation:pulse-b 2s ease-in-out infinite}
+  @keyframes pulse-b{0%,100%{box-shadow:0 0 0 0 rgba(0,170,255,0.2)}50%{box-shadow:0 0 14px 3px rgba(0,170,255,0.2)}}
+  .hero h1{font-family:'Orbitron',monospace;font-size:clamp(20px,4vw,44px);font-weight:900;letter-spacing:2px;color:#fff;text-shadow:0 0 30px rgba(0,170,255,0.4);line-height:1.2;margin-bottom:12px}
+  .hero h1 span{color:var(--accent-blue)}
+  .hero-sub{font-family:'Share Tech Mono',monospace;color:var(--text-dim);font-size:12px;letter-spacing:2px;margin-bottom:30px}
+  .hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+  .stat{text-align:center}
+  .stat-num{font-family:'Orbitron',monospace;font-size:28px;font-weight:700;color:var(--accent-blue)}
+  .stat-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px}
+  .mission-banner{background:linear-gradient(90deg,rgba(0,170,255,0.08),rgba(170,85,255,0.08));border:1px solid rgba(0,170,255,0.2);text-align:center;padding:14px 20px;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--accent-blue);letter-spacing:2px;margin:0}
+  .container{max-width:1200px;margin:0 auto;padding:40px 20px 80px}
+  .phase-header{display:flex;align-items:center;gap:18px;margin:55px 0 24px;padding-bottom:16px;border-bottom:1px solid var(--border);position:relative}
+  .phase-header::after{content:'';position:absolute;bottom:-1px;left:0;width:220px;height:1px;background:var(--phase-color,var(--accent-blue));box-shadow:0 0 10px var(--phase-color,var(--accent-blue))}
+  .phase-badge{background:var(--phase-color,var(--accent-blue));color:#000;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;padding:6px 14px;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+  .phase-title{font-family:'Orbitron',monospace;font-size:clamp(13px,2.2vw,19px);font-weight:700;color:#fff}
+  .phase-goal{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);text-align:right;max-width:280px}
+  @media(max-width:768px){.phase-goal{display:none}}
+  .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+  .card{background:var(--bg-card);border:1px solid var(--border);position:relative;transition:border-color .2s,transform .2s,box-shadow .2s;opacity:1;transform:translateY(0)}
+  .card.visible{opacity:1;transform:translateY(0);transition:opacity .5s,transform .5s,border-color .2s,box-shadow .2s}
+  .card:hover{border-color:var(--card-color,var(--accent-blue));box-shadow:0 0 22px rgba(0,170,255,0.07),inset 0 0 30px rgba(0,170,255,0.02);transform:translateY(-2px)}
+  .card-header{padding:15px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:14px}
+  .report-num{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--card-color,var(--accent-blue));background:rgba(0,170,255,0.07);border:1px solid var(--card-color,var(--accent-blue));padding:3px 8px;white-space:nowrap;opacity:.85}
+  .card-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;color:#fff;line-height:1.3;margin-bottom:5px}
+  .card-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .badge-cat{font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 7px;border:1px solid;letter-spacing:1px}
+  .sev-critical{color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)}
+  .sev-high{color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)}
+  .sev-medium{color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)}
+  .sev-low{color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)}
+  .ref-tag{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);padding:2px 7px;border:1px solid var(--border);background:rgba(0,0,0,0.3)}
+  .card-body{padding:16px 18px}
+  .scenario-row{display:flex;gap:10px;margin-bottom:14px;padding:10px 12px;background:rgba(0,0,0,0.35);border-left:3px solid var(--card-color,var(--accent-blue))}
+  .scenario-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--card-color,var(--accent-blue));letter-spacing:2px;white-space:nowrap;padding-top:2px}
+  .scenario-text{font-size:13px;color:var(--text-primary);line-height:1.5}
+  .steps-title{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;margin-bottom:10px;margin-top:10px}
+  .checklist{list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+  .checklist li{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5}
+  .check-box{width:16px;height:16px;border:1px solid var(--card-color,var(--accent-blue));flex-shrink:0;margin-top:2px;cursor:pointer;transition:background .15s;position:relative}
+  .check-box.done{background:var(--card-color,var(--accent-blue))}
+  .check-box.done::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:900}
+  .check-text{flex:1}
+  .check-text code{font-family:'Share Tech Mono',monospace;font-size:11px;background:rgba(0,170,255,0.07);border:1px solid rgba(0,170,255,0.2);padding:1px 5px;color:var(--accent-blue)}
+  .mindset{background:rgba(0,0,0,0.4);border:1px solid rgba(255,194,51,0.2);padding:11px 14px;margin-top:4px}
+  .mindset::before{content:'🏛️ INTERVIEW PREP';font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--accent-yellow);letter-spacing:2px;display:block;margin-bottom:6px}
+  .mindset p{font-size:12px;color:var(--accent-yellow);font-style:italic;line-height:1.6}
+  .pro-tip{background:rgba(0,170,255,0.05);border:1px solid rgba(0,170,255,0.2);padding:10px 13px;margin-top:10px}
+  .pro-tip::before{content:'💡 CROSS-APP INTEL';font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--accent-cyan);letter-spacing:2px;display:block;margin-bottom:5px}
+  .pro-tip p{font-size:12px;color:#88ccdd;line-height:1.6}
+  .progress-section{background:var(--bg-card);border:1px solid var(--border);padding:22px 26px;margin-top:40px}
+  .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:1px}
+  #prog-count{color:var(--accent-blue);font-size:20px;font-family:'Orbitron',monospace}
+  .prog-bar-bg{background:rgba(0,0,0,0.5);height:6px;width:100%}
+  .prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple));width:0%;transition:width .3s;box-shadow:0 0 8px rgba(0,170,255,0.5)}
+  .phase-progress{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:16px}
+  @media(max-width:600px){.phase-progress{grid-template-columns:repeat(3,1fr)}}
+  .phase-prog-item{text-align:center;padding:8px 4px;background:rgba(0,0,0,0.3);border:1px solid var(--border)}
+  .phase-prog-num{font-family:'Orbitron',monospace;font-size:16px;color:#fff}
+  .phase-prog-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-top:2px}
+  .quick-nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:20px;background:var(--bg-card);border-bottom:1px solid var(--border)}
+  .nav-btn{font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px 14px;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;background:transparent;letter-spacing:1px;transition:all .2s;text-decoration:none;display:inline-block}
+  .nav-btn:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+  .master-table-section{margin-top:55px}
+  .master-table-section h2{font-family:'Orbitron',monospace;font-size:17px;color:#fff;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12px;font-family:'Share Tech Mono',monospace}
+  thead tr{background:rgba(0,170,255,0.06);border-bottom:2px solid var(--accent-blue)}
+  th{padding:10px 14px;text-align:left;color:var(--accent-blue);letter-spacing:1px;font-size:10px}
+  tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+  tbody tr:hover{background:var(--bg-card-hover)}
+  td{padding:9px 14px;vertical-align:top}
+  td:first-child{color:var(--text-dim)}td:nth-child(2){color:#fff}
+  footer{text-align:center;padding:30px 20px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);border-top:1px solid var(--border);letter-spacing:2px;margin-top:60px}
+</style>
+</head>
+<body>
+
+<div class="mission-banner">
+  ◀ MISSION 02: PASSWORD RESET COMPLETE &nbsp;|&nbsp; ▶ NOW EXECUTING: MISSION 03 — OTP/MFA BYPASS &nbsp;|&nbsp; AUTHORIZED RESEARCH ONLY ▶
+</div>
+<div class="hero">
+  <div class="hero-tag">// MISSION 03: CLASSIFIED //</div>
+  <h1>🔐 OTP / MFA BYPASS<br><span>BUG HUNTER'S</span> MASTER CHECKLIST</h1>
+  <div class="hero-sub">[ 31 REPORTS · 6 PHASES · 31 ATTACK VECTORS · WORLD-CLASS SOP ]</div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">31</div><div class="stat-label">REPORTS ANALYZED</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">ATTACK PHASES</div></div>
+    <div class="stat"><div class="stat-num">31</div><div class="stat-label">TECHNIQUES</div></div>
+    <div class="stat"><div class="stat-num">$160K+</div><div class="stat-label">BOUNTIES DOCUMENTED</div></div>
+  </div>
+</div>
+<div class="quick-nav">
+  <a class="nav-btn" href="#phase1">PHASE 1: RESPONSE MANIPULATION</a>
+  <a class="nav-btn" href="#phase2">PHASE 2: INJECTION ATTACKS</a>
+  <a class="nav-btn" href="#phase3">PHASE 3: RACE & BRUTE FORCE</a>
+  <a class="nav-btn" href="#phase4">PHASE 4: SESSION & TOKEN</a>
+  <a class="nav-btn" href="#phase5">PHASE 5: HEADER & NETWORK</a>
+  <a class="nav-btn" href="#phase6">PHASE 6: LOGIC & ARCHITECTURE</a>
+  <a class="nav-btn" href="#table">ALL REPORTS</a>
+</div>
+<div class="container">
+  <div class="progress-section">
+    <div class="progress-header">
+      <span>// MISSION PROGRESS — OTP/MFA BYPASS CHECKLIST</span>
+      <span><span id="prog-count">0</span> / 31 REPORTS EXECUTED</span>
+    </div>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill"></div></div>
+    <div class="phase-progress">
+      <div class="phase-prog-item"><div class="phase-prog-num" id="p1-count" style="color:#00aaff">0/3</div><div class="phase-prog-label">RESPONSE</div></div>
+      <div class="phase-prog-item"><div class="phase-prog-num" id="p2-count" style="color:#ffc233">0/4</div><div class="phase-prog-label">INJECTIO</div></div>
+      <div class="phase-prog-item"><div class="phase-prog-num" id="p3-count" style="color:#ff7733">0/5</div><div class="phase-prog-label">RACE & B</div></div>
+      <div class="phase-prog-item"><div class="phase-prog-num" id="p4-count" style="color:#aa55ff">0/6</div><div class="phase-prog-label">SESSION </div></div>
+      <div class="phase-prog-item"><div class="phase-prog-num" id="p5-count" style="color:#ff3355">0/6</div><div class="phase-prog-label">HEADER &</div></div>
+      <div class="phase-prog-item"><div class="phase-prog-num" id="p6-count" style="color:#00ff88">0/7</div><div class="phase-prog-label">LOGIC & </div></div>
+    </div>
+  </div>
+
+<div class="phase-header" id="phase1" style="--phase-color:#00aaff">
+  <div class="phase-badge" style="background:#00aaff">PHASE 01</div>
+  <div class="phase-title">RESPONSE MANIPULATION</div>
+  <div class="phase-goal">Tamper server responses to trick frontend into granting access</div>
+</div>
+<div class="cards-grid">
+  <div class="card p1-card" style="--card-color:#00aaff">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00aaff;color:#00aaff;background:rgba(0,170,255,0.07)">#01</div>
+      <div>
+        <div class="card-title">OTP Bypass via Response Manipulation &amp; Status Code Tampering</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)">RESPONSE TAMPER</span>
+          <span class="ref-tag">HackerOne · Financial · $2,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00aaff">
+        <div class="scenario-label" style="color:#00aaff">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Modern apps use Microservices — Login service alag, MFA service alag. Frontend sirf server ke Yes/No response par trust karta hai. Agar Backend sirf authenticated:true/false bolta hai aur Frontend us par dashboard kholta hai, toh hum response edit karke Frontend ko ullu bana sakte hain.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Victim ke credentials se login karo — MFA/OTP screen trigger hogi</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Random galat 6-digit OTP dalo (e.g., <code>000000</code>)</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Burp Suite mein <code>POST /api/v2/verify-otp</code> request intercept karo</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Action → Do Intercept → <code>Response to this request</code> select karo</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Server ka response dekho: <code>401 Unauthorized</code> + <code>{"status":"error","authenticated":false}</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Response edit karo: <code>200 OK</code> + <code>{"status":"success","authenticated":true}</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Forward karo — Browser ko lagega login successful hai → Dashboard open!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Pehle apne real account se SUCCESS response capture karo (pattern match ke liye)</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Status Code Tamper: <code>401/403</code> ko <code>200</code> karne par UI change ho raha hai?</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Boolean Replacement: <code>false→true</code> aur <code>error→success</code> karke dekha?</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Dashboard khulne ke baad sensitive action (Change Password) karo — bina OTP ke ho raha hai toh FULL BYPASS hai</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Status Code Only: Sirf 403→200 try karo. The Null Body: Response body delete karke {} ya {&quot;status&quot;:&quot;success&quot;} dalo. IDOR Chain: Dashboard khulne ke baad victim ka email change karne ki koshish karo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Response manipulation se login kaise hua? A: Ise Client-Side Security Dependency kehte hain. Server response par blind trust karke session activate karta hai. Fix: Server ko independently verify karna chahiye, response mein sensitive flags nahi bhejne chahiye.</p></div>
+    </div>
+  </div>
+  <div class="card p1-card" style="--card-color:#00aaff">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00aaff;color:#00aaff;background:rgba(0,170,255,0.07)">#02</div>
+      <div>
+        <div class="card-title">OTP Bypass via Response Leakage (Secret in JSON)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)">OTP LEAK</span>
+          <span class="ref-tag">Bugcrowd · E-commerce · $4,000</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00aaff">
+        <div class="scenario-label" style="color:#00aaff">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Developers debugging ke liye ya lazy coding ki wajah se server-side logic ko frontend se mix kar dete hain. Server OTP verify karta hai lekin error response mein galti se Expected OTP bhi leak kar deta hai jo database se mila tha.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Victim ka phone number dalo aur <code>Send OTP</code> click karo</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Random 6-digit OTP dalo: <code>123456</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Burp Suite mein <code>POST /api/auth/verify-otp</code> capture karo</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Response dekho: <code>400 Bad Request</code> — but body mein: <code>{"debug_info":{"attempted":"123456","expected":"882731"}}</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Leaked OTP <code>882731</code> ko note karo — yahi asli OTP hai!</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Wahi OTP dalo → Login successful!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Response ki HAR line padho — koi extra field hai jo request mein nahi thi?</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Response HEADERS check karo (e.g., <code>X-Debug-OTP: 1234</code>)</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Jaan-bujhkar galat format mein OTP dalo (symbols/alphabet) — server kya error throw karta hai?</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Frontend ki <code>.js</code> files mein dhoondho kya wo OTP word handle kar rahi hain</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Debug Mode: URL mein ?debug=true ya ?test=1 dalo. Hidden Fields: Pure JSON object khol kar dekho. Error Messages: Verbose errors (SQL/Stack Traces) ke andar OTP ya tokens leak ho sakte hain.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: OTP response mein kaise leak hua? A: Ye Information Disclosure hai. Developers debug_info production mein chod dete hain. Fix: Production mein debug fields strip karo, error responses mein minimum info do.</p></div>
+    </div>
+  </div>
+  <div class="card p1-card" style="--card-color:#00aaff">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00aaff;color:#00aaff;background:rgba(0,170,255,0.07)">#25</div>
+      <div>
+        <div class="card-title">OTP Bypass via Boolean Response Manipulation (200 OK Trick)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00aaff;border-color:#00aaff;background:rgba(0,170,255,0.08)">BOOL MANIP</span>
+          <span class="ref-tag">HackerOne · Global Ecommerce · $6,200</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00aaff">
+        <div class="scenario-label" style="color:#00aaff">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">SPA apps (React/Next.js) mein backend sirf success:true/false bhejta hai. Frontend JavaScript ko Login karwane ka poora control hai. Server ke Error response ko Success mein badal do toh frontend login karwa deta hai aur server naye session ko Valid maan leta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Victim ka mobile number dalo, OTP screen aa gayi</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Galat OTP dalo: <code>000000</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Burp mein <code>Do Intercept → Response to this request</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Original: <code>401</code> + <code>{"success":false,"message":"Invalid OTP"}</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Modify: <code>200 OK</code> + <code>{"success":true,"message":"Verified"}</code></div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Frontend ne dashboard load kiya → Backend ka Temporary Session activate ho gaya → Full Access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Har Error response intercept karke badla?</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">App React/Angular/Vue use kar rahi hai? (Inme ye bug milne ke chances zyada)</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">JS code mein <code>window.location='/dashboard'</code> response par depend hai?</div></li>
+        <li><div class="check-box" data-phase="1" onclick="toggleCheck(this)"></div><div class="check-text">Dashboard par page refresh karo — dashboard raha toh Full Bypass, gayab hua toh sirf UI bypass</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Status Code Swap: 401/403 ko hamesha 200 OK dalke dekho. Match Success Body: Pehle valid login karke Success format dekho, wahi paste karo. Header Manipulation: Response mein Set-Cookie header add karke session accept ho raha hai?</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Sirf status code badalne se login kaise hua? A: Client-Side Security Dependency — server aur frontend UI state Sync nahi hote toh ye bug hota hai. Fix: Server independently verify kare, response mein sensitive flags na bheje.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="phase-header" id="phase2" style="--phase-color:#ffc233">
+  <div class="phase-badge" style="background:#ffc233">PHASE 02</div>
+  <div class="phase-title">INJECTION ATTACKS</div>
+  <div class="phase-goal">Inject payloads into OTP parameters to bypass validation logic</div>
+</div>
+<div class="cards-grid">
+  <div class="card p2-card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ffc233;color:#ffc233;background:rgba(255,194,51,0.07)">#04</div>
+      <div>
+        <div class="card-title">OTP Bypass via NoSQL Injection (Type Juggling)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">NoSQL INJECTION</span>
+          <span class="ref-tag">HackerOne · Big Tech · $5,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ffc233">
+        <div class="scenario-label" style="color:#ffc233">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Modern apps MongoDB/CouchDB (NoSQL) use karti hain jo JSON objects handle karte hain. Agar server inputs ko sanitize nahi karta, toh OTP ki jagah NoSQL Operator ($ne, $gt, $regex) bhej kar database query ka logic badal sakte hain.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Login karo aur OTP stage par <code>POST /api/verify-mfa</code> capture karo</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Original body: <code>{"user_id":"9912","otp":"123456"}</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">OTP ko NoSQL operator se replace karo: <code>{"otp":{"$ne":"1"}}</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Server query banti hai: <code>db.users.find({otp:{$ne:"1"}})</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Database check karega: Kya OTP '1' ke barabar NAHI hai? → YES (hamesha True!)</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Server is True result ko valid login maan leta hai → Access granted!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">OTP parameter ko string se <code>object {}</code> ya <code>array []</code> mein badal sakte ho?</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Response mein <code>MongoError</code> ya <code>BSON</code> dikhe toh NoSQL Injection 100% try karo</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Multiple operators try karo: <code>$ne:null</code>, <code>$gt:0</code>, <code>$regex:".*"</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">OTP ki jagah special characters (<code>' " ; {</code>) dalo — database error leak ho raha hai?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Operator Swapping: $ne ke alawa $gt (Greater Than) ya $regex try karo. Array Injection: {&quot;otp&quot;:[true,123456]} bhejo. Content-Type: application/xml ya text/plain accept ho raha hai?</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: NoSQL injection se OTP bypass kaise rokein? A: Strict Type Validation — otp sirf Number/String ho, JSON Object nahi. Joi/Zod schemas use karo aur $ operators ko sanitize karo.</p></div>
+    </div>
+  </div>
+  <div class="card p2-card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ffc233;color:#ffc233;background:rgba(255,194,51,0.07)">#05</div>
+      <div>
+        <div class="card-title">OTP Bypass via Null/Empty Token Injection</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">NULL INJECTION</span>
+          <span class="ref-tag">HackerOne · Enterprise SaaS · $4,800</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ffc233">
+        <div class="scenario-label" style="color:#ffc233">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Developer OTP verify karte waqt ye check bhool jata hai ki agar user ne Empty ya Null value bheji toh kya hoga. Agar logic hai: if(submitted_otp == stored_otp) aur stored_otp database mein Null hai, toh null==null hamesha True ho jayega.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Login karo, OTP screen par <code>POST /api/v2/mfa/verify</code> capture karo</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Original: <code>{"user_id":"1005","otp":"123456"}</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">OTP ko <code>null</code> (without quotes) se replace karo</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Variant: <code>{"otp":""}</code> ya <code>{"otp":[]}</code> try karo</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Server response: <code>200 OK</code> — Validation logic Empty inputs handle nahi kar paya!</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Bypass granted — victim ke account mein access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text"><code>otp: null</code> bhej kar dekha?</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Empty string <code>""</code> ya empty array <code>[]</code> kaam kar raha hai?</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Request se OTP field poora DELETE karke server ka response check karo</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">JSON kaam na kare toh <code>application/x-www-form-urlencoded</code> mein <code>otp=</code> (empty) bhejo</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Remove Parameter: OTP parameter poora uda do. Data Type Swapping: String 'null' vs Boolean null. Parameter Pollution: otp=123456&amp;otp= (duplicate with empty).</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Null value se OTP bypass kaise rokein? A: Strict Schema Validation — input sirf Fixed-length String (6 digits) ho. isRequired aur notEmpty checks lagao taaki null/undefined server logic tak pahunche hi nahi.</p></div>
+    </div>
+  </div>
+  <div class="card p2-card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ffc233;color:#ffc233;background:rgba(255,194,51,0.07)">#24</div>
+      <div>
+        <div class="card-title">OTP Bypass via Language/Locale Injection (Template Trick)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">LOCALE INJECT</span>
+          <span class="ref-tag">Bugcrowd · Logistics · $3,800</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ffc233">
+        <div class="scenario-label" style="color:#ffc233">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Server SMS bhejte waqt Language/Locale check karta hai. Agar aisi language dalo jo server ko samajh na aaye, toh Default Template par gir jata hai. Special Characters se SMS Gateway ka OTP Variable gayab ho jata hai aur server Empty/Null OTP bhejta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Send OTP request capture karo: <code>{"mobile":"9999999999","locale":"en-US"}</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Test 1: <code>"locale":""</code> (Empty)</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Test 2: <code>"locale":"../../../"</code> (Path Traversal)</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Test 3 (Winner): <code>"locale":"xx_XX"</code> (Non-existent language)</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">SMS Gateway template crash → Victim ko SMS: <code>Your OTP code is: </code> (OTP gayab!)</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Login screen par OTP field BLANK chodo → Server ne null==null maan liya → Bypass!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Alag-alag languages (<code>ar, zh, ru</code>) se OTP format badal raha hai?</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text"><code>locale=""</code> ya <code>locale=null</code> karne se SMS bina OTP deliver ho raha hai?</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Burp se locale par symbols (<code>' " ; \ /</code>) fuzz karo</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">SMS khali aata hai toh verification screen par <code>0000</code>, <code>null</code>, ya blank try karo</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Locale Manipulation: Accept-Language header ya locale parameter change karo. Template Injection: locale=en{{7*7}} — SMS mein 49 aaye toh SSTI hai! Null Byte: locale=en%00 try karo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Template error se MFA bypass kaise? A: Fail-Open Logic — SMS gateway template error par OTP variable populate nahi karta toh Null value bhejta hai. Server bhi Null store karta hai toh blank input se bypass. Fix: Template error par process Abrupt Terminate karo.</p></div>
+    </div>
+  </div>
+  <div class="card p2-card" style="--card-color:#ffc233">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ffc233;color:#ffc233;background:rgba(255,194,51,0.07)">#31</div>
+      <div>
+        <div class="card-title">OTP Bypass via Null Byte Injection (%00 Trick)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#ffc233;border-color:#ffc233;background:rgba(255,194,51,0.08)">NULL BYTE</span>
+          <span class="ref-tag">Private · Messaging App · $3,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ffc233">
+        <div class="scenario-label" style="color:#ffc233">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Backend systems (C/C++ based libraries) Null Byte (%00) ko End of String maante hain. Mobile number ke baad %00 aur extra characters daal do toh validation layer poora string check karti hai par SMS layer %00 ke baad ignore karti hai. Rate limiter confuse ho jata hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Login page — Mobile Number + OTP se login</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Victim number: <code>9876543210</code></div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Payload: <code>9876543210%001234567890</code> (Hacker's number after null byte)</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Database Check: Server ne <code>9876543210</code> dekha → victim ka account mila (%00 ke baad ignore)</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Rate Limiter: Poora string dekha <code>9876543210%00123...</code> → Naya unique number! No block!</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Har baar %00 ke baad random digits → Unlimited Brute Force → 4-digit OTP 1 min mein crack!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text"><code>%00</code> ke alawa <code>\0</code>, <code>0x00</code>, <code>\u0000</code> try karo</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">Number ke aage symbols lagane se Too many attempts error gayab ho raha hai?</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text"><code>number</code> vs <code>number%00</code> ka response bilkul same hai? (Server null byte ignore kar raha hai)</div></li>
+        <li><div class="check-box" data-phase="2" onclick="toggleCheck(this)"></div><div class="check-text">SMS abhi bhi sahi number par aa raha hai payload dalne ke baad?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Filename Injection: document.pdf%00.jpg try karo. Email Bypass: victim@target.com%00@attacker.com. Mobile Fuzzing: %00, %0d%0a (CRLF), %20 (Space) se different identity treat ho raha hai?</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Null byte 2026 mein kaise kaam karega? A: Modern languages handle kar leti hain par backend mein Legacy Systems/C-based Extensions use hote hain. Data travel karte waqt parsing mismatch hota hai. Attacker rate limiting bypass ya login logic manipulate kar sakta hai.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="phase-header" id="phase3" style="--phase-color:#ff7733">
+  <div class="phase-badge" style="background:#ff7733">PHASE 03</div>
+  <div class="phase-title">RACE & BRUTE FORCE</div>
+  <div class="phase-goal">Exploit timing & rate limits to crack or bypass OTP codes</div>
+</div>
+<div class="cards-grid">
+  <div class="card p3-card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff7733;color:#ff7733;background:rgba(255,119,51,0.07)">#03</div>
+      <div>
+        <div class="card-title">OTP Bypass via Race Condition (Multi-Threaded Validation)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">RACE CONDITION</span>
+          <span class="ref-tag">HackerOne · Crypto Exchange · $6,000</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff7733">
+        <div class="scenario-label" style="color:#ff7733">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Server OTP verify karte waqt do kaam karta hai: (1) OTP check (2) Rate-limit check. Agar 50 requests ek hi microsecond mein bhejo, toh server Race Condition mein phans jata hai — pehli request verify hone se pehle doosri ko Success maan leta hai ya rate-limit counter update karna bhool jata hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Victim ka login karo aur OTP stage par pahuncho</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Burp Suite mein <code>POST /api/v1/mfa/verify</code> capture karo</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">20 random galat OTPs ki list banao</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Burp Suite ka <code>Turbo Intruder</code> extension use karo</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Script likho jo 50 threads se alag-alag galat OTPs ek saath bheje</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Server ka database lock nahi hua → ek request ne session ko Authenticated mark kar diya!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Server ek session se multiple simultaneous requests allow kar raha hai?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Requests ke timing mein milliseconds ka gap dene se result badal raha hai?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Ek galat OTP + ek valid login request saath bhejne se Success state overlap ho rahi hai?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Site HTTP/2 use kar rahi hai? Single TCP Connection par multiple requests = Race ke liye perfect</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Parallel Requests: Sensitive endpoints par 10-20 requests ek saath bhejo. Connection Warming: Pehle 1-2 normal requests bhejo, phir race attack. Turbo Intruder: Standard Intruder slow hai, hamesha Turbo Intruder ya custom Python scripts use karo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Race Condition se OTP kaise bypass hua? A: Ye Concurrency Issue hai. Non-Atomic operations mein context switch hota hai. Fix: Database Locking ya Atomic Transactions use karo taaki ek operation complete hone se pehle doosra start na ho.</p></div>
+    </div>
+  </div>
+  <div class="card p3-card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff7733;color:#ff7733;background:rgba(255,119,51,0.07)">#11</div>
+      <div>
+        <div class="card-title">OTP Bypass via Normalization Logic (The +91 vs 00 Trick)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">NORMALIZATION</span>
+          <span class="ref-tag">Bugcrowd · Financial App · $4,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff7733">
+        <div class="scenario-label" style="color:#ff7733">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">OTP Generator aur Rate Limiter mobile number ko alag tarike se read karte hain. Rate Limiter +919999999999 aur 09999999999 ko alag numbers samajhta hai, lekin SMS Gateway dono par ek hi mobile par OTP bhej deta hai. Isse unlimited attempts possible hain.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">OTP brute-force shuru karo — 5 attempts baad server block kare: <code>Too many attempts on +919999999999</code></div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Number format badal do: Attempts 6-10: <code>09999999999</code></div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Attempts 11-15: <code>00919999999999</code></div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Attempts 16-20: <code>9999999999</code> (without country code)</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Rate limiter ne har format ko Naya User samjha, SMS gateway ne victim ko hi OTP bheja!</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Unlimited attempts → 4-digit OTP crack → Full Account Takeover!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text"><code>+91</code>, <code>0</code>, <code>0091</code>, without code par alag rate limits mil rahi hain?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Server response mein mobile number normalize karke dikha raha hai?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Extra digits add karo: <code>1234567890</code> vs <code>0001234567890</code> same treat ho rahe hain?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">E.164 format vs Local format test karo</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Special Characters: Number mein space/dash dalne se rate limit bypass? Null Byte: Number ke end mein %00/%20 dalo. Email Normalization: Gmail dot trick — victim.name vs v.ictimname@gmail.com.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Rate limit bypass ke liye mobile number ke sath kya karoge? A: Input Normalization check karunga. Validation Layer aur Delivery Layer number ko differently parse karte hain toh bypass mil sakta hai. Different formats se rate limiting bypass karke unlimited OTP attempts.</p></div>
+    </div>
+  </div>
+  <div class="card p3-card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff7733;color:#ff7733;background:rgba(255,119,51,0.07)">#12</div>
+      <div>
+        <div class="card-title">OTP Bypass via Method Swapping (SMS vs Voice Call Logic)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">METHOD SWAP</span>
+          <span class="ref-tag">HackerOne · Ride-Sharing · $3,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff7733">
+        <div class="scenario-label" style="color:#ff7733">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Apps multiple OTP options deti hain: SMS, Email, Voice Call. Developers SMS par tagdi rate limiting lagate hain lekin Voice Call OTP par rate limit lagana bhool jate hain. Hacker SMS se block hokar Voice Call endpoint par switch karke brute-force karta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Target: 4-digit OTP brute force karna hai</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text"><code>POST /api/otp/sms/verify</code> par 5-10 attempts → IP block ho gayi</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Request change karo — Voice Call endpoint: <code>POST /api/otp/voice/verify</code></div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Voice call endpoint par koi rate limit nahi thi!</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">OTP Same (Shared) hai chahe SMS se aaye ya Call se</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Intruder se 0000-9999 tak codes bhejo → <code>200 OK</code> = Account Access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">App mein OTP ke kitne raste hain? (SMS, Voice, WhatsApp, Email)</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Har channel ki apni ALAG rate limit hai?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">SMS se aaya code Voice Call endpoint par kaam kar raha hai?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">5 attempts SMS + 5 Voice + 5 WhatsApp — ye Cumulative limit hai ya Independent?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Switch Channels: SMS block hai toh Email/WhatsApp OTP check karo. Common Backend: type=sms ko type=voice badalne se rate limit bypass? Resend Overlap: Itni baar Resend karke purane OTPs expire na hon.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Cross-Channel OTP bypass kaise rokein? A: Rate limiting hamesha Identity-based honi chahiye, Method-based nahi. User ID/Phone Number par total limit ho chahe koi bhi channel use kare. OTP validation Centralized hona chahiye.</p></div>
+    </div>
+  </div>
+  <div class="card p3-card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff7733;color:#ff7733;background:rgba(255,119,51,0.07)">#23</div>
+      <div>
+        <div class="card-title">OTP Bypass via Parameter Pollution &amp; Double-OTP Request</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">HPP ATTACK</span>
+          <span class="ref-tag">Bugcrowd · Fintech · $5,000</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff7733">
+        <div class="scenario-label" style="color:#ff7733">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Server-side validation pehli value par check lagati hai lekin SMS provider doosri value process karta hai. Hacker victim ka number pehle dalta hai (rate limit na lage) aur apna number baad mein (OTP use mil jaye). HTTP Parameter Pollution (HPP).</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Login page par victim ka mobile number dalo, request intercept karo</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Parameter duplicate (Pollute) karo: <code>mobile_number=+91VICTIM&mobile_number=+91HACKER</code></div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Validation Layer: Pehla number dekha (+91VICTIM) → Valid registered user → Pass!</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">SMS Delivery Layer: Backend ka framework doosra parameter utha leta hai</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Gateway ne OTP HACKER ke number par bhej diya!</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Hacker ko phone par OTP mila → Victim ke account mein login!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text"><code>?mobile=123&mobile=456</code> karne se server error deta hai ya accept kar leta hai?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Server Node.js ya Python hai toh HPP ke chances zyada hain</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">OTP request ke baad response mein hacker ka number dikh raha hai ya victim ka?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Comma, Semicolon, Pipe (<code>|</code>) use karke do numbers ek saath bhejo</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Array Injection: JSON mein {&quot;mobile&quot;:[&quot;+91-VICTIM&quot;,&quot;+91-HACKER&quot;]}. Special Char: mobile=+91VICTIM%2c+91HACKER (comma encoded). Field Duplication: {&quot;mobile&quot;:&quot;victim&quot;,&quot;mobile&quot;:&quot;hacker&quot;}.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Do mobile numbers ek parameter mein bhejne se bypass kaise hua? A: Inconsistent Parameter Parsing — Security module pehla parameter parse karta hai par SMS module aakhri utha leta hai. Fix: Duplicate parameters reject karo.</p></div>
+    </div>
+  </div>
+  <div class="card p3-card" style="--card-color:#ff7733">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff7733;color:#ff7733;background:rgba(255,119,51,0.07)">#28</div>
+      <div>
+        <div class="card-title">OTP Bypass via Race Condition in Number Normalization</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff7733;border-color:#ff7733;background:rgba(255,119,51,0.08)">RACE + NORM</span>
+          <span class="ref-tag">Private · Transportation App · $6,800</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff7733">
+        <div class="scenario-label" style="color:#ff7733">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Backend do kaam saath karta hai: Number check + OTP generate. Ek millisecond mein victim aur hacker dono numbers ki request bhejo toh server Confuse ho jata hai — login victim ke account par shuru karta hai par OTP hacker ke number par bhej deta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Do numbers ready: Victim (V) aur Hacker (H)</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Turbo Intruder se high-speed parallel requests bhejo:</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Request 1: <code>POST /api/login {"mobile":"+91-VICTIM"}</code></div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Request 2: <code>POST /api/login {"mobile":"+91-HACKER"}</code></div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Race Condition: Validation layer ne Victim lock kiya, SMS layer ne Hacker ka number utha liya!</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Hacker ke phone par OTP aaya → Victim ke account mein login!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Turbo Intruder use kiya? Standard Intruder race ke liye slow hai</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Resend OTP request mein mobile number badalne se OTP naye number par ja raha hai?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Requests ke beech milliseconds gap dene se result badal raha hai?</div></li>
+        <li><div class="check-box" data-phase="3" onclick="toggleCheck(this)"></div><div class="check-text">Too many requests ke baad bhi race condition ho rahi hai?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Parallel Fuzzing: Send OTP par 20-30 requests ek saath bhejo. State Overlap: Ek number se start karo, OTP aane se pehle doosre se Resend karo. Connection Warming: Normal requests pehle bhejo phir attack.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Do requests saath mein bhejne se OTP hacker ko kaise mila? A: Concurrency Issue — Non-Atomic operations mein context switch hota hai. User Identification aur OTP Delivery ke beech state change ho gaya. Fix: Database Locking ya Atomic Transactions use karo.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="phase-header" id="phase4" style="--phase-color:#aa55ff">
+  <div class="phase-badge" style="background:#aa55ff">PHASE 04</div>
+  <div class="phase-title">SESSION & TOKEN</div>
+  <div class="phase-goal">Manipulate sessions, JWTs & cookies to skip MFA verification</div>
+</div>
+<div class="cards-grid">
+  <div class="card p4-card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#aa55ff;color:#aa55ff;background:rgba(170,85,255,0.07)">#07</div>
+      <div>
+        <div class="card-title">OTP Bypass via Remember Me Cookie Reuse</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">COOKIE REUSE</span>
+          <span class="ref-tag">HackerOne · Social Media · $5,200</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Remember this browser feature mein server special cookie set karta hai. Agli baar login par server cookie dekh kar OTP skip karta hai. Flaw: Cookie User ID se linked thi par Session ID se nahi. Purani cookie inject karke server ko yakeen dilao ki ye Trusted Browser hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Victim ki purani cookie chura lo (XSS ya physical access se): <code>mfa_trust_token=ABC123XYZ</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Apne computer se victim ke credentials se login karo</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">OTP screen aaye — Burp se request intercept karo</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Request mein purani cookie add karo: <code>Cookie: session=new; mfa_trust_token=ABC123XYZ</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Server ne dekha token valid hai → OTP mangna SKIP kar diya!</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Bina OTP ke seedha dashboard mein access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Login ke baad <code>Set-Cookie</code> headers mein Long-lived cookies dhoondho</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Ye cookies logout ke baad server-side invalidate ho rahi hain?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Cookie value simple hai (device_123)? Badal kar dekho kya bypass mil raha hai</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Site sirf cookie par depend hai ya IP/User-Agent bhi check kar rahi hai? Headers badlo</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Cookie Harvesting: MFA ke baad kaunsi cookies set ho rahi hain check karo. Logout Test: Purani mfa_token cookie logout ke baad bhi kaam kar rahi hai? Cross-Account: User A ki cookie User B ke flow mein kaam kar rahi hai?</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Remember Me feature secure kaise banayein? A: (1) Device Binding: Token ko hardware fingerprint + IP se bind karo. (2) One-time Use: Logout par saare trust tokens invalidate karo. (3) Rotation: Har use par token value change ho.</p></div>
+    </div>
+  </div>
+  <div class="card p4-card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#aa55ff;color:#aa55ff;background:rgba(170,85,255,0.07)">#15</div>
+      <div>
+        <div class="card-title">OTP Bypass via JWT Claim Manipulation (MFA:False Trick)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">JWT TAMPER</span>
+          <span class="ref-tag">HackerOne · Cloud Storage · $5,800</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Login ke baad JWT milta hai jismein mfa_verified:false hota hai. OTP verify ke baad mfa_verified:true ho jata hai. Server signature check karta hai par ye nahi dekhta ki token Verify endpoint se hokar aaya hai ya nahi. Hacker pehle token ko hi manipulate kar deta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Victim ke credentials dalo — Server ne JWT response mein diya</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">JWT ko <code>jwt.io</code> par decode karo: <code>{"user_id":"123","mfa_verified":false}</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Token Header badal do: <code>{"alg":"None"}</code> (signature ki zaroorat nahi)</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Payload mein <code>mfa_verified</code> ko <code>false→true</code> karo</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Modified Token ko dashboard request mein bhejo</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Server ne dekha mfa_verified:true → Bina OTP ke poora access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Har JWT decode karke logic samjho — login ke beech mein aane wale sab tokens</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Token bina signature ke accept ho raha hai? (Algorithm None Test)</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">HS256 hai toh <code>hashcat</code> se secret key crack karne ki koshish karo</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Har boolean value (<code>true/false</code>) flip karke dekho</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Algorithm Confusion: HS256 ko RS256 mein badalna ya None algorithm try karo. Sensitive Claims: is_admin, mfa_passed, step_completed flags dhoondho. Token Switching: Apna valid mfa_verified:true token victim ki user_id ke saath use karo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: JWT mein mfa_verified flag rakhna galat kyun hai? A: JWT claims blindly trust karna galat hai. Server-side session store mein MFA State rakho jo sirf OTP endpoint update kare. Agar signature weak hai toh attacker token manipulate karke bypass karega.</p></div>
+    </div>
+  </div>
+  <div class="card p4-card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#aa55ff;color:#aa55ff;background:rgba(170,85,255,0.07)">#21</div>
+      <div>
+        <div class="card-title">TOTP Bypass via Time-Sync Manipulation (Clock Trick)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">TOTP REPLAY</span>
+          <span class="ref-tag">Private · Modern Web App · $3,200</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">TOTP (Google Authenticator) Time par chalta hai. Server ne client ke bheje hue Timestamp par trust kiya. Hacker ne server ko purana timestamp bheja aur purana (used) TOTP code use karke bypass kar liya — Replay Attack.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Hacker ke paas victim ka purana TOTP code hai (screen-sharing/shoulder surfing se)</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Login karo, TOTP page aaya, request intercept karo</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Request mein <code>client_time</code> parameter hai: <code>{"totp_code":"551234","client_time":"2025-10-10T10:00:00Z"}</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text"><code>client_time</code> ko 2 minute pehle ka kar do jab 551234 valid tha</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Server ne socha client ka clock piche hai → Code ko valid maan liya!</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Used OTP dobara use ho gaya — Replay Attack successful!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Login ke baad URL mein <code>?verified=false</code> dikha raha hai? <code>true</code> karke dekho</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Login response JSON mein OTP ya <code>secret_key</code> leak ho rahi hai?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Bina OTP dale sensitive APIs access kar paa rahe ho?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Ek hi TOTP code do baar use ho sakta hai 30 seconds ke andar?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Predictable Redirects: URL mein ?verified=false→true karo. MFA Token Leak: JSON response mein secret_key check karo. Session Pre-auth: Bina OTP dale API access try karo. TOTP Replay: Same code 2x use karo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Session-based vs Token-based MFA mein fark? A: Scoped Tokens use karo. Login ke baad milne wala token sirf MFA-Verify endpoint ke liye valid ho. Server backend mein MFA_STATE maintain kare jo sirf verification ke baad upgrade ho.</p></div>
+    </div>
+  </div>
+  <div class="card p4-card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#aa55ff;color:#aa55ff;background:rgba(170,85,255,0.07)">#22</div>
+      <div>
+        <div class="card-title">OTP Bypass via Concurrent Session Race (Logout Gap)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">SESSION RACE</span>
+          <span class="ref-tag">HackerOne · Financial Services · $4,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Server Session ID login ke turant baad generate karta hai aur Partial status deta hai. Agar ek hi account do browsers mein login karo, toh ek device ka Successful OTP doosre device ke Partial Session ko Full Session mein convert kar deta hai bina OTP check kiye.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Do browsers kholo (Browser A + Browser B)</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Dono mein victim ke credentials se login karo → Dono OTP Screen par</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Browser A mein sahi OTP dalo → Browser A login ho gaya!</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Browser B mein (jahan OTP nahi dala) sirf page REFRESH karo</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Browser B bhi automatically dashboard mein ghus gaya!</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Kyunki server ne User Session ko MFA_VERIFIED=TRUE mark kiya — per-session check nahi tha</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Laptop + Mobile dono se ek saath login karke dekho</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Ek session verify hone ke baad doosre Pending session ko refresh karo</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Dono browsers mein SessionID cookie bilkul SAME hai? (Same=Fixation bug)</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Dashboard par transaction karo — server doosre session par phir se OTP maang raha hai?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Multi-Tab: Ek browser mein do tabs kholo, ek mein OTP dalo, doosra auto-login ho raha hai? Mobile vs Web: Mobile par verify karne se web session bypass? Password Reset Overlap: Reset ke baad purana atka session auto-login?</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Ek device par OTP dala toh doosra bypass kyun hua? A: Session Integrity issue hai. MFA verification Session ID se bind honi chahiye, sirf User ID se nahi. Har login attempt ka unique temporary token ho, specific session verify hone tak Authenticated status na mile.</p></div>
+    </div>
+  </div>
+  <div class="card p4-card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#aa55ff;color:#aa55ff;background:rgba(170,85,255,0.07)">#27</div>
+      <div>
+        <div class="card-title">OTP Bypass via JWT Algorithm Confusion (Public Key Swap)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">JWT ALG SWAP</span>
+          <span class="ref-tag">HackerOne · Enterprise Cloud · $8,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">App RS256 (Asymmetric) algorithm use karti hai — Private Key server par, Public Key sabke liye available. Hacker token header RS256→HS256 badal de toh server Public Key ko Secret Key ki tarah use karne lagta hai. Public Key hacker ke paas hai toh wo fake token sign kar sakta hai!</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Login par password dalo, OTP screen aaye — JWT mila jismein <code>mfa:false</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Server se Public Key uthaao: <code>/.well-known/jwks.json</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">JWT Header badlo: <code>{"alg":"HS256"}</code> (RS256 se HS256)</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Payload badlo: <code>{"user_id":"victim_123","mfa_verified":true}</code></div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Public Key se token sign karo (HS256 algorithm ke saath)</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Server ne token verify kiya — Public Key as Secret treat kiya → Signature match → Full Access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text"><code>/.well-known/jwks.json</code> check kiya?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Server <code>alg:HS256</code> accept kar raha hai jabki asli token RS256 hai?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">OTP se pehle aur baad ke tokens compare karo — kaunsi field badal rahi hai?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Token bina signature ke (<code>alg:None</code>) kaam kar raha hai?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Public Key Discovery: /robots.txt ya JS files mein Public Keys leak ho rahi hain? Token Substitution: Partial Token ko Full Token mein promote karo Claims badal kar. Algorithm: None, HS256, HS512 sab try karo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Algorithm Confusion kyun dangerous hai? A: Implementation Flaw — server Header ki alg field par blind trust karta hai. RS256→HS256 badalne se Public Key shared secret ban jati hai. Attacker valid-looking tokens generate karke MFA bypass kar sakta hai.</p></div>
+    </div>
+  </div>
+  <div class="card p4-card" style="--card-color:#aa55ff">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#aa55ff;color:#aa55ff;background:rgba(170,85,255,0.07)">#30</div>
+      <div>
+        <div class="card-title">OTP Bypass via Session Donating (Attacker-to-Victim Swap)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#aa55ff;border-color:#aa55ff;background:rgba(170,85,255,0.08)">SESSION DONATE</span>
+          <span class="ref-tag">Private · Crypto Trading · $9,000</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#aa55ff">
+        <div class="scenario-label" style="color:#aa55ff">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Server Flow_ID/Correlation_ID generate karta hai jo OTP se link hota hai. Server check nahi karta ki jis Flow_ID ka OTP verify hua wo wahi user hai. Hacker apna OTP verify karke wahi Verified Session victim ke login flow mein Inject kar deta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Do browsers kholo — Browser A (Attacker) aur Browser B (Victim target)</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Browser A: Apne account se login karo, sahi OTP dalo → Verified session_token mila</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Browser B: Victim ke credentials se login karo → OTP mang raha hai</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Victim ki OTP verification request mein apna verified <code>session_token/flow_id</code> replace karo</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Server ne dekha token pehle hi verify hai → Victim account ko SUCCESS mark kar diya!</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Bina victim ka OTP jaane — apne dummy session se victim ke Crypto wallet mein access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Request mein koi aisi ID hai jo session se independent hai?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Ek verified token doosre user ID ke saath kaam kar raha hai?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">OTP verify hote waqt server user ID aur token cross-verify kar raha hai?</div></li>
+        <li><div class="check-box" data-phase="4" onclick="toggleCheck(this)"></div><div class="check-text">Hamesha do accounts (Attacker + Victim) use karo data mix test ke liye</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Token Swapping: Apne verified cookies/tokens victim ke flow mein dalo. Flow ID Manipulation: flow_id=123 ko 456 (Hacker verified) se replace karo. Double-Login: Apne account se login karke bina logout kiye doosre tab mein victim ka password dalo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Apne OTP se dusre ka account bypass kaise hua? A: Weak Session-to-User Binding — OTP result sirf Token par depend karta hai, check nahi karta token kis user ke liye generate hua. Fix: Har MFA flow ko specific User ID + Session ID se bind karo.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="phase-header" id="phase5" style="--phase-color:#ff3355">
+  <div class="phase-badge" style="background:#ff3355">PHASE 05</div>
+  <div class="phase-title">HEADER & NETWORK</div>
+  <div class="phase-goal">Abuse HTTP headers & network configs to hijack OTP delivery</div>
+</div>
+<div class="cards-grid">
+  <div class="card p5-card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff3355;color:#ff3355;background:rgba(255,51,85,0.07)">#06</div>
+      <div>
+        <div class="card-title">OTP Bypass via Location Header Manipulation (Redirect Hijack)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">REDIRECT HIJACK</span>
+          <span class="ref-tag">Bugcrowd · Travel Giant · $3,800</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Login flow Step-by-Step hota hai: Credentials→OTP→Dashboard. Developer assume karta hai user Step 3 par tabhi pahunchega jab Step 2 Success hoga. Agar server-side check missing hai aur hum Redirect response manipulate karein, toh bina OTP ke dashboard par land kar sakte hain.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Sahi email/password dalo — OTP page aa jayega (<code>/verify-otp</code>)</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Random OTP dalo aur request intercept karo</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Server ka <code>401 Unauthorized</code> response ko <code>302 Found</code> badal do</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Response mein header add karo: <code>Location: /user/dashboard</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Browser dekha 302 + Location header → Redirect execute kar di!</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Frontend sirf URL change par Dashboard render kar raha tha → Full access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text"><code>401/403</code> ko <code>302/301</code> Redirect codes mein badalne se access mil raha hai?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Login ke Next Step URLs (<code>/welcome</code>, <code>/setup-profile</code>) bina OTP ke access karo</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Frontend code mein <code>routes.js</code> dekho — <code>auth:true</code> par <code>mfa:true</code> nahi hai?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">OTP success ke baad specific cookie (<code>mfa_verified=1</code>) set hoti hai? Manually set karke dekho</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Forced Navigation: URL bar mein direct /dashboard dalo. Referrer Header: Referer: https://target.com/otp-success dalo. JS Variables: Console mein isMfaVerified=false ko true karo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Redirect se dashboard khula par data kaise dikha? A: Ye Authorization Bypass hai. Site ne Authenticate toh password se kiya, lekin Authorize karne ke liye OTP wait nahi kiya. Fix: Server-side API endpoints par MFA session check hona chahiye.</p></div>
+    </div>
+  </div>
+  <div class="card p5-card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff3355;color:#ff3355;background:rgba(255,51,85,0.07)">#09</div>
+      <div>
+        <div class="card-title">OTP Hijacking via Host Header Injection (SMS Gateway Routing)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">HOST INJECTION</span>
+          <span class="ref-tag">Bugcrowd · Cloud Hosting · $6,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Send OTP karne par server SMS Gateway ko request bhejta hai. Server Host header ka use karke SMS mein Login Link ya Brand Name daalta hai. Agar server bina verify kiye Host header use karta hai, toh attacker use badal kar OTP link apne server par redirect kar sakta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Victim ka mobile number dalo, <code>Send OTP</code> ki request capture karo</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Original: <code>Host: target.com</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Host header badal do: <code>Host: attacker-evil-server.com</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Server SMS generate karega: <code>Your login link is: https://attacker-evil-server.com/verify?code=123456</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Victim ko SMS mila — link par click kiya</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">OTP/Secret Code hacker ke server logs mein → Hacker ne login kar liya!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text"><code>Host</code>, <code>Origin</code>, ya <code>Referer</code> badalne se SMS link/content badal raha hai?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Mobile number dalte hi response body mein OTP chupa hai?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Number ke aage <code>#</code> ya <code>&</code> dalkar SMS gateway confuse ho raha hai?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Server ka <code>Date</code> header manipulate karke purane TOTP codes valid ban rahe hain?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Request Smuggling: X-Forwarded-Host ya X-Host header try karo. TOTP Secret Leak: /api/v1/generate-totp se response mein Secret Key dikh rahi hai? SMS Flooding: Itne SMS bhejo ki purana OTP valid reh jaye.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Host header se SMS link kaise badla? A: Server request.getHost() par blind trust karta hai. Fix: SMS domain static config se aana chahiye, user header se nahi. Whitelisted hosts only allow karo.</p></div>
+    </div>
+  </div>
+  <div class="card p5-card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff3355;color:#ff3355;background:rgba(255,51,85,0.07)">#10</div>
+      <div>
+        <div class="card-title">OTP Leakage via Burp Collaborator (OOB Data Exfiltration)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">OOB EXFIL</span>
+          <span class="ref-tag">Private · Banking/Fintech · $5,000</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Server SMS/Email bhejte waqt dynamically URL generate karta hai. Agar Host/X-Forwarded-Host header bina check kiye uthata hai, toh OTP Verification Link attacker ke Burp Collaborator server par redirect ho jayega.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Burp Collaborator Client kholo → unique link copy karo: <code>xyz123.oastify.com</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Victim ka mobile number dalo, Login with OTP link request capture karo</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Host header badal do: <code>Host: xyz123.oastify.com</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Server SMS generate karega: <code>Click here: https://xyz123.oastify.com/verify?token=SECRET</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Victim ne link click kiya → Burp Collaborator ke Poll Now tab mein HTTP Request aayi!</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">URL mein SECRET_OTP_TOKEN → Hacker ne use karke login kar liya</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Har header (Host, Referer, X-Forwarded-For) mein Collab link daal kar Send OTP karo</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Server sirf DNS request bhej raha hai ya poori HTTP request?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Apne number par SMS bhej kar dekho link ka domain kya hai</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Password Reset aur Email Verification links par bhi OOB test karo</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Headers to Test: X-Forwarded-Host, Referer, Origin sab mein Collab link dalo. In-Parameter: ?redirect_url= mein Collab link dalo. SSRF Connection: Server khud se Collab par ping bhej raha hai toh External Interaction allow hai.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Collaborator se OTP kaise hack hua? A: Ye Out-of-Band Interaction hai. Server user-supplied headers ko sensitive communications mein use karta hai, attacker apna domain inject karke tokens exfiltrate kar sakta hai → Full ATO.</p></div>
+    </div>
+  </div>
+  <div class="card p5-card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff3355;color:#ff3355;background:rgba(255,51,85,0.07)">#13</div>
+      <div>
+        <div class="card-title">OTP Bypass via Referer Header Validation (False Origin)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">REFERER SPOOF</span>
+          <span class="ref-tag">HackerOne · Gaming · $4,200</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Backend server check karta hai request kahan se aa rahi hai. Developer ne shortcut logic lagaya: Agar Referer header /otp-success se aa raha hai toh matlab user ne OTP verify kar liya, seedha session token de do. Hacker bina OTP dale sirf Referer header change karke bypass karta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Victim ke credentials dalo, OTP screen khul gayi</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Random OTP dalo, <code>POST /api/v1/auth/final-login</code> capture karo</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Server error: <code>401 Unauthorized</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Wahi request phir bhejo par Referer header change karo:</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Old: <code>Referer: https://target.com/verify-otp</code> → New: <code>Referer: https://target.com/otp-verification-success</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Server ka logic bypass! Valid Session Cookie generate karke de di!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Pehle dummy account se login karke OTP Success URL note karo</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Success URL ko Referer mein dalte ho toh 403/401 gayab ho rahe hain?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Browser Console mein koi script <code>document.referrer</code> check karke redirect kar rahi hai?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Bina Step 2 (OTP) kiye seedha Step 3 (Final Auth) API call kar sakte ho with spoofed headers?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Origin Header: Origin ko bhi Success URL se replace karo. X-Forwarded-Host: /dashboard ya /success dalo. Step Skipping: Seedha /api/v1/get-user-data call karo with spoofed Referer.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Sirf Referer check karna kyun galat hai? A: Referer/Origin client-side control mein hote hain, attacker proxy se manipulate kar sakta hai. Security hamesha Server-side Session State par honi chahiye — MFA_Verified flag database mein check karo.</p></div>
+    </div>
+  </div>
+  <div class="card p5-card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff3355;color:#ff3355;background:rgba(255,51,85,0.07)">#18</div>
+      <div>
+        <div class="card-title">OTP Bypass via Email-to-SMS Gateway Injection</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">GATEWAY INJECT</span>
+          <span class="ref-tag">Bugcrowd · Logistics · $4,000</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Backend ki SMS aur Email service ek hi gateway use karti hai. Server mobile number check nahi karta ki wo Sirf Digits hain. Hacker mobile number ki jagah Email-to-SMS address daal deta hai aur OTP hacker ke email par aa jata hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Login page par jao jahan Mobile Number se login hota hai</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Send OTP button click karo, request capture karo: <code>{"phone":"9999999999"}</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Phone number replace karo: <code>{"phone":"hacker-email@gmail.com"}</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Ya bypass: <code>{"phone":"9999999999@provider.com"}</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Server-side regex weak tha — pure string ko SMS provider ko bhej diya</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">SMS provider ne Email detect kiya → OTP hacker ke inbox mein → Login!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Phone field mein alphabet ya symbols (<code>@</code>, <code>.</code>) allow ho rahe hain?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Email dala toh server ne <code>200 OK</code> diya ya Invalid Format?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text"><code>phone=99999&email=hacker@gmail.com</code> bhej kar dono par OTP mangwa sakte ho?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Bahut bada input (100+ chars) dalne se gateway crash hokar default destination par bhej raha hai?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Special Chars in Phone: @ . + dalkar email mein convert karo. Provider Gateways: number@tmomail.net, number@vtext.com try karo. CRLF: %0A dalkar gateway ko confuse karo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Mobile field mein kuch bhi daal raha hai toh problem kahan? A: Input Validation + Logic Flaw hai. Server ko Strict Regex use karna chahiye jo sirf numeric digits allow kare. Email/arbitrary strings allow karna = gateway manipulation.</p></div>
+    </div>
+  </div>
+  <div class="card p5-card" style="--card-color:#ff3355">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#ff3355;color:#ff3355;background:rgba(255,51,85,0.07)">#29</div>
+      <div>
+        <div class="card-title">OTP Bypass via X-Forwarded-For Header Spoofing</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#ff3355;border-color:#ff3355;background:rgba(255,51,85,0.08)">IP SPOOF</span>
+          <span class="ref-tag">HackerOne · Enterprise SaaS · $4,000</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#ff3355">
+        <div class="scenario-label" style="color:#ff3355">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Companies employees ke liye Ease of Access rakhti hain: Internal IP se request aaye toh OTP skip. Server X-Forwarded-For header par trust karta hai. Hacker header manually set karke server ko yakeen dilata hai ki wo Internal Network se login kar raha hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Normal request bheji — OTP screen aa gayi</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Request intercept karo aur header add karo: <code>X-Forwarded-For: 127.0.0.1</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Ya internal range: <code>X-Forwarded-For: 192.168.1.1</code> ya <code>10.0.0.1</code></div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Server ne header dekha — socha internal admin panel se request hai!</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">MFA policy skip → <code>302 Redirect</code> dashboard par!</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Bina kisi OTP ke victim ke account mein access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Site ke docs ya error messages mein internal IP leaked hai?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Header server ke real IP check ko overwrite kar raha hai?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Sirf <code>/api/v1/login</code> par bypass hai ya poori site par?</div></li>
+        <li><div class="check-box" data-phase="5" onclick="toggleCheck(this)"></div><div class="check-text">Cloudflare ke piche hai toh <code>CF-Connecting-IP</code> badal kar dekho</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Header Fuzzing: X-Real-IP, X-Client-IP, True-Client-IP sab 127.0.0.1 se try karo. Internal Domain: Host header ko localhost ya internal.target.com badalo. Admin Bypass: /admin/login par OTP nahi hota wahan try karo.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: IP-based MFA bypass kaise rokein? A: X-Forwarded-For user-controllable header hai. Sirf trusted Proxy/Load Balancer ke IPs par trust karo. Kisi condition mein MFA ko sirf IP ke base par skip na karo, khas kar external requests par.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="phase-header" id="phase6" style="--phase-color:#00ff88">
+  <div class="phase-badge" style="background:#00ff88">PHASE 06</div>
+  <div class="phase-title">LOGIC & ARCHITECTURE</div>
+  <div class="phase-goal">Exploit app logic flaws, deep links & state confusion for bypass</div>
+</div>
+<div class="cards-grid">
+  <div class="card p6-card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,0.07)">#08</div>
+      <div>
+        <div class="card-title">OTP Bypass via OAuth Account Linking (Social Login Chain)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">OAUTH BYPASS</span>
+          <span class="ref-tag">HackerOne · Fintech Giant · $7,000</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Apps do login raaste deti hain: Email+Password (MFA enforced) aur Social Login. Developer ne Social Login par MFA nahi lagaya kyunki assume kiya Google ne verify kiya hoga. Hacker victim account mein apna Google ID link karke Login with Google se OTP bypass karta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Victim ke credentials se login try karo — OTP mang raha hai, login nahi kiya</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Pre-auth Account Linking endpoint dhoondho: <code>/connect/google</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">CSRF link bhejo victim ko jisse victim ka session hacker ke Google ID se link ho jaye</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Naye browser par jao aur <code>Login with Google</code> click karo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Server ne dekha Google ID linked hai → seedha dashboard mein ghusa diya!</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">OTP step skip — OAuth flow mein MFA check integrated hi nahi tha</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Google, Apple, Facebook — sab OAuth providers par MFA enforced hai?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Login hone se PEHLE social account link kar sakte ho? (Pre-Auth Linking)</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Social login se ghusne ke baad MFA ko OFF kar sakte ho bina OTP ke?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Security Policy har login method par SAME hai ya sirf email-login par?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Switch Login Methods: Password par MFA hai toh Google/Facebook/Github se check karo. Account Merge: MFA wala + bina MFA wala merge karke dekho. Password Reset Bypass: Reset ke baad auto-login bina OTP?</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Social Login par MFA kyun chahiye? A: Zero Trust Architecture — hamein nahi pata user ka Google kitna secure hai. Critical apps mein har auth event par apna MFA check hona chahiye, chahe koi bhi provider ho.</p></div>
+    </div>
+  </div>
+  <div class="card p6-card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,0.07)">#14</div>
+      <div>
+        <div class="card-title">OTP Bypass via IDOR in SMS Resend (The Number Swap)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">IDOR SWAP</span>
+          <span class="ref-tag">HackerOne · Crypto Wallet · $8,000</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Resend OTP request mein server mobile number ya user ID parameter allow karta hai. Developer ne check nahi kiya ki OTP usi account ke linked number par ja raha hai. Hacker Resend request mein victim ki user_id rakh kar mobile_number apna daal deta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Victim ka email + password (phishing se nikala) → OTP stage aa gayi</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Resend OTP via SMS button click karo, request intercept karo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Request: <code>POST /api/v1/auth/resend-otp</code> with <code>{"user_id":"VICTIM_ID","phone":"+91-VICTIM"}</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">IDOR Attack: <code>phone_number</code> ko apna number daal do, <code>user_id</code> victim ki rehne do</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Server ne victim ke account ka OTP generate kiya aur HACKER ke number par bheja!</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Hacker ke phone par OTP aaya → victim ke crypto wallet ka full access!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">OTP request mein kitne identifiers hain? (user_id, email, uuid, phone)</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">User A ka OTP User B ke phone par mangwa sakte ho?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Burp Suite Forms tab mein hidden input hai jo mobile number hold kar raha hai?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Email par OTP link aa raha hai toh email parameter badal kar apne inbox mein mangwa sakte ho?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Parameter Injection: OTP request mein email/phone manually add karo agar nahi hai. Session Overlap: Apne account se Resend ki request lo, victim ki session_id dalo. Response Body IDOR: Server response mein otp_id ya token hai?</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: IDOR in MFA kaise rokein? A: MFA flow mein Static Binding chahiye. User fully authenticated hone tak OTP destination change nahi kar sakta. Resend mein server database se linked number par hi OTP bheje, client request se nahi.</p></div>
+    </div>
+  </div>
+  <div class="card p6-card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,0.07)">#16</div>
+      <div>
+        <div class="card-title">OTP Bypass via Time-Based Side Channel Attack</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">TIMING ATTACK</span>
+          <span class="ref-tag">Private · Govt Portal · $4,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Server String Comparison use karta hai jo Character by Character match karta hai. Agar pehla digit sahi hai toh server ko check mein thoda zyada time lagta hai. Agar galat hai toh turant error deta hai. Is time difference se OTP digit-by-digit nikal sakte hain.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Server par rate limiting hai (10 attempts/minute) — but timing attack se bypass possible</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Python script likho jo har request ka Response Time miliseconds mein measure kare</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><code>0XXXXX</code> se <code>9XXXXX</code> tak bhejo — <code>4XXXXX</code> par 2ms zyada = pehla digit <code>4</code>!</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Pehla digit fix karo, doosra dhoondho: <code>40XXXX</code> to <code>49XXXX</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Aise 60-70 requests mein poora 6-digit OTP nikal liya bina rate limit hit kiye!</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Server ko laga sahi OTP dala → Access granted!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Burp Suite ya ffuf mein response time monitor karo (Timing Column enable karo)</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Server <code>==</code> use kar raha hai ya <code>SafeCompare</code>?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Network stable hona chahiye — 10-15 baar ek hi request bhej kar Average Time nikalo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Server galat password par <code>sleep(2)</code> kar raha hai? Parallelism se bypass karo</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Response Time: Burp Logger mein Time column hamesha ON rakho. Username Enumeration mein bhi kaam aata hai. Database Latency: Heavy database mein True vs False condition ka gap 50-100ms ho sakta hai.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Time dekh kar OTP bypass kaise? A: Side-Channel Attack hai. Fix: Constant-Time Comparison functions use karo (Python: secrets.compare_digest, Node.js: crypto.timingSafeEqual). Ye hamesha ek hi time lete hain chahe match ho ya na ho.</p></div>
+    </div>
+  </div>
+  <div class="card p6-card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,0.07)">#17</div>
+      <div>
+        <div class="card-title">OTP Bypass via Application State Confusion (Cache &amp; History)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-high">HIGH</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">STATE CONFUSION</span>
+          <span class="ref-tag">Bugcrowd · E-learning · $3,200</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">SPA apps browser memory mein State save karti hain. Server-side session Semi-Authenticated ho jata hai login ke baad. Agar hacker Back Button ya Forward Cache se /dashboard par jump kare, toh frontend purane Success state ko use kar leta hai aur No-Cache headers missing hon toh dashboard render ho jata hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Victim ke account mein login karo — OTP page (<code>/verify-otp</code>) aa jayega</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Browser bar mein manually type karo: <code>https://target.com/dashboard</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Server redirect karega wapas OTP page par — yahan tak sahi hai</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Ab Back + Forward button tezi se click karo (ya browser history se /dashboard click karo)</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Browser cache mein dashboard ka kuch hissa tha + No-Cache headers missing → Dashboard render hua!</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Esc dabao (page load roko) ya Burp se redirect block karo → Dashboard LOCKED on screen!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Browser Back/Forward se MFA screen bypass ho rahi hai?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Server responses mein <code>Cache-Control: no-store, no-cache</code> bhej raha hai?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Burp mein 302 responses drop karke dekho — piche ka page Authenticated hai?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Mobile app mein OTP screen par app background mein dalo phir wapas aao — seedha dashboard khul rahi hai?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>History Navigation: Login aur OTP ke beech Back/Forward karo. Forced Stop: Redirect hote waqt X (Stop) button dabao. Incognito vs Normal: Cache clear karne se bypass khatam ho raha hai?</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Back button se dashboard dekh le toh kaise rokein? A: Strict Server-Side Session Management chahiye. Dashboard tab render ho jab mfa_verified=TRUE ho. Cache-Control: no-store header lagao taaki browser memory mein save na kare.</p></div>
+    </div>
+  </div>
+  <div class="card p6-card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,0.07)">#19</div>
+      <div>
+        <div class="card-title">CORS Misconfiguration — MFA Page Data Leak</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">CORS EXPLOIT</span>
+          <span class="ref-tag">HackerOne · Social Media · $4,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">OTP page par browser background mein API call karta hai (/api/v1/mfa/status). Developer ne CORS policy galat set ki: Access-Control-Allow-Origin: * — koi bhi website is API ka data padh sakti hai. Hacker ki malicious site victim ke browser se API call karke response mein chupa OTP chura leti hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Malicious website banao (e.g., <code>free-gift-cards.com</code>) aur victim ko link bhejo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Victim apne account par login kar raha hai, OTP page par ruka hai, dusre tab mein hacker ka link khola</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Hacker ki site background mein: <code>fetch('https://target.com/api/v1/mfa/details',{credentials:'include'})</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">CORS misconfigured tha → target.com ne hacker ki site ko data de diya!</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Response: <code>{"mfa_status":"pending","last_otp_sent":"552134"}</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Hacker ne 552134 receive kiya → victim ke account mein login!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">OTP page par hone waali har XHR/Fetch request scan karo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Request mein <code>Origin: https://evil.com</code> dalo — response mein reflect ho raha hai?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><code>Access-Control-Allow-Credentials: true</code> hai? Iske bina victim cookies send nahi hongi</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Response body mein <code>otp</code>, <code>secret</code>, ya <code>backup_code</code> hai?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Check Wildcards: API response mein Access-Control-Allow-Origin: * hai? Pre-OTP Leaks: Login ke turant baad API calls mein OTP/session secret leak? PostMessage: window.postMessage target origin * hai toh listen kar sakte ho.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: CORS policy MFA ke liye kaise secure rakhein? A: No Wildcards kabhi nahi, sirf trusted subdomains allow karo. OTP jaise sensitive data kabhi GET/POST response mein direct nahi bhejo, sirf Success/Failure status bhejo.</p></div>
+    </div>
+  </div>
+  <div class="card p6-card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,0.07)">#20</div>
+      <div>
+        <div class="card-title">OTP Bypass via Deep Link State Injection (Mobile App)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">DEEP LINK</span>
+          <span class="ref-tag">Bugcrowd · Fintech/Wallet · $5,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">Mobile apps Deep Links use karti hain (myapp://verify?status=success). Developer ne OTP verify ke baad khulne wali screen ke liye deep link rakha: fintechapp://auth/success?mfa=passed. App ka frontend sirf deep link open karne se Authenticated State mein chala jata hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Victim ke credentials dalo — Mobile app OTP mang rahi hai</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">App ki <code>AndroidManifest.xml</code> ya <code>Info.plist</code> reversing karke Deep Links nikaalo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Deep link mila: <code>finapp://login/callback?verify=true</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Mobile browser mein ye URL dalo aur Go karo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">App ne OTP screen band kar di aur Dashboard khol diya! (verify=true flag par trust)</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">App ne server ko naya token request kiya bolkar MFA verify hua → Server ne bhi de diya!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">App mein jitne intent-filters aur deep links hain extract karo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Deep link ke parameters (status, verify, mfa) change karne se behavior badal raha hai?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Dashboard par gayi toh API calls abhi bhi 403 de rahi hain? (Haan=UI bypass, Nahi=Full Critical!)</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">OAuth login ke baad ka redirect link manually trigger kiya ja sakta hai?</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Reversing: apktool se decompile karo, strings.xml mein Schema dhoondho. State Manipulation: ?admin=true ya ?step=3 se steps skip karo. Intent Injection: adb shell am start -n com.app.name/.SuccessActivity.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: Deep links se MFA bypass kaise rokein? A: Mobile apps ko sensitive state sirf URL parameters par depend nahi karni chahiye. Deep links sirf Navigation ke liye hon. Verification hamesha server-side par ho jahan server confirm kare MFA complete hua.</p></div>
+    </div>
+  </div>
+  <div class="card p6-card" style="--card-color:#00ff88">
+    <div class="card-header">
+      <div class="report-num" style="border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,0.07)">#26</div>
+      <div>
+        <div class="card-title">OTP Bypass via GraphQL Mutation Overlap (Double Action)</div>
+        <div class="card-meta">
+          <span class="badge-cat sev-critical">CRITICAL</span>
+          <span class="badge-cat" style="color:#00ff88;border-color:#00ff88;background:rgba(0,255,136,0.08)">GRAPHQL BATCH</span>
+          <span class="ref-tag">HackerOne · Big Tech Social · $7,500</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scenario-row" style="border-left-color:#00ff88">
+        <div class="scenario-label" style="color:#00ff88">VULNERABILITY LOGIC</div>
+        <div class="scenario-text">GraphQL Batching mein ek request mein multiple Mutations bhej sakte hain. Hacker ek request mein galat OTP (verifyOTP) + session update (loginUser) saath bhejta hai. GraphQL engine confusion mein verifyOTP fail hone ke baavjood loginUser execute kar deta hai.</div>
+      </div>
+      <div class="steps-title">// STEP-BY-STEP ATTACK SCENARIO</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Login page, OTP stage — GraphQL request capture karo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Original: <code>mutation { verifyOTP(code:"000000") { success } }</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Batching Injection: do mutations ek saath bhejo:</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><code>action1: verifyOTP(code:"000000") { success }</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><code>action2: loginUser(userId:"VICTIM_ID") { sessionToken }</code></div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">action1 mein error (Invalid OTP) par action2 execute ho gaya → sessionToken mil gaya!</div></li>
+      </ul>
+      <div class="steps-title">// VERIFICATION CHECKLIST</div>
+      <ul class="checklist">
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">Ek request mein <code>[]</code> array dalkar multiple queries bhej sakte ho?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text"><code>verifyOTP</code> aur <code>setSession</code> ek saath bhejne par auth check skip ho raha hai?</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">OTP argument mein <code>null</code>, <code>[]</code>, ya long strings fuzz karo</div></li>
+        <li><div class="check-box" data-phase="6" onclick="toggleCheck(this)"></div><div class="check-text">REST se secure hai par GraphQL se vulnerable? Developers GraphQL security bhool jate hain</div></li>
+      </ul>
+      <div class="pro-tip"><p><strong>💡 Cross-App Testing:</strong><br>Introspection: __schema query se saare mutations dhoondho. Alias Overlap: check1:verifyOTP(code:&quot;wrong&quot;), check2:verifyOTP(code:&quot;&quot;). Field Selection: Response mein authenticated-only fields maango chahe OTP galat ho.</p></div>
+      <div class="mindset"><p><strong>🏛️ Interview:</strong> Q: GraphQL MFA bypass kaise rokein? A: Atomic Transactions + Middleware Authorization chahiye. Har sensitive mutation execute hone se pehle MFA verify check ho. Batching mein independent validation ho, ek step fail=poori request reject (Rollback).</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="master-table-section" id="table">
+  <h2>📊 ALL REPORTS — MASTER REFERENCE TABLE</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>REPORT</th><th>TECHNIQUE</th><th>PHASE</th><th>SEVERITY</th><th>BOUNTY</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td>OTP Bypass via Response Manipulation &amp; Status Code Tampering</td><td>RESPONSE TAMPER</td><td style="color:#00aaff">P1</td><td style="color:#ff3355">CRITICAL</td><td>$2,500</td></tr>
+        <tr><td>02</td><td>OTP Bypass via Response Leakage (Secret in JSON)</td><td>OTP LEAK</td><td style="color:#00aaff">P1</td><td style="color:#ff3355">CRITICAL</td><td>$4,000</td></tr>
+        <tr><td>03</td><td>OTP Bypass via Race Condition (Multi-Threaded Validation)</td><td>RACE CONDITION</td><td style="color:#ff7733">P3</td><td style="color:#ff3355">CRITICAL</td><td>$6,000</td></tr>
+        <tr><td>04</td><td>OTP Bypass via NoSQL Injection (Type Juggling)</td><td>NoSQL INJECTION</td><td style="color:#ffc233">P2</td><td style="color:#ff3355">CRITICAL</td><td>$5,500</td></tr>
+        <tr><td>05</td><td>OTP Bypass via Null/Empty Token Injection</td><td>NULL INJECTION</td><td style="color:#ffc233">P2</td><td style="color:#ff3355">CRITICAL</td><td>$4,800</td></tr>
+        <tr><td>06</td><td>OTP Bypass via Location Header Manipulation (Redirect Hijack)</td><td>REDIRECT HIJACK</td><td style="color:#ff3355">P5</td><td style="color:#ff3355">CRITICAL</td><td>$3,800</td></tr>
+        <tr><td>07</td><td>OTP Bypass via Remember Me Cookie Reuse</td><td>COOKIE REUSE</td><td style="color:#aa55ff">P4</td><td style="color:#ff3355">CRITICAL</td><td>$5,200</td></tr>
+        <tr><td>08</td><td>OTP Bypass via OAuth Account Linking (Social Login Chain)</td><td>OAUTH BYPASS</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">CRITICAL</td><td>$7,000</td></tr>
+        <tr><td>09</td><td>OTP Hijacking via Host Header Injection (SMS Gateway Routing)</td><td>HOST INJECTION</td><td style="color:#ff3355">P5</td><td style="color:#ff3355">CRITICAL</td><td>$6,500</td></tr>
+        <tr><td>10</td><td>OTP Leakage via Burp Collaborator (OOB Data Exfiltration)</td><td>OOB EXFIL</td><td style="color:#ff3355">P5</td><td style="color:#ff3355">CRITICAL</td><td>$5,000</td></tr>
+        <tr><td>11</td><td>OTP Bypass via Normalization Logic (The +91 vs 00 Trick)</td><td>NORMALIZATION</td><td style="color:#ff7733">P3</td><td style="color:#ff3355">CRITICAL</td><td>$4,500</td></tr>
+        <tr><td>12</td><td>OTP Bypass via Method Swapping (SMS vs Voice Call Logic)</td><td>METHOD SWAP</td><td style="color:#ff7733">P3</td><td style="color:#ff3355">CRITICAL</td><td>$3,500</td></tr>
+        <tr><td>13</td><td>OTP Bypass via Referer Header Validation (False Origin)</td><td>REFERER SPOOF</td><td style="color:#ff3355">P5</td><td style="color:#ff3355">CRITICAL</td><td>$4,200</td></tr>
+        <tr><td>14</td><td>OTP Bypass via IDOR in SMS Resend (The Number Swap)</td><td>IDOR SWAP</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">CRITICAL</td><td>$8,000</td></tr>
+        <tr><td>15</td><td>OTP Bypass via JWT Claim Manipulation (MFA:False Trick)</td><td>JWT TAMPER</td><td style="color:#aa55ff">P4</td><td style="color:#ff3355">CRITICAL</td><td>$5,800</td></tr>
+        <tr><td>16</td><td>OTP Bypass via Time-Based Side Channel Attack</td><td>TIMING ATTACK</td><td style="color:#00ff88">P6</td><td style="color:#ff7733">HIGH</td><td>$4,500</td></tr>
+        <tr><td>17</td><td>OTP Bypass via Application State Confusion (Cache &amp; History)</td><td>STATE CONFUSION</td><td style="color:#00ff88">P6</td><td style="color:#ff7733">HIGH</td><td>$3,200</td></tr>
+        <tr><td>18</td><td>OTP Bypass via Email-to-SMS Gateway Injection</td><td>GATEWAY INJECT</td><td style="color:#ff3355">P5</td><td style="color:#ff3355">CRITICAL</td><td>$4,000</td></tr>
+        <tr><td>19</td><td>CORS Misconfiguration — MFA Page Data Leak</td><td>CORS EXPLOIT</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">CRITICAL</td><td>$4,500</td></tr>
+        <tr><td>20</td><td>OTP Bypass via Deep Link State Injection (Mobile App)</td><td>DEEP LINK</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">CRITICAL</td><td>$5,500</td></tr>
+        <tr><td>21</td><td>TOTP Bypass via Time-Sync Manipulation (Clock Trick)</td><td>TOTP REPLAY</td><td style="color:#aa55ff">P4</td><td style="color:#ff7733">HIGH</td><td>$3,200</td></tr>
+        <tr><td>22</td><td>OTP Bypass via Concurrent Session Race (Logout Gap)</td><td>SESSION RACE</td><td style="color:#aa55ff">P4</td><td style="color:#ff3355">CRITICAL</td><td>$4,500</td></tr>
+        <tr><td>23</td><td>OTP Bypass via Parameter Pollution &amp; Double-OTP Request</td><td>HPP ATTACK</td><td style="color:#ff7733">P3</td><td style="color:#ff3355">CRITICAL</td><td>$5,000</td></tr>
+        <tr><td>24</td><td>OTP Bypass via Language/Locale Injection (Template Trick)</td><td>LOCALE INJECT</td><td style="color:#ffc233">P2</td><td style="color:#ff7733">HIGH</td><td>$3,800</td></tr>
+        <tr><td>25</td><td>OTP Bypass via Boolean Response Manipulation (200 OK Trick)</td><td>BOOL MANIP</td><td style="color:#00aaff">P1</td><td style="color:#ff3355">CRITICAL</td><td>$6,200</td></tr>
+        <tr><td>26</td><td>OTP Bypass via GraphQL Mutation Overlap (Double Action)</td><td>GRAPHQL BATCH</td><td style="color:#00ff88">P6</td><td style="color:#ff3355">CRITICAL</td><td>$7,500</td></tr>
+        <tr><td>27</td><td>OTP Bypass via JWT Algorithm Confusion (Public Key Swap)</td><td>JWT ALG SWAP</td><td style="color:#aa55ff">P4</td><td style="color:#ff3355">CRITICAL</td><td>$8,500</td></tr>
+        <tr><td>28</td><td>OTP Bypass via Race Condition in Number Normalization</td><td>RACE + NORM</td><td style="color:#ff7733">P3</td><td style="color:#ff3355">CRITICAL</td><td>$6,800</td></tr>
+        <tr><td>29</td><td>OTP Bypass via X-Forwarded-For Header Spoofing</td><td>IP SPOOF</td><td style="color:#ff3355">P5</td><td style="color:#ff3355">CRITICAL</td><td>$4,000</td></tr>
+        <tr><td>30</td><td>OTP Bypass via Session Donating (Attacker-to-Victim Swap)</td><td>SESSION DONATE</td><td style="color:#aa55ff">P4</td><td style="color:#ff3355">CRITICAL</td><td>$9,000</td></tr>
+        <tr><td>31</td><td>OTP Bypass via Null Byte Injection (%00 Trick)</td><td>NULL BYTE</td><td style="color:#ffc233">P2</td><td style="color:#ff7733">HIGH</td><td>$3,500</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div><!-- /container -->
+
+<footer>
+  [ ELITE BUG HUNTER'S MANUAL ] · [ MISSION 03: OTP/MFA BYPASS ] · [ 31 REPORTS ] · [ 6 PHASES ]<br><br>
+  <span style="color:#00aaff">◀ MISSION 02: PASSWORD RESET &nbsp;|&nbsp; MISSION 03: OTP/MFA BYPASS ▶ &nbsp;|&nbsp; MISSION 04: COMING SOON ▶</span><br><br>
+  <span style="color:#444;font-size:10px">AUTHORIZED BUG BOUNTY RESEARCH ONLY — NEVER TEST WITHOUT EXPLICIT WRITTEN PERMISSION</span>
+</footer>
+
+<script>
+  const phaseMax = {1:3,2:4,3:5,4:6,5:6,6:7};
+  const phaseDone = {1:0,2:0,3:0,4:0,5:0,6:0};
+
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    const p = parseInt(el.getAttribute('data-phase'));
+    if (el.classList.contains('done')) phaseDone[p]++;
+    else phaseDone[p]--;
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const a = document.querySelectorAll('.check-box');
+    const d = document.querySelectorAll('.check-box.done');
+    document.getElementById('prog-count').textContent = d.length;
+    document.getElementById('prog-fill').style.width = (d.length / a.length * 100) + '%';
+    for (let p = 1; p <= 6; p++) {
+      const e = document.getElementById('p' + p + '-count');
+      if (e) e.textContent = phaseDone[p] + '/' + phaseMax[p];
+    }
+  }
+
+  document.querySelectorAll('.nav-btn').forEach(function(b) {
+    b.addEventListener('click', function(e) {
+      e.preventDefault();
+      var t = document.querySelector(b.getAttribute('href'));
+      if (t) t.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+
+  updateProgress();
+</script>
+</body></html>

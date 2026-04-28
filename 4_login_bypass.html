@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mission 04 — Login Bypass Mastery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-deep: #080c12;
+            --bg-card: #0d1520;
+            --bg-card2: #111b2a;
+            --bg-box: #0a1219;
+            --border: #1a2d40;
+            --border-glow: #ff6b3533;
+            --cyan: #00c8ff;
+            --cyan-dim: #00a8d4;
+            --cyan-glow: #00c8ff55;
+            --blue: #4488ff;
+            --purple: #9b59ff;
+            --green: #00ff88;
+            --yellow: #ffd700;
+            --orange: #ff8c42;
+            --red: #ff4757;
+            --accent: #ff6b35;
+            --text-primary: #e8f4f8;
+            --text-secondary: #7ba8c0;
+            --text-dim: #4a7090;
+            --severity-crit: #ff2d55;
+            --severity-high: #ff6b35;
+            --severity-med: #ffd700;
+            --severity-low: #00ff88;
+            --severity-info: #4488ff
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at 20% 0%, #ff6b3508 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, #00c8ff05 0%, transparent 50%)
+        }
+
+        .mission-header {
+            text-align: center;
+            padding: 50px 20px 30px;
+            position: relative
+        }
+
+        .mission-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent)
+        }
+
+        .mission-tag {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            font-size: 13px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: block
+        }
+
+        .mission-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(24px, 4vw, 42px);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), var(--yellow), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 8px
+        }
+
+        .mission-subtitle {
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            flex-wrap: wrap
+        }
+
+        .stat-item {
+            text-align: center
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--cyan)
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 2px
+        }
+
+        .master-progress {
+            max-width: 900px;
+            margin: 25px auto 0;
+            padding: 0 20px
+        }
+
+        .master-bar-wrap {
+            height: 8px;
+            background: var(--bg-card);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border)
+        }
+
+        .master-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--yellow), var(--green));
+            border-radius: 4px;
+            transition: width .6s ease
+        }
+
+        .master-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px
+        }
+
+        .master-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 2px
+        }
+
+        .master-pct {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: var(--accent)
+        }
+
+        .filter-bar {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center
+        }
+
+        .filter-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all .2s
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent)
+        }
+
+        .phase-section {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap
+        }
+
+        .phase-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            color: var(--accent);
+            letter-spacing: 3px;
+            background: var(--bg-card);
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border-glow)
+        }
+
+        .phase-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            flex: 1
+        }
+
+        .phase-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-dim)
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 20px
+        }
+
+        @media(max-width:500px) {
+            .cards-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .report-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all .3s ease;
+            position: relative
+        }
+
+        .report-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--cyan));
+            opacity: .5;
+            transition: opacity .3s
+        }
+
+        .report-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent)
+        }
+
+        .report-card:hover::before {
+            opacity: 1
+        }
+
+        .card-header {
+            padding: 18px 20px 14px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card2)
+        }
+
+        .card-meta {
+            flex: 1
+        }
+
+        .report-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            margin-bottom: 4px
+        }
+
+        .report-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 6px
+        }
+
+        .report-target {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4
+        }
+
+        .severity-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            height: fit-content;
+            font-weight: 600
+        }
+
+        .sev-critical {
+            background: #ff2d5520;
+            color: var(--severity-crit);
+            border: 1px solid #ff2d5540
+        }
+
+        .sev-high {
+            background: #ff6b3520;
+            color: var(--severity-high);
+            border: 1px solid #ff6b3540
+        }
+
+        .sev-medium {
+            background: #ffd70020;
+            color: var(--severity-med);
+            border: 1px solid #ffd70040
+        }
+
+        .sev-low {
+            background: #00ff8820;
+            color: var(--severity-low);
+            border: 1px solid #00ff8840
+        }
+
+        .sev-info {
+            background: #4488ff20;
+            color: var(--severity-info);
+            border: 1px solid #4488ff40
+        }
+
+        .sev-na {
+            background: #ffffff10;
+            color: #888;
+            border: 1px solid #ffffff20
+        }
+
+        .technique-tag {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: var(--cyan-glow);
+            color: var(--cyan);
+            margin: 2px 4px 2px 0;
+            border: 1px solid #00c8ff30
+        }
+
+        .card-body {
+            padding: 16px 20px 18px
+        }
+
+        .scenario-box {
+            background: var(--bg-box);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 14px
+        }
+
+        .scenario-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--yellow);
+            letter-spacing: 2px;
+            margin-bottom: 8px
+        }
+
+        .scenario-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7
+        }
+
+        .scenario-text code.c {
+            background: #ff6b3515;
+            color: var(--accent);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px
+        }
+
+        .checklist-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--green);
+            letter-spacing: 2px;
+            margin-bottom: 10px
+        }
+
+        .checklist {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 12px;
+            background: var(--bg-box);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .2s;
+            user-select: none
+        }
+
+        .checklist-item:hover {
+            border-color: var(--cyan-dim);
+            background: #0d1822
+        }
+
+        .checklist-item.done {
+            border-color: var(--green);
+            background: #00ff8808
+        }
+
+        .checklist-item.done .item-checkbox {
+            background: var(--green);
+            border-color: var(--green)
+        }
+
+        .checklist-item.done .item-checkbox::after {
+            content: '✓';
+            color: #000;
+            font-size: 10px;
+            font-weight: 700
+        }
+
+        .checklist-item.done .item-text {
+            opacity: .6;
+            text-decoration: line-through
+        }
+
+        .item-checkbox {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+            transition: all .2s
+        }
+
+        .item-step {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--accent);
+            min-width: 18px;
+            margin-top: 2px
+        }
+
+        .item-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5
+        }
+
+        .item-text strong {
+            color: var(--text-primary)
+        }
+
+        .mindset-box {
+            background: linear-gradient(135deg, #9b59ff10, #4488ff10);
+            border: 1px solid #9b59ff30;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 14px
+        }
+
+        .mindset-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--purple);
+            letter-spacing: 2px;
+            margin-bottom: 6px
+        }
+
+        .mindset-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-style: italic
+        }
+
+        .protip-box {
+            background: linear-gradient(135deg, #ffd70010, #ff8c4210);
+            border: 1px solid #ffd70030;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 14px
+        }
+
+        .protip-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--yellow);
+            letter-spacing: 2px;
+            margin-bottom: 6px
+        }
+
+        .protip-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6
+        }
+
+        .chain-box {
+            background: linear-gradient(135deg, #ff6b3510, #ff475710);
+            border: 1px solid #ff6b3530;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 14px
+        }
+
+        .chain-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--red);
+            letter-spacing: 2px;
+            margin-bottom: 6px
+        }
+
+        .chain-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--orange);
+            line-height: 1.8;
+            word-break: break-all
+        }
+
+        .impact-box {
+            background: linear-gradient(135deg, #ff2d5510, #ff6b3510);
+            border: 1px solid #ff2d5530;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 14px
+        }
+
+        .impact-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--red);
+            letter-spacing: 2px;
+            margin-bottom: 6px
+        }
+
+        .impact-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6
+        }
+
+        .card-progress {
+            margin-top: 10px
+        }
+
+        .card-progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px
+        }
+
+        .card-progress-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 1px
+        }
+
+        .card-progress-pct {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--accent)
+        }
+
+        .card-bar-wrap {
+            height: 4px;
+            background: var(--bg-deep);
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .card-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 2px;
+            transition: width .4s ease
+        }
+
+        .mission-footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 40px
+        }
+
+        .footer-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 3px
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══ HEADER ═══ -->
+    <header class="mission-header">
+        <span class="mission-tag">⬡ CLASSIFIED REGISTER ⬡</span>
+        <h1 class="mission-title">MISSION 04 — LOGIN BYPASS MASTERY</h1>
+        <p class="mission-subtitle">29 Real-World HackerOne Reports · Authentication Defeat · Enumeration to Full
+            Account Takeover</p>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-value" id="totalReports">35</div>
+                <div class="stat-label">Total Reports</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="completedCards">0</div>
+                <div class="stat-label">Cards Done</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="completedItems">0</div>
+                <div class="stat-label">Steps Done</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══ MASTER PROGRESS ═══ -->
+    <div class="master-progress">
+        <div class="master-info"><span class="master-label">OVERALL MISSION PROGRESS</span><span class="master-pct"
+                id="masterPct">0%</span></div>
+        <div class="master-bar-wrap">
+            <div class="master-bar-fill" id="masterBar"></div>
+        </div>
+    </div>
+
+    <!-- ═══ FILTER BAR ═══ -->
+    <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterCards('all',this)">ALL</button>
+        <button class="filter-btn" onclick="filterCards('critical',this)">🔴 CRITICAL</button>
+        <button class="filter-btn" onclick="filterCards('high',this)">🟠 HIGH</button>
+        <button class="filter-btn" onclick="filterCards('medium',this)">🟡 MEDIUM</button>
+        <button class="filter-btn" onclick="filterCards('low',this)">🟢 LOW</button>
+        <button class="filter-btn" onclick="filterCards('na',this)">⚪ N/A</button>
+        <button class="filter-btn" onclick="filterCards('complete',this)">✅ DONE</button>
+        <button class="filter-btn" onclick="filterCards('incomplete',this)">⬜ TODO</button>
+    </div>
+
+    <!-- ═══ PHASE 1 — USER ENUMERATION & RECON ═══ -->
+    <section class="phase-section" id="phase1">
+        <div class="phase-header"><span class="phase-number">PHASE 01</span><span class="phase-title">USER ENUMERATION &
+                RECON ATTACKS</span><span class="phase-count" id="p1count">0 / 5 reports</span></div>
+        <div class="cards-grid" id="grid-phase1">
+
+            <!-- REPORT #01 -->
+            <div class="report-card" data-severity="medium" id="report-01">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #01 · Category 1.1</div>
+                        <div class="report-title">User Enumeration via Error Message — Response Text Difference</div>
+                        <div class="report-target">🎯 Financial/Enterprise Platform · Post June 2024 · Medium</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">User Enumeration</span><span
+                                class="technique-tag">Error Message Diff</span><span class="technique-tag">Status Code
+                                Diff</span></div>
+                    </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Login page par valid email daalte hi response tha <code
+                                class="c">"Incorrect password for this user."</code> (401), par invalid email par <code
+                                class="c">"User not found."</code> (404). Hacker ne Burp Intruder se usernames.txt load
+                            karke request baarish ki → "Incorrect password" wale emails = Valid Targets → Brute Force &
+                            Credential Stuffing ready!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Response Text check karo</strong> — Kya error message alag
+                                hai? "Wrong password" vs "Account does not exist".</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Status Codes compare karo</strong> — Kya dono ke liye status
+                                code alag hai? (e.g., 200 OK vs 401 Unauthorized vs 404).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Response Time (Timing Attack)</strong> — Text aur code same
+                                hain? Dekho valid user par server zyada time le raha hai? (Backend password hash karne
+                                mein time lagata hai).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Intruder se mass test karo</strong> — common-emails.txt load
+                                karo aur response length/code filter karo.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">Fix ye hai ki server ko hamesha ek generic message dena chahiye:
+                            "Invalid Username or Password." — Dono cases mein same response, same status code, same
+                            time.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #02 -->
+            <div class="report-card" data-severity="high" id="report-02">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #02 · Category 1.2</div>
+                        <div class="report-title">PII Leak via WordPress REST API — Admin Email Enumeration (MTN)</div>
+                        <div class="report-target">🎯 MTN Group (WordPress) · @h0w · High · PII Leak + Admin Recon</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">WordPress API</span><span
+                                class="technique-tag">CORS Misconfig</span><span class="technique-tag">Forgot Password
+                                Abuse</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">/wp-json/wp/v2/users/15</code> → Bina auth ke Admin
+                            ka Email + Username leak! CORS <code class="c">Access-Control-Allow-Credentials: true</code>
+                            → JS script se logged-in user ka data chori. Admin ka email milte hi → <code
+                                class="c">/wp-login.php?action=lostpassword</code> → Server ne confirm kiya "valid
+                            account hai" → Brute Force ya Phish ready!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>API Fuzzing karo</strong> — <code
+                                    class="c">/wp-json/wp/v2/users</code> ya <code class="c">/api/users/1</code> check
+                                karo. Kya email leak ho raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>CORS Check karo</strong> — Header mein <code
+                                    class="c">Access-Control-Allow-Credentials</code> dekho. Kya third-party access
+                                possible hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Auth Throttling check karo</strong> — Forgot Password page par
+                                50 baar email daal kar dekho. Kya system block karta hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>User ID enumerate karo</strong> — <code
+                                    class="c">/wp-json/wp/v2/users/1</code>, <code class="c">/2</code>, <code
+                                    class="c">/3</code>... sab check karo.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"User Enumeration sirf error messages se nahi, balki Unprotected APIs
+                            se bhi hoti hai. Jab email mil jata hai, toh Brute Force aur Phishing ki success rate 90%
+                            badh jati hai."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #03 -->
+            <div class="report-card" data-severity="critical" id="report-03">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #03 · Category 2.3</div>
+                        <div class="report-title">OTP Bypass — Unlimited Resend Brute Force (Grab)</div>
+                        <div class="report-target">🎯 Grab Android App · @sp1d3rs · Critical · Account Takeover</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">OTP Brute Force</span><span
+                                class="technique-tag">Unlimited Resend</span><span class="technique-tag">Logic
+                                Flaw</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">4-digit OTP, 3 attempts limit par verify — par <code
+                                class="c">/profiles/activationsms</code> (Resend) par koi limit nahi! Hacker ne 3 fixed
+                            codes chune (1056,1057,1058) → Har 30 sec resend + try → 24-72 ghante baad server ne wahi
+                            OTP generate kiya → Account Takeover! Probability game: 10,000 mein se 3 = Sooner or later
+                            success.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Resend Abuse test karo</strong> — Kya unlimited baar OTP maang
+                                sakte ho? Resend endpoint par rate limit check.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Code Complexity check karo</strong> — Kya OTP sirf 4 digit ka
+                                hai? (Easy to brute force). 6-digit hona chahiye.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Response Manipulation try karo</strong> — Galat OTP dalkar
+                                response ko <code class="c">success: true</code> karke dekho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Race Condition test karo</strong> — Kya ek hi OTP do alag
+                                windows mein ek saath use kar sakte ho?</span>
+                        </li>
+                    </ul>
+                    <div class="impact-box">
+                        <div class="impact-label">💥 MAXIMUM IMPACT</div>
+                        <div class="impact-text">Rate Limiting sirf galat password par hi nahi, "Success" aur "Resend"
+                            endpoints par bhi honi chahiye. Unlimited Resend = 100% Account Takeover guaranteed with
+                            time.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #04 -->
+            <div class="report-card" data-severity="low" id="report-04">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #04 · Category 5.5</div>
+                        <div class="report-title">Sensitive Metadata Leak — IDOR on User Profile API (WakaTime)</div>
+                        <div class="report-target">🎯 WakaTime · @ctrl_cipher · Low · Recon Base for Higher Attacks
+                        </div>
+                        <div style="margin-top:8px;"><span class="technique-tag">BAC / IDOR</span><span
+                                class="technique-tag">Metadata Hunting</span><span class="technique-tag">API
+                                Tampering</span></div>
+                    </div><span class="severity-badge sev-low">🟢 LOW</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">GET /api/v1/users/attacker_user</code> → Username
+                            badla <code class="c">victim_admin</code> → Server ne doosre user ka data de diya! Response:
+                            <code class="c">is_email_confirmed: true</code>, <code
+                                class="c">is_email_public: false</code>. Ab hacker janta hai ye active account hai →
+                            Brute Force ya Forgot Password par focus!
+                        </div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Username Swapping karo</strong> — Kya doosre user ka
+                                username/ID dalkar uska profile data nikal sakte ho?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Metadata Hunting karo</strong> — Response mein <code
+                                    class="c">is_admin</code>, <code class="c">is_verified</code>, <code
+                                    class="c">email_status</code> jaise fields dhoondho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Auth-Token Remove karo</strong> — Kya ye data bina
+                                Authorization header ke bhi mil raha hai? (Unauthenticated access).</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">BAC sirf account takeover ke liye nahi hota. Kabhi-kabhi ye sirf
+                            "Metadata" leak karta hai, jo batata hai kaunsa account Target karne layak hai.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #05 -->
+            <div class="report-card" data-severity="medium" id="report-05">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #05 · Category 2.2</div>
+                        <div class="report-title">2FA Bypass — OTP Brute Force via Intercept-Stay Logic (SingleStore)
+                        </div>
+                        <div class="report-target">🎯 authsvc.singlestore.com · @axolot23 · Medium (Triaged) · ATO</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">2FA Bypass</span><span
+                                class="technique-tag">Rate Limit Bypass</span><span class="technique-tag">Intercept
+                                Logic</span></div>
+                    </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">3 galat OTP ke baad <code class="c">303 See Other</code> (logout
+                            redirect) — par Burp Intruder mein browser refresh nahi kiya toh server har request process
+                            karta raha! 166,236th request par <code class="c">HTTP 302</code> mila = Sahi OTP hit →
+                            Session active → Dashboard access bina 2FA ke!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Redirection Bypass test karo</strong> — 3 fail ke baad
+                                redirect ho raha hai, toh Burp mein request tab bhi 200/302 de rahi hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Response Code Scan karo</strong> — Intruder mein Length mat
+                                dekho, Status Codes filter karo (Look for 302/200).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>OTP Reusability check karo</strong> — Sahi OTP use karne ke
+                                baad, wahi OTP doosre session mein kaam karta hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Wait-Time Check karo</strong> — Kya 1000 requests ke baad WAF
+                                ya IP block trigger hota hai?</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Redirect (303) karne se attack nahi rukta. Hacker ke liye redirect
+                            sirf ek status code hai. Jab tak Server-Side Token destroy nahi hota, brute force possible
+                            hai."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══ PHASE 2 — BRUTE FORCE & RATE LIMIT BYPASS ═══ -->
+    <section class="phase-section" id="phase2">
+        <div class="phase-header"><span class="phase-number">PHASE 02</span><span class="phase-title">BRUTE FORCE &
+                INJECTION ATTACKS</span><span class="phase-count" id="p2count">0 / 5 reports</span></div>
+        <div class="cards-grid" id="grid-phase2">
+
+            <!-- REPORT #06 -->
+            <div class="report-card" data-severity="medium" id="report-06">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #06 · Category 2.6</div>
+                        <div class="report-title">Horizontal Brute Force & Request Stripping — Intelligent Rate Limit
+                            Bypass (Lichess)</div>
+                        <div class="report-target">🎯 Lichess · @hajjaj0x · Informative (Logic Critical)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Horizontal Brute Force</span><span
+                                class="technique-tag">Request Stripping</span><span class="technique-tag">Cluster
+                                Bomb</span></div>
+                    </div><span class="severity-badge sev-info">🔵 INFO</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Ek account par 10-20 password try → <code
+                                class="c">429 Too Many Requests</code>. Par 1000 alag accounts par 1-1 password try kiya
+                            + CSRF tokens & cookies hata diye (Stateless request) → Server ne kabhi 429 nahi diya!
+                            Cluster Bomb mode: 1000 usernames × common passwords → <code class="c">200 OK</code> =
+                            Account cracked!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Horizontal Test karo</strong> — Ek user par 100 password ke
+                                bajaye, 100 users par 1 password try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Header Stripping karo</strong> — Request se CSRF tokens aur
+                                Cookies hata kar dekho kya server accept karta hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Timing Analysis karo</strong> — Requests ke beech 1-2 second
+                                ka gap dalo. Kya server ab block kar raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Common password list use karo</strong> — Top 1000 passwords
+                                try karo, aksar ek hit ho hi jata hai.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">Rate Limiting hamesha "Security" aur "User Experience" ke beech
+                            compromise hota hai. Pro hacker hamesha us gap mein ghusta hai jahan "UX" ke liye security
+                            thoda dheela chhoda gaya ho.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #07 -->
+            <div class="report-card" data-severity="high" id="report-07">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #07 · Category 5.1</div>
+                        <div class="report-title">Execution After Redirect (EAR) — Missing exit() After Header (DoD)
+                        </div>
+                        <div class="report-target">🎯 U.S. Dept Of Defense (*.mil) · @jarvis0x1 · High</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">EAR</span><span
+                                class="technique-tag">Response Manipulation</span><span class="technique-tag">Missing
+                                die()</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">header("Location: login.php");</code> ke baad <code
+                                class="c">exit();</code> missing! Browser redirect hua par server ne neeche ka pura
+                            Personnel Data response body mein bhej diya. Burp mein Content-Length bahut bada tha →
+                            Hacker ne <code class="c">Location</code> header delete kiya → 302 ko 200 banaya → Pura
+                            Admin Dashboard dikha bina login ke!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Content-Length check karo</strong> — Redirect response ka size
+                                500 bytes se zyada hai toh kuch gadbad hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Strip Headers karo</strong> — Burp mein Location header delete
+                                karke dekho page content load hota hai ya nahi.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Match-Replace Rule lagao</strong> — Burp Proxy mein auto-rule:
+                                302 Found → 200 OK replace.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Har protected page test karo</strong> — <code
+                                    class="c">/admin</code>, <code class="c">/dashboard</code>, <code
+                                    class="c">/personnel</code> sab par EAR check.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Redirect ≠ Security. Agar server redirect ke baad execution stop nahi
+                            karta, toh hacker poora page content body mein dekh sakta hai. Ye bug DoD jaise bade systems
+                            par bhi mila!"</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #08 -->
+            <div class="report-card" data-severity="high" id="report-08">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #08 · Category 4.1 · CVE-2025-52664</div>
+                        <div class="report-title">Error & Time-Based Blind SQLi — Admin Search Exploit (Revive Adserver)
+                        </div>
+                        <div class="report-target">🎯 Revive Adserver v6.0.0 · @kanon4 · High (8.8)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Error-Based SQLi</span><span
+                                class="technique-tag">Time-Based Blind</span><span
+                                class="technique-tag">EXTRACTVALUE</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Admin search ka <code class="c">keyword</code> parameter bina
+                            sanitize kiye seedha DB query mein! Error-based: <code
+                                class="c">EXTRACTVALUE(8429, CONCAT(0x5c, (SELECT DATABASE())))</code> → DB name error
+                            mein leak. Time-based: <code class="c">SLEEP(5)</code> → 5 sec delay = vulnerable! SQLMap se
+                            poora database extract.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Single Quote test karo</strong> — <code class="c">'</code>
+                                dalo. SQL Syntax Error aaye toh Error-based injection check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Sleep Test karo</strong> — <code
+                                    class="c">') OR SLEEP(10)--</code> dalo. Response 10 sec late aaye toh Blind SQLi
+                                hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>SQLMap Automation chalao</strong> — Request file save karo
+                                (.txt) aur <code class="c">sqlmap -r test.txt --dbs</code> chalao.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Post-Auth fields bhi check karo</strong> — Login ke baad
+                                search, filter, aur sort parameters mein SQLi test.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">Admin Login → Search Feature → keyword Parameter → No Sanitization →
+                            EXTRACTVALUE/SLEEP → Full DB Dump</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #09 -->
+            <div class="report-card" data-severity="critical" id="report-09">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #09 · Category 4.3</div>
+                        <div class="report-title">Blind NoSQL Injection — $where to RCE Chain (Rocket.Chat)</div>
+                        <div class="report-target">🎯 Rocket.Chat (users.list API) · @sonarsource · Critical · RCE!
+                        </div>
+                        <div style="margin-top:8px;"><span class="technique-tag">NoSQL Injection</span><span
+                                class="technique-tag">$where Operator</span><span class="technique-tag">Regex
+                                Extraction</span><span class="technique-tag">RCE</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">$where</code> operator block nahi tha → Hacker ne JS
+                            regex se admin ka Password Reset Token ek-ek character dhoondha: <code
+                                class="c">{"$where":"this.roles.includes('admin') && /^A/.test(this.services.password.reset.token)"}</code>.
+                            Token milte hi password reset → Admin login → Webhooks se malicious script → Root Shell =
+                            RCE!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Operator Testing karo</strong> — Login ya API mein <code
+                                    class="c">{"$ne": null}</code> ya <code class="c">{"$gt": ""}</code> daal. Login ho
+                                gaya toh NoSQLi hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Blind Regex try karo</strong> — <code
+                                    class="c">{"username": {"$regex": "^a"}}</code> dalkar valid users dhoondho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>$where JS Execution test karo</strong> — <code
+                                    class="c">{"$where": "sleep(5000)"}</code> delay hota hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Token extraction automate karo</strong> — Script likho jo
+                                character-by-character token brute force kare.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">NoSQLi → $where JS → Regex Token Extraction → Password Reset → Admin
+                            Login → Webhooks → Reverse Shell → RCE</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #10 -->
+            <div class="report-card" data-severity="high" id="report-10">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #10 · Category 1.1</div>
+                        <div class="report-title">LDAP Anonymous Bind — Directory Leak Without Password (DoD)</div>
+                        <div class="report-target">🎯 U.S. Dept Of Defense · @shuvam321 · High (8.8+)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">LDAP</span><span
+                                class="technique-tag">Anonymous Bind</span><span class="technique-tag">Protocol
+                                Misconfig</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Port 636 (LDAPS) open → Python <code class="c">ldap3</code> library
+                            se bina credentials ke <code class="c">connection.bind()</code> → <code
+                                class="c">True</code>! Poore network ki directory structure dikhi: domains (<code
+                                class="c">dc=disa,dc=mil</code>), internal admin accounts (<code
+                                class="c">cn=iasdsadmin</code>), emails, phone numbers — sabh bina password ke!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Port Scan karo</strong> — Port 389/636/3268/3269 check karo.
+                                Open hain toh LDAP testing start.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Anonymous Bind test karo</strong> — <code
+                                    class="c">ldapsearch</code> ya Python <code class="c">ldap3</code> se bina password
+                                ke connect karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Naming Context nikalo</strong> — Bind ho jaye toh Naming
+                                Contexts se poora org ka internal map nikaalo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>User attributes dump karo</strong> — <code
+                                    class="c">mail</code>, <code class="c">telephoneNumber</code>, <code
+                                    class="c">memberOf</code> fields extract karo.</span>
+                        </li>
+                    </ul>
+                    <div class="impact-box">
+                        <div class="impact-label">💥 MAXIMUM IMPACT</div>
+                        <div class="impact-text">Authentication Bypass sirf login page tak nahi — kabhi kabhi poora
+                            "Directory Server" hi khula hota hai jahan se hazaron users ke data chura sakte ho. Classic
+                            infra pentesting Critical!</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══ PHASE 3 — CLIENT-SIDE & LOGIC ATTACKS ═══ -->
+    <section class="phase-section" id="phase3">
+        <div class="phase-header"><span class="phase-number">PHASE 03</span><span class="phase-title">CLIENT-SIDE
+                ATTACKS & LOGIC FLAWS</span><span class="phase-count" id="p3count">0 / 5 reports</span></div>
+        <div class="cards-grid" id="grid-phase3">
+
+            <!-- REPORT #11 -->
+            <div class="report-card" data-severity="high" id="report-11">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #11 · Category 4.5</div>
+                        <div class="report-title">Client-Side Template Injection (CSTI) — Stored XSS via Image
+                            Collection (Mars)</div>
+                        <div class="report-target">🎯 Mars (HackerOne #2234564) · @themarkib0x0 · High (7.3)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">CSTI</span><span
+                                class="technique-tag">Template Injection</span><span class="technique-tag">Stored
+                                XSS</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Image Collection ka Title mein <code class="c">{{ 7*7 }}</code> dala
+                            → Page render par <code class="c">49</code> dikha = CSTI confirmed! Angular payload: <code
+                                class="c">{{constructor.constructor('alert(document.cookie)')()}}</code> → Description
+                            mein save = Stored XSS. Jo bhi admin collection dekhega, uska Session Cookie hacker ke paas!
+                        </div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Math Test karo</strong> — <code class="c">{{ 7*7 }}</code>,
+                                <code class="c">${ 7*7 }</code>, <code class="c"><%= 7*7 %></code> dalkar dekho. 49
+                                dikhta hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Framework Detect karo</strong> — Site Angular ya Vue.js use
+                                kar rahi hai? (Wappalyzer tool se check).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>XSS Escalation karo</strong> — Math execute ho raha toh
+                                framework-specific XSS payload try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Stored context check karo</strong> — Kya injected payload save
+                                hota hai aur doosron ko dikhta hai?</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"CSTI ko aksar halka samajhte hain kyunki ye sirf math dikhata hai.
+                            Par ye Stored XSS ka rasta hai — agar hacker victim ke browser mein template execute kare,
+                            toh pura ATO possible hai."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #12 -->
+            <div class="report-card" data-severity="medium" id="report-12">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #12 · Category 5.1</div>
+                        <div class="report-title">Response Manipulation (Boolean Flip) — OTP/Verification Bypass (Mars)
+                        </div>
+                        <div class="report-target">🎯 Mars (Appointment System) · @mo3giza · Medium (6.1)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Boolean Flip</span><span
+                                class="technique-tag">Response Tamper</span><span class="technique-tag">Client
+                                Trust</span></div>
+                    </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Galat verification code dala → Server: <code
+                                class="c">{"valid": false}</code>. Burp mein response intercept karke <code
+                                class="c">false</code> → <code class="c">true</code> kiya → Frontend ne "true" dekha aur
+                            bina sahi code ke appointment book hone diya! Frontend sirf server ke "Status Message" par
+                            trust kar raha tha.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Intercept Response karo</strong> — Burp mein hamesha
+                                "Intercept Response" on karke dekho server kya bol raha hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Flip Booleans karo</strong> — <code
+                                    class="c">false → true</code>, <code class="c">0 → 1</code>, <code
+                                    class="c">error → success</code> dalkar dekho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Status Code Tamper karo</strong> — <code
+                                    class="c">401 Unauthorized</code> ko <code class="c">200 OK</code> mein badal kar
+                                dekho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Multi-step forms test karo</strong> — Checkout, settings,
+                                verification — har step par response flip try karo.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">Frontend par bharosa karna = No security. Verification tabhi valid
+                            maani jaye jab backend database mein session "Verified" mark ho chuka ho.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #13 -->
+            <div class="report-card" data-severity="medium" id="report-13">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #13 · Category 13 & 14</div>
+                        <div class="report-title">Sensitive Data Leak via Browser Cache & Insecure Channel (HTTP)</div>
+                        <div class="report-target">🎯 Enterprise Management Portal · Medium/High</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">No Cache-Control</span><span
+                                class="technique-tag">HTTP Login</span><span class="technique-tag">Back Button
+                                Leak</span></div>
+                    </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Login page HTTP par (not HTTPS) → Wireshark se plaintext password
+                            sniff! Server ne <code class="c">Cache-Control: no-store</code> nahi bheja → Logout ke baad
+                            browser "Back" button dabaya → Cached page se dashboard data dikha bina login ke! Shared
+                            computer = Full access.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Protocol Check karo</strong> — URL <code
+                                    class="c">https://</code> se shuru ho raha hai? Nahi toh High-level bug hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Back-Button Test karo</strong> — Logout ke baad browser ka
+                                "Back" button dabao. Kya data dikh raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Header Audit karo</strong> — Response mein <code
+                                    class="c">Cache-Control</code> aur <code class="c">Pragma</code> headers check
+                                karo.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">Hacking sirf complex codes nahi — kabhi kabhi basic headers miss karne
+                            se poora system compromise ho jata hai.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #14 -->
+            <div class="report-card" data-severity="na" id="report-14">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #14 · Category 11.2 · N/A</div>
+                        <div class="report-title">Path Traversal Bypass — False Positive & AI Trap (curl)</div>
+                        <div class="report-target">🎯 curl (libcurl) · @ba5 · N/A (Banned!) · Learning Report</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Path Traversal</span><span
+                                class="technique-tag">False Positive</span><span class="technique-tag">AI
+                                Hallucination</span></div>
+                    </div><span class="severity-badge sev-na">⚪ N/A</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Hacker ne bola <code
+                                class="c">file:///%2f%2e%2e%2fetc%2fpasswd</code> se curl bypass hoga. Daniel Stenberg
+                            (curl creator) ne 2 min mein reject kiya: "file:// ka kaam hi local files read karna hai —
+                            isme bypass ki kya baat?" Hacker ne AI se report generate ki thi — "Word Salad" impressive
+                            par logic zero → BANNED!</div>
+                    </div>
+                    <div class="checklist-label">✅ WHAT NOT TO DO</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>AI hallucination se baacho</strong> — AI ko code samajhne ke
+                                liye use karo, report likhne ke liye nahi.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Severity verify karo</strong> — Kya ye sach mein bypass hai?
+                                Ya feature hi aisa hai? (Design vs Bug).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Manual verify karo</strong> — Hamesha apne bug ko khud test
+                                karo, AI par depend mat ho.</span>
+                        </li>
+                    </ul>
+                    <div class="impact-box">
+                        <div class="impact-label">⚠️ KEY LESSON</div>
+                        <div class="impact-text">"Quality over Quantity." 47 techniques pata hona acchi baat hai, par
+                            har technique har jagah bug nahi hoti. Galt reports bhejoge toh BANNED ho jaoge!</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #15 -->
+            <div class="report-card" data-severity="high" id="report-15">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #15 · Category 5.5</div>
+                        <div class="report-title">IDOR in Subscription API — Billing Data Hijack (lemlist)</div>
+                        <div class="report-target">🎯 lemlist · @0hmz · High · Sensitive Customer Data Leak</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">IDOR</span><span
+                                class="technique-tag">Missing Auth</span><span class="technique-tag">Billing Leak</span>
+                        </div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">GET /api/v1/subscriptions/view?id=1005</code> → ID
+                            badla <code class="c">1004</code> → Server ne doosre customer ki billing info (Invoice,
+                            Plan, Address) de di! Server check nahi kar raha tha ki <code
+                                class="c">session_user_id == requested_data_owner_id</code>. Simple increment/decrement
+                            se poora customer database leak!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>ID Swapping karo</strong> — Apni ID badal kar doosre user ki
+                                ID dalkar dekho. Data mil raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Method Swapping karo</strong> — GET par access nahi hai toh
+                                POST, PUT, ya DELETE try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Unauthenticated Test karo</strong> — Bina login kiye API
+                                endpoint hit karke dekho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>UUID vs Sequential check karo</strong> — Agar IDs 101, 102
+                                hain toh enumerate karo. UUID hain toh harder.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Developers aksar core login secure kar dete hain, par internal APIs
+                            par security lagana bhool jate hain. IDOR = Authentication ki sabse badi haar."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══ PHASE 4 — SESSION & REPLAY ATTACKS ═══ -->
+    <section class="phase-section" id="phase4">
+        <div class="phase-header"><span class="phase-number">PHASE 04</span><span class="phase-title">SESSION, REPLAY &
+                TOKEN ATTACKS</span><span class="phase-count" id="p4count">0 / 5 reports</span></div>
+        <div class="cards-grid" id="grid-phase4">
+
+            <!-- REPORT #16 -->
+            <div class="report-card" data-severity="high" id="report-16">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #16 · Category 7.2</div>
+                        <div class="report-title">Replayable Password Change — Stale Request Replay (Malwarebytes)</div>
+                        <div class="report-target">🎯 Malwarebytes · @mantu1738 · High (Informative marked, logic High)
+                        </div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Request Replay</span><span
+                                class="technique-tag">Session Expiration</span><span class="technique-tag">CSRF
+                                Reuse</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Browser A mein password change request capture ki → <code
+                                class="c">PUT /authentication/password</code> → Logout kiya → Browser B mein login kiya
+                            → Repeater se purani request bheji → Server ne "Success" bola! Purana CSRF token naye
+                            session mein bhi kaam kar raha tha → Hidden backdoor: request ek baar capture, kabhi bhi
+                            replay!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Save to Repeater karo</strong> — Har sensitive request
+                                (password change, email update) Repeater mein permanent save karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Session Refresh test karo</strong> — Logout karke login karo,
+                                phir purani request bhejkar dekho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>CSRF Reuse check karo</strong> — Kya ek hi CSRF token do alag
+                                sessions mein kaam kar raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Old password requirement check karo</strong> — Kya password
+                                change ke liye purana password maanga ja raha hai?</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">👑 VETERAN MINDSET</div>
+                        <div class="mindset-text">"Session Management sirf cookie delete karne tak nahi hoti. Agar
+                            backend stale requests ko fresh sessions mein allow karta hai, toh hacker hidden backdoor
+                            bana sakta hai."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #17 -->
+            <div class="report-card" data-severity="high" id="report-17">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #17 · Category 4.5 · CVE-2025-52668</div>
+                        <div class="report-title">Stored XSS & Session Riding — HttpOnly Bypass (Revive Adserver)</div>
+                        <div class="report-target">🎯 Revive Adserver v6.0.1 · @cyberjoker · High (8.7)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Stored XSS</span><span
+                                class="technique-tag">Session Riding</span><span class="technique-tag">HttpOnly
+                                Bypass</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Tracker name mein XSS payload save kiya → Admin ke stats page par
+                            execute hua. HttpOnly cookies thi = <code class="c">document.cookie</code> nahi chura sakte.
+                            Par "Session Riding" kiya — Page se CSRF token read kiya → <code class="c">fetch()</code> se
+                            admin ke browser se hi <code class="c">/admin/account-user-edit.php</code> hit karke naya
+                            admin account create kar liya!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>HttpOnly Bypass — Session Riding try karo</strong> — Cookie
+                                nahi chura sakte toh victim ke browser se hi request bhejo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>DOM Hunting karo</strong> — Page source mein <code
+                                    class="c">token</code>, <code class="c">csrf</code>, ya <code
+                                    class="c">secret</code> dhoondho jo JS se read ho sake.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Self-Trigger test karo</strong> — Low privilege account se
+                                kuch save kar sakte ho jo Admin dekhega?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Account creation via XSS automate karo</strong> — JS script jo
+                                admin context mein naya account banaye.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">Low-Priv Advertiser → Stored XSS in Tracker → Admin Views Stats →
+                            Session Riding → CSRF Token Read → New Admin Created → Full Takeover</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #18 -->
+            <div class="report-card" data-severity="low" id="report-18">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #18 · Category 6.2 & 6.3</div>
+                        <div class="report-title">CSRF Token Fixation — Token Not Tied to User Session (Mozilla)</div>
+                        <div class="report-target">🎯 Mozilla (Internal API) · @bashbdeer · Low · $500</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">CSRF Fixation</span><span
+                                class="technique-tag">Token Binding</span><span class="technique-tag">Cross-User
+                                Replay</span></div>
+                    </div><span class="severity-badge sev-low">🟢 LOW</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">User-A ka <code class="c">csrftoken</code> copy kiya → User-B ke
+                            session mein paste kiya → Server ne reject nahi kiya! Server sirf check karta tha "Kya token
+                            valid hai?" — NOT "Kya ye is user ka hai?" → Hacker ne malicious page banaya jo apna token
+                            hardcode karke kisi ka bhi API token delete kar sakta tha.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Token Swapping karo</strong> — User-A ka token User-B ki
+                                request mein dalkar dekho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Token Removal test karo</strong> — Token delete karke request
+                                bhejo. Server bina token ke maan raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Same-Token Reuse check karo</strong> — Wahi token logout/login
+                                ke baad bhi kaam karta hai? (Static Token).</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">CSRF Protection sirf "checkbox" nahi hai. Agar token Unique aur
+                            User-Linked nahi hai, toh hacker ke liye khula darwaza hai. Mozilla ne $500 diye kyunki
+                            fundamental logic fail tha.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #19 -->
+            <div class="report-card" data-severity="medium" id="report-19">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #19 · Category 5.1 & 7.2</div>
+                        <div class="report-title">Login Response Replay — 429 Error Bypass via Response Swap (WakaTime)
+                        </div>
+                        <div class="report-target">🎯 WakaTime · @ctrl_cipher · Informative (Logic High-Impact)</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Response Replay</span><span
+                                class="technique-tag">429 Bypass</span><span class="technique-tag">Session Swap</span>
+                        </div>
+                    </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Pehle sahi password se login karke <code class="c">302 Found</code>
+                            response + cookies save ki. Phir galat passwords se <code
+                                class="c">429 Too Many Requests</code> trigger kiya. Burp mein 429 error ko purane
+                            Success response se replace karke forward kiya → Browser ne cookies set ki → Dashboard
+                            access bina sahi password ke!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Save Success Response karo</strong> — Ek baar sahi login karke
+                                response copy kar lo (cookies + headers).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Trigger Rate Limit karo</strong> — Galat passwords se brute
+                                force karo jab tak 429 na aaye.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Response Swap karo</strong> — 429 error ko purane success
+                                response se replace karke forward karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Session validity check karo</strong> — Kya purani cookies naye
+                                session mein bhi valid hain?</span>
+                        </li>
+                    </ul>
+                    <div class="impact-box">
+                        <div class="impact-label">⚠️ KEY LESSON</div>
+                        <div class="impact-text">"Trusting the Client" sabse badi galti hai. 429 sirf ek message hai —
+                            agar backend session verify nahi karta, toh rate limiting sirf ek parda hai jo hacker aasani
+                            se hata sakta hai.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #20 -->
+            <div class="report-card" data-severity="critical" id="report-20">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #20 · Category 5.5</div>
+                        <div class="report-title">Salesforce Apex Controller IDOR — Medical Records Theft (DoD)</div>
+                        <div class="report-target">🎯 U.S. DoD (█████.mil) · @oxylis · Critical · Nuclear Bug!</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Apex IDOR</span><span
+                                class="technique-tag">Attachment Cloning</span><span class="technique-tag">Ownership
+                                Swap</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text"><code class="c">cloneAttachment</code> action ne permission check
+                            nahi kiya! Hacker ne <code class="c">attachmentId=Victim_File</code> + <code
+                                class="c">parentId=Hacker_ID</code> bheja → Server ne victim ki private medical file
+                            clone karke hacker ke account se link kar di → <code
+                                class="c">/servlet/servlet.FileDownload?file=[Cloned_ID]</code> → Sensitive records
+                            download!</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Action Hunting karo</strong> — Traffic mein <code
+                                    class="c">clone</code>, <code class="c">copy</code>, <code class="c">share</code>,
+                                <code class="c">reassign</code> actions dhoondho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Ownership Manipulation karo</strong> — Request mein TargetID
+                                apni ID se badal kar dekho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Enumerate IDs karo</strong> — Agar IDs pattern follow karti
+                                hain toh poora database leak possible.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Download endpoint test karo</strong> — Cloned file ka direct
+                                download link try karo.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">Enumerate Attachment IDs → cloneAttachment(victimFile, hackerID) → No
+                            Auth Check → Ownership Swap → FileDownload → Private Medical Records Theft</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- %%PHASE5_PLACEHOLDER%% -->
+
+</body>
+
+</html>

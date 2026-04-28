@@ -1,0 +1,2639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mission 09 — JWT Mastery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-deep: #080c12;
+            --bg-card: #0d1520;
+            --bg-card2: #111b2a;
+            --bg-box: #0a1219;
+            --border: #1a2d40;
+            --border-glow: #ff6b3533;
+            --cyan: #00c8ff;
+            --cyan-dim: #00a8d4;
+            --cyan-glow: #00c8ff55;
+            --blue: #4488ff;
+            --purple: #9b59ff;
+            --green: #00ff88;
+            --yellow: #ffd700;
+            --orange: #ff8c42;
+            --red: #ff4757;
+            --accent: #ff6b35;
+            --text-primary: #e8f4f8;
+            --text-secondary: #7ba8c0;
+            --text-dim: #4a7090;
+            --severity-crit: #ff2d55;
+            --severity-high: #ff6b35;
+            --severity-med: #ffd700;
+            --severity-low: #00ff88;
+            --severity-info: #4488ff
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at 20% 0%, #ff6b3508 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, #4488ff06 0%, transparent 50%)
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, #ff6b3503 2px, #ff6b3503 4px);
+            pointer-events: none;
+            z-index: 0
+        }
+
+        .mission-header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative
+        }
+
+        .mission-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b3522, #ff2d5522);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 4px;
+            padding: 6px 20px;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            text-transform: uppercase
+        }
+
+        .mission-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(28px, 5vw, 52px);
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b35, #ff2d55, #9b59ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            margin-bottom: 8px
+        }
+
+        .mission-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+            letter-spacing: 2px
+        }
+
+        .mission-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap
+        }
+
+        .stat-item {
+            text-align: center
+        }
+
+        .stat-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent)
+        }
+
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase
+        }
+
+        .master-progress {
+            max-width: 900px;
+            margin: 0 auto 50px;
+            padding: 0 20px
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .progress-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 2px
+        }
+
+        .progress-pct {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--accent)
+        }
+
+        .progress-bar-wrap {
+            height: 6px;
+            background: #1a2d40;
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #ff2d55);
+            border-radius: 3px;
+            transition: width .5s ease;
+            box-shadow: 0 0 12px #ff6b3555;
+            width: 0%
+        }
+
+        .phase-section {
+            max-width: 1100px;
+            margin: 0 auto 60px;
+            padding: 0 20px
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .phase-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            background: #ff6b3514;
+            border: 1px solid #ff6b3533;
+            padding: 4px 10px;
+            border-radius: 2px;
+            letter-spacing: 2px
+        }
+
+        .phase-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary)
+        }
+
+        .phase-count {
+            margin-left: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim)
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+            gap: 24px
+        }
+
+        .report-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all .3s ease;
+            position: relative;
+            animation: fadeInUp .4s ease both
+        }
+
+        .report-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), #ff2d55);
+            opacity: 0;
+            transition: opacity .3s ease
+        }
+
+        .report-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 8px 40px #ff6b3512, 0 0 0 1px #ff6b3522;
+            transform: translateY(-2px)
+        }
+
+        .report-card:hover::before {
+            opacity: 1
+        }
+
+        .card-header {
+            padding: 18px 20px 14px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card2)
+        }
+
+        .card-meta {
+            flex: 1
+        }
+
+        .report-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-bottom: 4px
+        }
+
+        .report-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3
+        }
+
+        .report-target {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #ff9060;
+            margin-top: 4px
+        }
+
+        .severity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        .sev-critical {
+            background: #ff2d5520;
+            border: 1px solid #ff2d5560;
+            color: var(--severity-crit)
+        }
+
+        .sev-high {
+            background: #ff6b3520;
+            border: 1px solid #ff6b3560;
+            color: var(--severity-high)
+        }
+
+        .sev-medium {
+            background: #ffd70020;
+            border: 1px solid #ffd70060;
+            color: var(--severity-med)
+        }
+
+        .sev-low {
+            background: #00ff8820;
+            border: 1px solid #00ff8860;
+            color: var(--severity-low)
+        }
+
+        .sev-info {
+            background: #4488ff20;
+            border: 1px solid #4488ff60;
+            color: var(--severity-info)
+        }
+
+        .technique-tag {
+            display: inline-block;
+            background: #ff6b3514;
+            border: 1px solid #ff6b3544;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+            margin: 4px 4px 0 0
+        }
+
+        .card-body {
+            padding: 16px 20px
+        }
+
+        .scenario-box {
+            background: var(--bg-box);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 4px;
+            padding: 12px 14px;
+            margin-bottom: 16px
+        }
+
+        .scenario-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            text-transform: uppercase
+        }
+
+        .scenario-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5
+        }
+
+        .checklist-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--blue);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .checklist-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        .checklist {
+            list-style: none
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid #1a2d4060;
+            cursor: pointer;
+            transition: all .2s ease;
+            border-radius: 3px
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none
+        }
+
+        .checklist-item:hover {
+            background: #ff6b3506;
+            padding-left: 6px
+        }
+
+        .item-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--accent);
+            border-radius: 3px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+            transition: all .2s ease;
+            background: transparent
+        }
+
+        .checklist-item.done .item-checkbox {
+            background: var(--green);
+            border-color: var(--green)
+        }
+
+        .checklist-item.done .item-checkbox::after {
+            content: '✓';
+            color: #080c12;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .item-step {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--accent);
+            flex-shrink: 0;
+            padding-top: 1px
+        }
+
+        .item-text {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex: 1;
+            transition: color .2s
+        }
+
+        .checklist-item.done .item-text {
+            color: var(--text-dim);
+            text-decoration: line-through;
+            text-decoration-color: #4a709066
+        }
+
+        .card-progress {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border)
+        }
+
+        .card-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px
+        }
+
+        .card-progress-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--text-dim);
+            letter-spacing: 1px
+        }
+
+        .card-progress-pct {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--green)
+        }
+
+        .card-bar-wrap {
+            height: 3px;
+            background: #1a2d40;
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .card-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 2px;
+            transition: width .4s ease;
+            width: 0%
+        }
+
+        .mindset-box {
+            background: #9b59ff0a;
+            border: 1px solid #9b59ff33;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 14px
+        }
+
+        .mindset-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--purple);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .mindset-text {
+            font-size: 12px;
+            color: #b89ddd;
+            line-height: 1.5;
+            font-style: italic
+        }
+
+        .protip-box {
+            background: #ffd70009;
+            border: 1px solid #ffd70033;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .protip-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--yellow);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .protip-text {
+            font-size: 12px;
+            color: #c9a83a;
+            line-height: 1.5
+        }
+
+        .chain-box {
+            background: #ff6b3509;
+            border: 1px solid #ff6b3530;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .chain-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .chain-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #d4823a;
+            line-height: 1.6
+        }
+
+        .impact-box {
+            background: #ff2d5509;
+            border: 1px solid #ff2d5530;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .impact-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--red);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .impact-text {
+            font-size: 12px;
+            color: #d44466;
+            line-height: 1.5
+        }
+
+        .filter-bar {
+            max-width: 1100px;
+            margin: 0 auto 30px;
+            padding: 0 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        .filter-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 1px
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 5px 14px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all .2s ease;
+            letter-spacing: 1px
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: #ff6b3510
+        }
+
+        .mission-footer {
+            text-align: center;
+            padding: 40px 20px 60px;
+            border-top: 1px solid var(--border)
+        }
+
+        .footer-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 2px
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a2d40;
+            border-radius: 3px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent)
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .report-card:nth-child(2n) {
+            animation-delay: .05s
+        }
+
+        .report-card:nth-child(3n) {
+            animation-delay: .10s
+        }
+
+        code.c {
+            color: #ff9060;
+            font-size: 11px;
+            background: #ff6b3511;
+            padding: 1px 5px;
+            border-radius: 3px
+        }
+
+        @media(max-width:700px) {
+            .cards-grid {
+                grid-template-columns: 1fr
+            }
+
+            .mission-stats {
+                gap: 20px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="mission-header">
+        <div class="mission-badge">⬡ MISSION 09 ⬡ JWT MASTERY ⬡</div>
+        <h1 class="mission-title">JWT<br>MASTERY</h1>
+        <p class="mission-subtitle">// SIGNATURE BYPASS · KEY ATTACKS · HEADER INJECTION · CLAIM TAMPERING · SESSION
+            FLAWS — 34 REAL BOUNTY REPORTS</p>
+        <div class="mission-stats">
+            <div class="stat-item">
+                <div class="stat-num" id="totalReports">34</div>
+                <div class="stat-label">Total Reports</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="completedItems">0</div>
+                <div class="stat-label">Steps Done</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">120</div>
+                <div class="stat-label">Techniques Mapped</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="completedCards">0</div>
+                <div class="stat-label">Reports Completed</div>
+            </div>
+        </div>
+    </header>
+    <div class="master-progress">
+        <div class="progress-header"><span class="progress-label">◈ OVERALL MISSION PROGRESS</span><span
+                class="progress-pct" id="masterPct">0%</span></div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="masterBar"></div>
+        </div>
+    </div>
+    <div class="filter-bar">
+        <span class="filter-label">FILTER ▸</span>
+        <button class="filter-btn active" onclick="filterCards('all',this)">ALL (34)</button>
+        <button class="filter-btn" onclick="filterCards('critical',this)">🔴 CRITICAL</button>
+        <button class="filter-btn" onclick="filterCards('high',this)">🟠 HIGH</button>
+        <button class="filter-btn" onclick="filterCards('medium',this)">🟡 MEDIUM</button>
+        <button class="filter-btn" onclick="filterCards('complete',this)">✅ COMPLETE</button>
+        <button class="filter-btn" onclick="filterCards('incomplete',this)">⏳ IN PROGRESS</button>
+    </div>
+
+    <!-- ═══ PHASE 1 — JWT SIGNATURE BYPASS ═══ -->
+    <section class="phase-section" id="phase1">
+        <div class="phase-header"><span class="phase-number">PHASE 01</span><span class="phase-title">JWT SIGNATURE
+                BYPASS ATTACKS</span><span class="phase-count" id="p1count">0 / 3 reports</span></div>
+        <div class="cards-grid" id="grid-phase1">
+
+            <!-- REPORT #01 -->
+            <div class="report-card" data-severity="critical" id="report-01">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #01 · Category 35.32</div>
+                        <div class="report-title">Privilege Escalation via JWT "alg: none" Attack</div>
+                        <div class="report-target">🎯 ██████.io · @z3r0_trust · $2,500 · Admin via Guest</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">alg: none</span><span
+                                class="technique-tag">Signature Bypass</span><span class="technique-tag">Privilege
+                                Escalation</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">JWT ke Header mein algorithm ko <code class="c">none</code> kar diya
+                            aur payload mein apni ID badal di. Server ne bina signature check kiye use "Admin" maan
+                            liya. Header: <code class="c">{"alg": "none", "typ": "JWT"}</code>, Signature delete, dot
+                            rakhо.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>JWT Decode karo</strong> — <code class="c">jwt.io</code> par
+                                token decode karo, payload mein <code class="c">role</code>, <code
+                                    class="c">admin</code>, <code class="c">email</code> check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>alg: none try karo</strong> — Header mein <code
+                                    class="c">"alg": "none"</code> set karo, signature wala part delete karo par
+                                trailing dot (.) rakho.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Variations try karo</strong> — <code class="c">None</code>,
+                                <code class="c">NONE</code>, <code class="c">nOnE</code> jaise case variations bhi test
+                                karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Info Leak check karo</strong> — Payload mein sensitive data
+                                (password hash, internal IP) check karo.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                        <div class="mindset-text">"Don't trust the header." Agar server user ke bataye huye algorithm
+                            par trust karega, toh hacker poora system bypass kar dega.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #09 -->
+            <div class="report-card" data-severity="critical" id="report-09">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #09 · Category 35.40</div>
+                        <div class="report-title">Authentication Bypass via Empty Signature</div>
+                        <div class="report-target">🎯 ██████.com · @mister_hacker · $1,000 · Admin Access</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Empty Signature</span><span
+                                class="technique-tag">Lazy Validator</span><span class="technique-tag">Auth
+                                Bypass</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Header mein <code class="c">HS256</code> rakha par signature poora
+                            delete kar diya. Server confuse hua — alg HS256 dekha par empty signature ko "Valid" maan
+                            liya. Token format: <code class="c">Header.Payload.</code> (khali signature).</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Algorithm rakho, Signature delete karo</strong> — Header mein
+                                <code class="c">HS256</code> ya <code class="c">RS256</code> rakho par signature part
+                                mita do.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Response check karo</strong> — Agar server <code
+                                    class="c">500</code> ya "Signature Missing" deta hai toh safe hai. Agar <code
+                                    class="c">200 OK</code> toh bypass!</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Trailing dot test karo</strong> — <code
+                                    class="c">Header.Payload.</code> vs <code class="c">Header.Payload</code> dono try
+                                karo, response compare karo.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                        <div class="mindset-text">"Validation must be binary." Ya toh signature sahi hai, ya galat.
+                            "Missing" ko "Sahi" maan lena sabse badi galti hai.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #03 -->
+            <div class="report-card" data-severity="critical" id="report-03">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #03 · Category 35.34</div>
+                        <div class="report-title">RS256 to HS256 Algorithm Confusion Attack</div>
+                        <div class="report-target">🎯 ████.com · @nahamsec · $5,000 · Full Admin Access</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Algorithm Confusion</span><span
+                                class="technique-tag">RS256→HS256</span><span class="technique-tag">Public Key
+                                Abuse</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Server RS256 (Private/Public key) use kar raha tha. Hacker ne
+                            algorithm badal kar HS256 kiya aur publicly available Public Key ko "Secret Key" ki tarah
+                            use karke token sign kiya. Server confused ho kar valid maan liya.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Algorithm check karo</strong> — Agar <code
+                                    class="c">alg: RS256</code> hai, toh public key dhoondho (<code
+                                    class="c">/.well-known/jwks.json</code>).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>RS256 ➔ HS256 switch karo</strong> — Header mein algorithm
+                                badal kar <code class="c">HS256</code> karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Public Key se sign karo</strong> — Public key ko as a
+                                plain-text secret use karke HS256 se sign karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>JWKS URL check karo</strong> — <code
+                                    class="c">/.well-known/jwks.json</code> aur <code
+                                    class="c">/.well-known/openid-configuration</code> hamesha test karo.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                        <div class="chain-formula">Get Public Key → Switch RS256→HS256 → Sign with PubKey as Secret →
+                            Admin Access</div>
+                    </div>
+                    <div class="mindset-box">
+                        <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                        <div class="mindset-text">"Context is everything." Agar aap ek chabi ko galat taale mein lagaoge
+                            aur taala khul jaye, toh wo taale ki galti hai.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+<!-- ═══ PHASE 2 — JWT SECRET KEY ATTACKS ═══ -->
+<section class="phase-section" id="phase2">
+    <div class="phase-header"><span class="phase-number">PHASE 02</span><span class="phase-title">JWT SECRET KEY
+            CRACKING & LEAKAGE</span><span class="phase-count" id="p2count">0 / 4 reports</span></div>
+    <div class="cards-grid" id="grid-phase2">
+
+        <!-- REPORT #02 -->
+        <div class="report-card" data-severity="critical" id="report-02">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #02 · Category 35.33</div>
+                    <div class="report-title">JWT Secret Key Brute-Force via Weak Secret</div>
+                    <div class="report-target">🎯 ████.com · @lucas_vamp · $3,000 · Full DB Access</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Weak Secret</span><span
+                            class="technique-tag">Brute-Force</span><span class="technique-tag">jwt_tool</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server HS256 use kar raha tha with weak secret key "supersecret". Hacker
+                        ne <code class="c">jwt_tool</code> se wordlist attack kiya, key crack ki, aur <code
+                            class="c">jwt.io</code> par admin token forge kar diya → Full Admin + Transaction
+                        manipulation.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Algorithm check karo</strong> — Agar <code class="c">HS256</code>
+                            hai, toh brute-force try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>jwt_tool use karo</strong> — <code
+                                class="c">jwt_tool &lt;TOKEN&gt; -C -d /path/to/wordlist.txt</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>IDOR ke liye check karo</strong> — Token ke payload mein user IDs
+                            dhoondho jo IDOR ke liye use ho sakein.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Encryption is useless if the key is weak." Taala kitna bhi mehenga ho,
+                        agar chabi "1234" hai toh koi bhi ghar mein ghus jayega.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #17 -->
+        <div class="report-card" data-severity="critical" id="report-17">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #17 · Category 35.48</div>
+                    <div class="report-title">Critical JWT Secret Brute-Force via Hashcat</div>
+                    <div class="report-target">🎯 ██████.com · @tess · $2,500 · Full Account Takeover</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Hashcat</span><span
+                            class="technique-tag">Mode 16500</span><span class="technique-tag">Offline Crack</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">HS256 token ko Hashcat (Mode 16500) + <code class="c">rockyou.txt</code>
+                        se 2 minute mein crack kiya. Key mili: "dragon123". Token forge karke Admin account takeover.
+                    </div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>HS256 identify karo</strong> — JWT header mein <code
+                                class="c">HS256</code> dikhe toh 100% brute-force try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Hashcat chalaao</strong> — <code
+                                class="c">hashcat -m 16500 jwt_token.txt rockyou.txt</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Default keys pehle try karo</strong> — <code
+                                class="c">secret</code>, <code class="c">password</code>, <code class="c">key</code>,
+                            <code class="c">admin123</code> manually test karo.</span>
+                    </li>
+                </ul>
+                <div class="chain-box">
+                    <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                    <div class="chain-formula">Capture JWT → hashcat -m 16500 → Key Found → Forge Admin Token → Full
+                        Takeover</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #18 -->
+        <div class="report-card" data-severity="critical" id="report-18">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #18 · Category 35.49</div>
+                    <div class="report-title">Authentication Bypass via Default JWT Secret Key</div>
+                    <div class="report-target">🎯 ██████.com · @sheikh_mubashar · $2,000 · Full Takeover</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Default Secret</span><span
+                            class="technique-tag">Manual Guess</span><span class="technique-tag">Tutorial Key</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Developer ne production mein tutorial wali default key "secret" chhod di.
+                        Hacker ne <code class="c">jwt.io</code> mein manually common keys try ki — "secret" se signature
+                        verified. Bina kisi tool ke key mil gayi.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Common keys try karo</strong> — <code class="c">secret</code>,
+                            <code class="c">123456</code>, <code class="c">password</code>, <code class="c">key</code>,
+                            <code class="c">development</code> manually test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>App name try karo</strong> — Developer kabhi kabhi app name ko
+                            secret key rakhta hai (e.g., <code class="c">healthtech2024</code>).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>jwt_tool --common flag</strong> — <code class="c">jwt_tool</code>
+                            ka <code class="c">--common</code> flag saari default keys ek saath test karta hai.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Defaults are the biggest vulnerability." Har system ki default settings
+                        badalna zaroori hai, warna hacker ko mehnat hi nahi karni padegi.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #19 -->
+        <div class="report-card" data-severity="critical" id="report-19">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #19 · Category 35.50</div>
+                    <div class="report-title">Authentication Bypass via JWT Secret Leaked on GitHub</div>
+                    <div class="report-target">🎯 ██████.com · @streaak · $5,000 · Full Admin Access</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">GitHub Dorking</span><span
+                            class="technique-tag">Secret Leak</span><span class="technique-tag">Source Code</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Hacker ne GitHub Dorks se company ka source code dhoondha jahan JWT
+                        secret key hardcoded thi: <code class="c">const secret = "f1nanc3_adm1n_k3y_2024"</code>. Key
+                        abhi bhi active thi → Full admin access.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>GitHub Dorking karo</strong> — <code
+                                class="c">org:companyname "JWT_SECRET"</code>, <code class="c">filename:.env JWT</code>,
+                            <code class="c">"HS256" "secret"</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>JS Files search karo</strong> — Browser DevTools mein saari <code
+                                class="c">.js</code> files mein "secret" keyword dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Wayback Machine check karo</strong> — Purane versions mein key ho
+                            sakti hai jo naye mein hata di gayi.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"The internet never forgets." Ek baar secret key public ki, toh wo hamesha
+                        ke liye compromised hai.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══ PHASE 3 — JWT HEADER INJECTION ═══ -->
+<section class="phase-section" id="phase3">
+    <div class="phase-header"><span class="phase-number">PHASE 03</span><span class="phase-title">JWT HEADER INJECTION
+            ATTACKS</span><span class="phase-count" id="p3count">0 / 4 reports</span></div>
+    <div class="cards-grid" id="grid-phase3">
+
+        <!-- REPORT #04 -->
+        <div class="report-card" data-severity="critical" id="report-04">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #04 · Category 35.35</div>
+                    <div class="report-title">Authentication Bypass via "jku" Header Injection</div>
+                    <div class="report-target">🎯 ████.net · @intigriti_researcher · $4,500 · Full Admin</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">JKU Injection</span><span
+                            class="technique-tag">SSRF Chain</span><span class="technique-tag">Key Hosting</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT header mein <code class="c">jku</code> parameter tha jo server ko
+                        batata hai key kahan se uthani hai. Server ne check nahi kiya ki URL trusted hai. Hacker ne apne
+                        server ka URL dala, apni key host ki → Server ne hacker ki key se verify kiya → Admin access.
+                    </div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Header fields check karo</strong> — JWT decode karke <code
+                                class="c">jku</code> ya <code class="c">jwk</code> dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>SSRF test karo</strong> — <code class="c">jku</code> mein Burp
+                            Collaborator URL dalkar dekho server hit kar raha hai ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Apna JWKS host karo</strong> — RSA key pair banao, public key ko
+                            JSON mein VPS par rakho, <code class="c">jku</code> mein URL dalo.</span>
+                    </li>
+                </ul>
+                <div class="chain-box">
+                    <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                    <div class="chain-formula">Generate Keys → Host JWKS on VPS → Set jku URL → Sign with Private Key →
+                        Admin</div>
+                </div>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Don't let the user tell you where to find the key." Agar server user ke
+                        bataye raste par jayega, toh hacker system mein ghus jayega.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #10 -->
+        <div class="report-card" data-severity="critical" id="report-10">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #10 · Category 35.41</div>
+                    <div class="report-title">Authentication Bypass via "jwk" Header Injection</div>
+                    <div class="report-target">🎯 ████.com · @Mister_Ch0c · $3,000+ · Full Takeover</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">JWK Injection</span><span
+                            class="technique-tag">Embedded Key</span><span class="technique-tag">RS256</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Hacker ne JWT header mein apni Public Key ko <code class="c">jwk</code>
+                        parameter mein JSON format mein embed kar diya. Server ne bina trust check kiye usi header wali
+                        key se verify kiya — bilkul waisa jaise chor apni chabi police ko de.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>RS256 check karo</strong> — Agar algorithm RS256 hai, toh <code
+                                class="c">jwk</code> injection try karne ka chance hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Public Key embed karo</strong> — Apni key ko <code
+                                class="c">jwk</code> parameter mein <code
+                                class="c">{"kty":"RSA","e":"AQAB","n":"..."}</code> format mein dalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>'kid' requirement check karo</strong> — Agar server sirf <code
+                                class="c">kid</code> mangta hai, toh path traversal try karo.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Input is always untrusted." Agar server client ke header se khud ko
+                        verify karega, toh security ka koi matlab nahi.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #05 -->
+        <div class="report-card" data-severity="critical" id="report-05">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #05 · Category 35.36</div>
+                    <div class="report-title">Authentication Bypass via "kid" Path Traversal</div>
+                    <div class="report-target">🎯 ████.com · @pmnh · $2,000 · Full Account Takeover</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">kid Traversal</span><span
+                            class="technique-tag">/dev/null</span><span class="technique-tag">Empty Key</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server <code class="c">kid</code> value ko seedha file path mein use kar
+                        raha tha. Hacker ne <code class="c">kid</code> ko <code class="c">/dev/null</code> par point
+                        kiya → Server ne empty string ko secret key maana → Hacker ne empty string se sign kiya → Match!
+                    </div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>"kid" parameter check karo</strong> — JWT decode karke dekho
+                            header mein <code class="c">kid</code> hai ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Path Traversal try karo</strong> — <code class="c">../../</code>
+                            dalkar dekho server file system hit kar raha hai ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Known static files try karo</strong> — <code
+                                class="c">/dev/null</code> (Linux), <code class="c">C:\Windows\win.ini</code> (Windows)
+                            se "Key Confusion" karo.</span>
+                    </li>
+                </ul>
+                <div class="chain-box">
+                    <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                    <div class="chain-formula">kid → /dev/null → Empty Key → Sign with "" → Signature Match → Admin
+                    </div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #06 -->
+        <div class="report-card" data-severity="critical" id="report-06">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #06 · Category 35.37</div>
+                    <div class="report-title">SQL Injection via JWT "kid" Header</div>
+                    <div class="report-target">🎯 ██████.com · @o_0_o · $3,500 · Auth Bypass + DB Leak</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">kid SQLi</span><span
+                            class="technique-tag">UNION SELECT</span><span class="technique-tag">Key Control</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server <code class="c">kid</code> ko database query mein use kar raha
+                        tha: <code class="c">SELECT key_value FROM keys WHERE key_id = 'KID'</code>. Hacker ne SQL
+                        Injection se query manipulate ki: <code class="c">UNION SELECT 'mysecret'--</code> → Hacker
+                        controlled key se token forge kiya.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>JWT Headers scan karo</strong> — <code class="c">kid</code>, <code
+                                class="c">jku</code>, <code class="c">x5t</code> jaise headers ko ignore mat
+                            karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>SQLi test karo</strong> — <code class="c">kid</code> value mein
+                            <code class="c">'</code>, <code class="c">"</code>, <code class="c">--</code> dalkar
+                            response monitor karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>UNION Injection karo</strong> — <code
+                                class="c">xxxx' UNION SELECT 'mysecret'--</code> se apni controlled key return
+                            karwao.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Security is interconnected." Ek SQL Injection bug poore Authentication
+                        system (JWT) ko bypass karwa sakta hai.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<!-- ═══ PHASE 4 — JWT CLAIM TAMPERING ═══ -->
+<section class="phase-section" id="phase4">
+    <div class="phase-header"><span class="phase-number">PHASE 04</span><span class="phase-title">JWT CLAIM TAMPERING &
+            PRIVILEGE ESCALATION</span><span class="phase-count" id="p4count">0 / 6 reports</span></div>
+    <div class="cards-grid" id="grid-phase4">
+
+        <!-- REPORT #11 -->
+        <div class="report-card" data-severity="critical" id="report-11">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #11 · Category 35.42</div>
+                    <div class="report-title">Privilege Escalation via "role" Claim Tampering</div>
+                    <div class="report-target">🎯 ██████.com · @0x00_ash · $1,800 · Full Admin Access</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Role Tamper</span><span
+                            class="technique-tag">Privilege Escalation</span><span class="technique-tag">Weak
+                            Secret</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT payload mein <code class="c">"role": "employee"</code> tha. Hacker ne
+                        pehle <code class="c">alg: none</code> try kiya, phir secret key brute-force ki (<code
+                            class="c">secret123</code>), role ko <code class="c">"admin"</code> kar diya → CEO/Admin
+                        level access.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Claims examine karo</strong> — Payload mein <code
+                                class="c">role</code>, <code class="c">admin</code>, <code class="c">groups</code>,
+                            <code class="c">permissions</code> dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Escalation test karo</strong> — <code class="c">false</code> →
+                            <code class="c">true</code>, <code class="c">user</code> → <code class="c">admin</code>
+                            karke response compare karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>IDOR check karo</strong> — JWT ke andar ki <code
+                                class="c">user_id</code> badal kar kisi aur ka data access try karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #12 -->
+        <div class="report-card" data-severity="critical" id="report-12">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #12 · Category 35.43</div>
+                    <div class="report-title">Full Account Takeover via JWT ID Substitution (IDOR)</div>
+                    <div class="report-target">🎯 ██████.com · @tess · $4,000 · Crypto Wallet Access</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">ID Substitution</span><span
+                            class="technique-tag">IDOR</span><span class="technique-tag">Account Takeover</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT mein <code class="c">"sub": "1337"</code> tha. Hacker ne apni ID mita
+                        kar admin ki ID <code class="c">"1"</code> dali aur <code class="c">alg: none</code> se
+                        signature bypass kiya → Kisi ka bhi wallet aur private data access.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Identity claims check karo</strong> — <code class="c">sub</code>,
+                            <code class="c">user_id</code>, <code class="c">uuid</code>, <code
+                                class="c">account_no</code> dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Substitute & Test karo</strong> — Apni ID ko doosre ki ID se
+                            badlo, dusre ka data access try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Signature bypass combine karo</strong> — ID badalne ke baad <code
+                                class="c">alg: none</code> ya RS256→HS256 hamesha try karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #13 -->
+        <div class="report-card" data-severity="high" id="report-13">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #13 · Category 35.44</div>
+                    <div class="report-title">Email Verification Bypass via JWT Payload Tampering</div>
+                    <div class="report-target">🎯 ██████.com · @0xabdullah · $1,500 · Access without Verify</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Boolean Flip</span><span
+                            class="technique-tag">email_verified</span><span class="technique-tag">Feature Bypass</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT mein <code class="c">"email_verified": false</code> tha. Hacker ne
+                        weak secret brute-force ki (<code class="c">welcome123</code>), <code class="c">false</code> →
+                        <code class="c">true</code> kiya → Bina email verify kiye saare features unlock.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Booleans scan karo</strong> — <code class="c">verified</code>,
+                            <code class="c">active</code>, <code class="c">is_email_confirmed</code>, <code
+                                class="c">is_premium</code> dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Status flip karo</strong> — <code class="c">false</code> → <code
+                                class="c">true</code> karo + signature bypass (<code class="c">alg: none</code> ya
+                            brute-force).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Feature access check karo</strong> — Status badalne se pehle
+                            blocked features ab khul rahe hain ya nahi.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #14 -->
+        <div class="report-card" data-severity="critical" id="report-14">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #14 · Category 35.45</div>
+                    <div class="report-title">Full Account Takeover via JWT "sub" Claim Manipulation</div>
+                    <div class="report-target">🎯 ██████.com · @mongobee · $2,500 · Any Account Access</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">sub Claim</span><span
+                            class="technique-tag">Email Swap</span><span class="technique-tag">Identity Theft</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT mein <code class="c">"sub": "hacker@mail.com"</code> tha. Hacker ne
+                        brute-force se key nikali (<code class="c">secretkey123</code>), <code class="c">sub</code>
+                        badal kar <code class="c">"admin@company.com"</code> kiya → Bina password ke Admin access.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Identity claims dhoondho</strong> — <code class="c">sub</code>,
+                            <code class="c">email</code>, <code class="c">user_id</code>, <code class="c">uid</code>
+                            fields check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Substitute & Sign karo</strong> — Identity badlo + signature
+                            bypass (<code class="c">alg: none</code> ya weak secret) try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Dashboard access check karo</strong> — Identity badalne ke baad
+                            doosre ke account ka data access try karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #15 -->
+        <div class="report-card" data-severity="high" id="report-15">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #15 · Category 35.46</div>
+                    <div class="report-title">JWT Expiration Bypass via "exp" Claim Manipulation</div>
+                    <div class="report-target">🎯 ██████.com · @0x00_ash · $1,000 · Long-term Access</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">exp Tamper</span><span
+                            class="technique-tag">Time Bypass</span><span class="technique-tag">Eternal Token</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Token expire ho gaya tha. Hacker ne weak key (<code
+                            class="c">123456</code>) crack ki, <code class="c">exp</code> timestamp ko saal 2030 mein
+                        set kiya → Server ne "Naya aur Valid" maan liya → Permanent access.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Expiry claims check karo</strong> — <code class="c">exp</code>,
+                            <code class="c">iat</code>, <code class="c">nbf</code> (Not Before) dhoondho aur values note
+                            karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Expiry extend karo</strong> — <code class="c">exp</code> timestamp
+                            ko future date se badlo + signature bypass try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Logout ke baad test karo</strong> — Logout ke baad bhi <code
+                                class="c">exp</code> badlane se token kaam kar raha hai ya nahi.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #16 -->
+        <div class="report-card" data-severity="high" id="report-16">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #16 · Category 35.47</div>
+                    <div class="report-title">Privilege Escalation via JWT "scope" Manipulation</div>
+                    <div class="report-target">🎯 ██████.com · @0x00_ash · $2,000 · Unauthorized API Actions</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Scope Escalation</span><span
+                            class="technique-tag">API Abuse</span><span class="technique-tag">Permission Inject</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT mein <code class="c">"scopes": "read:profile"</code> tha. Hacker ne
+                        key crack ki (<code class="c">api_secret_key</code>), scope mein <code
+                            class="c">write:user system:admin</code> add kiya → Delete user jaise admin actions access.
+                    </div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Scopes scan karo</strong> — <code class="c">scope</code>, <code
+                                class="c">scp</code>, <code class="c">permissions</code>, <code class="c">groups</code>
+                            dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>High-level scopes add karo</strong> — <code class="c">read</code>
+                            → <code class="c">write</code>, <code class="c">admin</code> replace karke test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>API docs check karo</strong> — Documentation se permission names
+                            dhoondho (<code class="c">admin_access</code> etc.) aur inject karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<!-- ═══ PHASE 5 — JWT SESSION & INVALIDATION FLAWS ═══ -->
+<section class="phase-section" id="phase5">
+    <div class="phase-header"><span class="phase-number">PHASE 05</span><span class="phase-title">JWT SESSION &
+            INVALIDATION FLAWS</span><span class="phase-count" id="p5count">0 / 3 reports</span></div>
+    <div class="cards-grid" id="grid-phase5">
+
+        <!-- REPORT #08 -->
+        <div class="report-card" data-severity="high" id="report-08">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #08 · Category 35.39</div>
+                    <div class="report-title">JWT Session Fixation & Logout Bypass</div>
+                    <div class="report-target">🎯 ████.com · @tess · $1,500 · Account Takeover</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Logout Bypass</span><span
+                            class="technique-tag">Token Replay</span><span class="technique-tag">Session Fixation</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT stateless hai — server save nahi karta. Logout karne par browser se
+                        token delete hua par server-side valid raha. Hacker ne purana token replay kiya → Full access.
+                        Password change ke baad bhi purana token chal raha tha!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Logout test karo</strong> — Logout ke baad purana token use karke
+                            request bhejo, chal rahi hai ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Password change test karo</strong> — Password badalne ke baad
+                            purana token verify karo. Chal raha hai = <strong>High Severity</strong>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>'exp' claim check karo</strong> — JWT decode karke <code
+                                class="c">exp</code> dekho. Agar 1 saal ya "Never" hai = Critical Risk.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Logout is a server-side responsibility, not just a browser action." Agar
+                        server token ko bhoolta nahi, toh user kabhi safe nahi hai.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #21 -->
+        <div class="report-card" data-severity="high" id="report-21">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #21 · Category 35.52</div>
+                    <div class="report-title">Account Takeover via JWT Session Fixation</div>
+                    <div class="report-target">🎯 ██████.in · @ayush_0x · $1,200 · Pre-auth Hijack</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Session Fixation</span><span
+                            class="technique-tag">Guest Token</span><span class="technique-tag">Token Reuse</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Website par Guest Token system tha. Login ke baad bhi wahi purana token
+                        use ho raha tha. Hacker ne apna guest token victim ke browser mein set kiya → Victim login kiya
+                        → Token hacker ke paas pehle se tha → Full access.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Pre-Login JWT check karo</strong> — Login se pehle koi token mil
+                            raha hai ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Tokens compare karo</strong> — Login ke baad token change hua ya
+                            wahi purana use ho raha hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Inject & Login test karo</strong> — Manually apna token browser
+                            mein dalo, phir login karke dekho authenticated ban gaya ya nahi.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #22 -->
+        <div class="report-card" data-severity="high" id="report-22">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #22 · Category 35.53</div>
+                    <div class="report-title">Long-Lived Sessions via JWT Logout Invalidation Bypass</div>
+                    <div class="report-target">🎯 ██████.com · @tess · $1,500 · Persistent Access</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">No Blacklist</span><span
+                            class="technique-tag">Token Replay</span><span class="technique-tag">Persistent
+                            Access</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Logout sirf browser-side cleanup tha. Server par JWT blacklist nahi tha.
+                        Hacker ne Burp history se purana token use kiya → 200 OK + saara data. Password change ke baad
+                        bhi token valid tha (24-48 hrs tak).</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Token save karo</strong> — Login karke token notepad mein save kar
+                            lo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Logout & Re-use karo</strong> — Logout dabane ke baad wahi token
+                            Burp Suite se bhej kar dekho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Expiry time check karo</strong> — JWT <code class="c">exp</code>
+                            decode karo, 1 mahina+ hai toh Critical Risk hai.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══ PHASE 6 — JWT INFORMATION DISCLOSURE ═══ -->
+<section class="phase-section" id="phase6">
+    <div class="phase-header"><span class="phase-number">PHASE 06</span><span class="phase-title">JWT INFORMATION
+            DISCLOSURE</span><span class="phase-count" id="p6count">0 / 3 reports</span></div>
+    <div class="cards-grid" id="grid-phase6">
+
+        <!-- REPORT #07 -->
+        <div class="report-card" data-severity="medium" id="report-07">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #07 · Category 35.38</div>
+                    <div class="report-title">Sensitive Data Leakage via JWT Payload</div>
+                    <div class="report-target">🎯 ████.com · @0xabdullah · $1,200 · Infra Exposure</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Info Disclosure</span><span
+                            class="technique-tag">Base64 Decode</span><span class="technique-tag">Password Hash</span>
+                    </div>
+                </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT sirf Base64 encoded hai, encrypted nahi. Payload mein tha: <code
+                            class="c">user_password_hash</code>, <code class="c">internal_ip</code>, <code
+                            class="c">db_connection_string</code>. Hacker ne SSRF + Hashcat combo se internal admin
+                        panel + user passwords nikaale.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Always decode karo</strong> — Koi bhi JWT mile, pehla kaam <code
+                                class="c">jwt.io</code> ya <code class="c">base64 -d</code> se decode karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Hashes dhoondho</strong> — Payload mein <code
+                                class="c">hash</code>, <code class="c">secret</code>, <code
+                                class="c">internal_id</code>, <code class="c">db_string</code> check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>PII check karo</strong> — Phone, email, SSN payload mein hai =
+                            Privacy Violation / PII Leak report karo.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Encoding is not Encryption." Base64 se data chhupaaya nahi ja sakta, sirf
+                        badla ja sakta hai.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #25 -->
+        <div class="report-card" data-severity="medium" id="report-25">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #25 · Category 35.56</div>
+                    <div class="report-title">Internal Infrastructure Disclosure via JWT Payload</div>
+                    <div class="report-target">🎯 ██████.com · @0xabdullah · $1,000 · SSRF Recon</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Internal IP</span><span
+                            class="technique-tag">Metadata Leak</span><span class="technique-tag">Cloud Recon</span>
+                    </div>
+                </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT payload mein <code class="c">"server_origin": "10.0.42.15"</code>,
+                        <code class="c">"service": "auth-prod-v2"</code>, <code
+                            class="c">"cluster": "aws-mumbai-sh-01"</code> tha. Hacker ne SSRF chain se internal admin
+                        panels hit kiye.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Decode every token</strong> — <code class="c">ip</code>, <code
+                                class="c">server</code>, <code class="c">host</code>, <code class="c">origin</code>,
+                            <code class="c">path</code> keywords check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Private IPs dhoondho</strong> — <code class="c">10.x.x.x</code>,
+                            <code class="c">172.16.x.x</code>, <code class="c">192.168.x.x</code> = Internal IP
+                            leak.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Metadata claims check karo</strong> — AWS/GCP instance IDs bhi
+                            tokens mein ho sakte hain, cloud hacking mein useful.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #26 -->
+        <div class="report-card" data-severity="high" id="report-26">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #26 · Category 35.57</div>
+                    <div class="report-title">Sensitive Data Exposure via Password Hash in JWT</div>
+                    <div class="report-target">🎯 ██████.com · @0xabdullah · $1,500 · Offline Cracking</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Password Hash</span><span
+                            class="technique-tag">Hashcat</span><span class="technique-tag">Mass Takeover</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT payload mein <code class="c">"password_hash": "$2a$10$abc..."</code>
+                        tha (Bcrypt). Hacker ne IDOR se multiple JWTs collect kiye, Hashcat (<code
+                            class="c">-m 3200</code>) se weak passwords crack kiye → Mass account takeover.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Hash keywords scan karo</strong> — <code class="c">hash</code>,
+                            <code class="c">pwd</code>, <code class="c">password</code>, <code
+                                class="c">secret_code</code> dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Algorithm identify karo</strong> — MD5: 32 chars, SHA1: 40 chars,
+                            Bcrypt: starts with <code class="c">$2a$</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>PII check karo</strong> — DOB, SSN, Phone Number leak = Privacy
+                            Violation report.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Hashing is for storage, not for transmission." Password hash kabhi
+                        network par travel nahi karna chahiye.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<!-- ═══ PHASE 7 — JWT STORAGE & TRANSPORT FLAWS ═══ -->
+<section class="phase-section" id="phase7">
+    <div class="phase-header"><span class="phase-number">PHASE 07</span><span class="phase-title">JWT STORAGE &
+            TRANSPORT FLAWS</span><span class="phase-count" id="p7count">0 / 3 reports</span></div>
+    <div class="cards-grid" id="grid-phase7">
+
+        <!-- REPORT #23 -->
+        <div class="report-card" data-severity="critical" id="report-23">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #23 · Category 35.54</div>
+                    <div class="report-title">JWT Theft via XSS due to Missing HttpOnly Flag</div>
+                    <div class="report-target">🎯 ██████.com · @da_ash · $2,500 · Full Account Takeover</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">XSS + JWT</span><span
+                            class="technique-tag">Cookie Theft</span><span class="technique-tag">Missing HttpOnly</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT Cookie mein tha par <code class="c">HttpOnly</code> flag missing.
+                        Hacker ne Stored XSS se <code class="c">document.cookie</code> chura ke apne server par bheja.
+                        Kisi bhi user ki profile dekhne par JWT auto-steal.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Cookie Flags check karo</strong> — F12 > Application tab >
+                            Cookies. <code class="c">HttpOnly</code> aur <code class="c">Secure</code> flags check
+                            karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>LocalStorage check karo</strong> — Console mein <code
+                                class="c">localStorage</code> / <code class="c">sessionStorage</code> type karo, JWT
+                            dikh raha hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>XSS trigger karo</strong> — <code class="c">document.cookie</code>
+                            console mein test karo. Token dikh raha hai = <strong>Critical</strong>.</span>
+                    </li>
+                </ul>
+                <div class="chain-box">
+                    <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                    <div class="chain-formula">Find XSS → No HttpOnly → document.cookie → fetch(hacker_url + cookie) →
+                        Account Takeover</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #24 -->
+        <div class="report-card" data-severity="high" id="report-24">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #24 · Category 35.55</div>
+                    <div class="report-title">CSRF via JWT in Cookies (Missing SameSite)</div>
+                    <div class="report-target">🎯 ██████.co · @0xabdullah · $1,500 · Unauthorized Actions</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">CSRF</span><span
+                            class="technique-tag">Cookie JWT</span><span class="technique-tag">No SameSite</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">JWT Cookie mein store tha (Header mein nahi). <code
+                            class="c">SameSite</code> flag missing. Hacker ne malicious page banaya jo victim ke browser
+                        se <code class="c">POST /api/update-email</code> bhejta hai — browser automatically JWT cookie
+                        attach karta hai → Email change → Account takeover.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>JWT storage check karo</strong> — JWT Cookie mein ja raha hai ya
+                            Header mein? Cookie = CSRF test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>SameSite flag check karo</strong> — <code
+                                class="c">SameSite</code> missing ya <code class="c">None</code> hai = High Severity
+                            bug.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>CSRF tokens check karo</strong> — Request mein dusra security
+                            token hai jo hacker guess nahi kar sakta?</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Cookies are a double-edged sword." Sessions aasan banati hain, par dhyan
+                        na ho toh hacker ke liye rasta khol deti hain.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #27 -->
+        <div class="report-card" data-severity="high" id="report-27">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #27 · Category 35.58</div>
+                    <div class="report-title">Blind SSRF via JWT "jku" Header Parameter</div>
+                    <div class="report-target">🎯 ██████.io · @intigriti_researcher · $2,500 · Internal Scan</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">SSRF via JWT</span><span
+                            class="technique-tag">Cloud Metadata</span><span class="technique-tag">Port Scan</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text"><code class="c">jku</code> mein Burp Collaborator URL dala → Server ne
+                        hit kiya. Phir internal IPs try kiye: <code class="c">169.254.169.254</code> (AWS metadata) aur
+                        <code class="c">localhost:8080/admin</code> → Firewall bypass, internal secrets leak.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>JKU/X5U inject karo</strong> — JWT header mein <code
+                                class="c">jku</code> ya <code class="c">x5u</code> add karke apna listener URL
+                            dalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>DNS hit check karo</strong> — Burp Collaborator / webhook.site par
+                            server se request aa rahi hai ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Internal IPs probe karo</strong> — <code
+                                class="c">127.0.0.1</code>, <code class="c">169.254.169.254</code> try karke response
+                            differences dekho.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══ PHASE 8 — ADVANCED JWT ATTACKS & BONUS ═══ -->
+<section class="phase-section" id="phase8">
+    <div class="phase-header"><span class="phase-number">PHASE 08</span><span class="phase-title">ADVANCED JWT ATTACKS &
+            BONUS TECHNIQUES</span><span class="phase-count" id="p8count">0 / 8 reports</span></div>
+    <div class="cards-grid" id="grid-phase8">
+
+        <!-- REPORT #20 -->
+        <div class="report-card" data-severity="critical" id="report-20">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #20 · Category 35.51</div>
+                    <div class="report-title">RS256 to HS256 Key Confusion (Enterprise)</div>
+                    <div class="report-target">🎯 ██████.net · @silentsignal · $3,500 · Full Admin</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Algorithm Confusion</span><span
+                            class="technique-tag">Enterprise</span><span class="technique-tag">Dual Algorithm</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server dono algorithms (RS256 + HS256) support karta tha. Hacker ne <code
+                            class="c">/.well-known/jwks.json</code> se public key li, token ka alg HS256 kiya, PubKey se
+                        sign kiya → Server confused → Admin access.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Public Key nikaalo</strong> — <code class="c">jwks.json</code> ya
+                            certificate files se key extract karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>HS256 switch karo</strong> — Header mein <code
+                                class="c">RS256</code> → <code class="c">HS256</code> badlo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>PubKey se sign karo</strong> — Public key ko "Secret" use karke
+                            sign karo, server accept karta hai ya nahi.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #28 -->
+        <div class="report-card" data-severity="critical" id="report-28">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #28 · Category 35.59</div>
+                    <div class="report-title">GraphQL Auth Bypass via JWT Context Error</div>
+                    <div class="report-target">🎯 ██████.com · @z3r0_trust · $3,000 · Private Data Leak</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">GraphQL</span><span
+                            class="technique-tag">Malformed JWT</span><span class="technique-tag">Middleware
+                            Bypass</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">GraphQL middleware JWT fail hone par error deta tha par query execute
+                        hone se nahi rokta tha. Malformed JWT (<code class="c">header.payload.wrongsig</code>) bheja →
+                        Server "Guest" samajh kar data return kiya → Poora database leak.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>GraphQL scan karo</strong> — App <code class="c">/graphql</code>
+                            ya <code class="c">/v1/query</code> use kar rahi hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Malformed JWT test karo</strong> — <code
+                                class="c">Bearer abc.xyz.123</code> dalkar dekho 200 OK aa raha hai ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Resolvers check karo</strong> — Query + Mutation dono bina token
+                            ke ya galat token ke saath try karo.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Errors should be terminal." Authentication fail = System ko aage ka rasta
+                        band karna chahiye, guest access nahi dena chahiye.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #29 -->
+        <div class="report-card" data-severity="critical" id="report-29">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #29 · Category 35.60</div>
+                    <div class="report-title">Firebase JWT Rules Bypass (Audience Confusion)</div>
+                    <div class="report-target">🎯 ██████.app · @security_knight · $2,000 · Full DB Access</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Firebase</span><span
+                            class="technique-tag">aud Confusion</span><span class="technique-tag">Cross-Project</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Firebase rules sirf <code class="c">request.auth.uid != null</code> check
+                        kar rahi thi. Hacker ne apne dusre Firebase project se valid JWT banayi → Victim app ne accept
+                        ki kyunki Google signed thi par <code class="c">aud</code> (Project ID) check nahi kiya.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Firebase identify karo</strong> — <code
+                                class="c">firebase-config</code> ya network calls mein <code
+                                class="c">googleapis.com</code> check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Any Firebase JWT use karo</strong> — Apne kisi dusre Firebase app
+                            ka token wahan test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>aud claim check karo</strong> — JWT decode karo, <code
+                                class="c">aud</code> project-specific nahi hai toh bypass possible.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Verification is not enough, Ownership matters." Sirf chabi asli hona
+                        kaafi nahi, ye bhi dekhna zaroori hai ki chabi isi taale ki hai.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS REPORT #30 -->
+        <div class="report-card" data-severity="critical" id="report-30">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #30 · BONUS · Category 35.61</div>
+                    <div class="report-title">JWT "x5u" Header Injection — Remote Certificate Attack</div>
+                    <div class="report-target">🎯 ██████.com · @pentester_pro · $3,500 · Full Admin</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">x5u Injection</span><span
+                            class="technique-tag">Certificate Abuse</span><span class="technique-tag">Remote Key</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text"><code class="c">x5u</code> (X.509 URL) header similar hai <code
+                            class="c">jku</code> ko par X.509 certificate URL point karta hai. Hacker ne apna
+                        self-signed certificate host kiya, <code class="c">x5u</code> mein URL dala → Server ne remotely
+                        certificate fetch ki aur verify kiya → Admin access.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>x5u/x5c header add karo</strong> — JWT header mein <code
+                                class="c">"x5u": "https://hacker.com/cert.pem"</code> inject karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Self-signed cert banao</strong> — <code class="c">openssl</code>
+                            se certificate banao aur VPS par host karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>x5c inline try karo</strong> — Certificate chain ko directly
+                            header mein embed karke verify bypass try karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS REPORT #31 -->
+        <div class="report-card" data-severity="critical" id="report-31">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #31 · BONUS · Category 35.62</div>
+                    <div class="report-title">JWT Token Confusion — Access Token as Refresh Token</div>
+                    <div class="report-target">🎯 ██████.com · @token_hunter · $2,500 · Persistent Access</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Token Confusion</span><span
+                            class="technique-tag">Refresh Abuse</span><span class="technique-tag">Cross-Token</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server access token aur refresh token ke beech properly differentiate
+                        nahi kar raha tha. Hacker ne access token ko <code class="c">/api/refresh</code> endpoint par
+                        bheja → Server ne naya access token issue kar diya → Infinite session without re-login.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Token types identify karo</strong> — App access token + refresh
+                            token dono use kar rahi hai? Dono decode karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Cross-use try karo</strong> — Access token ko refresh endpoint par
+                            bhejo aur vice versa.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>'typ' claim check karo</strong> — JWT mein <code
+                                class="c">"typ": "access"</code> vs <code class="c">"typ": "refresh"</code> properly
+                            validated hai ya nahi.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS REPORT #32 -->
+        <div class="report-card" data-severity="high" id="report-32">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #32 · BONUS · Category 35.63</div>
+                    <div class="report-title">JWT Cross-Service Confusion — Shared Secret Attack</div>
+                    <div class="report-target">🎯 ██████.io · @microservice_hacker · $2,000 · Cross-Service Escalation
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Cross-Service</span><span
+                            class="technique-tag">Shared Secret</span><span class="technique-tag">Microservice
+                            Abuse</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Multiple microservices same JWT secret share kar rahe the. Service A
+                        (low-privilege) ka token Service B (admin panel) par bhi valid tha. Hacker ne low-priv service
+                        se token liya → Admin service par use kiya → Full access kyunki same secret, no audience check.
+                    </div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Multiple services detect karo</strong> — Company ke alag-alag
+                            subdomains/APIs par same JWT test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>iss/aud claims check karo</strong> — <code class="c">iss</code>
+                            (Issuer) aur <code class="c">aud</code> (Audience) properly validated hain ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Token reuse karo</strong> — Service A ka token Service B par bhejo
+                            → Agar accept ho = Critical bug.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS REPORT #33 -->
+        <div class="report-card" data-severity="high" id="report-33">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #33 · BONUS · Category 35.64</div>
+                    <div class="report-title">JWT Null Signature via Library Deserialization Bug</div>
+                    <div class="report-target">🎯 ██████.com · @lib_breaker · $3,000 · Auth Bypass</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Null Byte</span><span
+                            class="technique-tag">Library Bug</span><span class="technique-tag">Deserialization</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Purani JWT libraries mein null byte (<code class="c">\x00</code>)
+                        signature mein inject karne se library signature comparison truncate kar deti thi. Hacker ne
+                        signature ke shuru mein null byte inject kiya → Library ne sirf null tak compare kiya → Match →
+                        Auth bypass.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Library version detect karo</strong> — Response headers, error
+                            messages se JWT library identify karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Null byte inject karo</strong> — Signature mein <code
+                                class="c">%00</code> ya <code class="c">\x00</code> prepend karke test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>CVE database check karo</strong> — Identified library ka known JWT
+                            CVEs search karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS REPORT #34 -->
+        <div class="report-card" data-severity="critical" id="report-34">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #34 · BONUS · Category 35.65</div>
+                    <div class="report-title">JWT "iss" Claim Spoofing — OAuth Provider Confusion</div>
+                    <div class="report-target">🎯 ██████.com · @oauth_ninja · $4,000 · SSO Bypass</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">iss Spoofing</span><span
+                            class="technique-tag">OAuth Confusion</span><span class="technique-tag">SSO Bypass</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">App multiple OAuth providers (Google, GitHub, custom) support karti thi.
+                        Server <code class="c">iss</code> (Issuer) claim properly validate nahi kar raha tha. Hacker ne
+                        apna OAuth server setup kiya, <code class="c">iss</code> mein apna URL dala → Server ne accept
+                        kiya → SSO bypass karke Admin access.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>iss claim decode karo</strong> — JWT mein <code
+                                class="c">iss</code> kya hai? Multiple providers supported hain?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Custom issuer try karo</strong> — <code class="c">iss</code> apne
+                            server ka URL dalo aur dekho server accept karta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>OIDC discovery check karo</strong> — <code
+                                class="c">/.well-known/openid-configuration</code> se allowed issuers list
+                            dhoondho.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Trust but verify the source." Multiple providers support karna = Har ek
+                        ki identity strictly verify karni chahiye.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="mission-footer">
+    <p class="footer-text">⬡ MISSION 09 — JWT MASTERY ⬡ 34 REPORTS ⬡ 8 PHASES ⬡ COMPLETE REGISTER ⬡</p>
+</footer>
+
+<script>
+    const STORAGE_KEY = 'm09_jwt_state';
+    function toggleItem(el) { el.classList.toggle('done'); saveState(); updateCardProgress(el.closest('.report-card')); updateMasterProgress(); }
+    function updateCardProgress(card) {
+        if (!card) return;
+        const items = card.querySelectorAll('.checklist-item'), done = card.querySelectorAll('.checklist-item.done');
+        const pct = items.length ? Math.round((done.length / items.length) * 100) : 0;
+        const pctEl = card.querySelector('.card-progress-pct'), barEl = card.querySelector('.card-bar-fill');
+        if (pctEl) pctEl.textContent = pct + '%'; if (barEl) barEl.style.width = pct + '%';
+    }
+    function updateMasterProgress() {
+        const allItems = document.querySelectorAll('.checklist-item'), allDone = document.querySelectorAll('.checklist-item.done');
+        const pct = allItems.length ? Math.round((allDone.length / allItems.length) * 100) : 0;
+        document.getElementById('masterPct').textContent = pct + '%';
+        document.getElementById('masterBar').style.width = pct + '%';
+        document.getElementById('completedItems').textContent = allDone.length;
+        let completedCards = 0;
+        document.querySelectorAll('.report-card').forEach(c => {
+            const t = c.querySelectorAll('.checklist-item').length, d = c.querySelectorAll('.checklist-item.done').length;
+            if (t > 0 && t === d) completedCards++;
+        });
+        document.getElementById('completedCards').textContent = completedCards;
+        ['phase1', 'phase2', 'phase3', 'phase4', 'phase5', 'phase6', 'phase7', 'phase8'].forEach((pid, i) => {
+            const sec = document.getElementById(pid); if (!sec) return;
+            const cards = sec.querySelectorAll('.report-card'), done = [...cards].filter(c => { const t = c.querySelectorAll('.checklist-item').length; return t > 0 && t === c.querySelectorAll('.checklist-item.done').length; });
+            const countEl = document.getElementById('p' + (i + 1) + 'count');
+            if (countEl) countEl.textContent = done.length + ' / ' + cards.length + ' reports';
+        });
+    }
+    function filterCards(type, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        document.querySelectorAll('.report-card').forEach(card => {
+            const sev = card.dataset.severity, items = card.querySelectorAll('.checklist-item'), doneItems = card.querySelectorAll('.checklist-item.done');
+            const isComplete = items.length > 0 && items.length === doneItems.length, isIncomplete = doneItems.length > 0 && !isComplete;
+            let show = false;
+            if (type === 'all') show = true;
+            else if (type === 'critical') show = sev === 'critical';
+            else if (type === 'high') show = sev === 'high';
+            else if (type === 'medium') show = sev === 'medium';
+            else if (type === 'complete') show = isComplete;
+            else if (type === 'incomplete') show = isIncomplete || doneItems.length === 0;
+            card.style.display = show ? '' : 'none';
+        });
+    }
+    function saveState() {
+        const state = {};
+        document.querySelectorAll('.report-card').forEach(card => {
+            const id = card.id, items = [];
+            card.querySelectorAll('.checklist-item').forEach((item, i) => { if (item.classList.contains('done')) items.push(i); });
+            if (items.length) state[id] = items;
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { }
+    }
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return;
+            const state = JSON.parse(raw);
+            Object.keys(state).forEach(id => {
+                const card = document.getElementById(id); if (!card) return;
+                const items = card.querySelectorAll('.checklist-item');
+                state[id].forEach(i => { if (items[i]) items[i].classList.add('done'); });
+                updateCardProgress(card);
+            });
+        } catch (e) { }
+        updateMasterProgress();
+    }
+    loadState();
+</script>
+</body>
+
+</html>

