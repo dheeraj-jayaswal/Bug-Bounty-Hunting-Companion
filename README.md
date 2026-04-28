@@ -1,10 +1,10 @@
-# 🕵️ Bug Bounty Hunting Checklist
+# 🕵️ Bug Bounty Hunting Companion
 
-This repository contains my personal **Bug Bounty Hunting Checklist and Methodology**.
+This repository contains my personal **Bug Bounty Hunting Companion and Methodology**.
 
 The goal of this project is to create a structured workflow for **reconnaissance, vulnerability discovery, and reporting** during web application security testing.
 
-Instead of randomly testing targets, this checklist helps maintain a **systematic and repeatable approach**.
+Instead of randomly testing targets, this Companion helps maintain a **systematic and repeatable approach**.
 
 ---
 
@@ -55,7 +55,7 @@ During this phase I try to identify:
 
 ---
 
-## 3️⃣ Vulnerability Testing Checklist
+## 3️⃣ Vulnerability Testing Companion
 
 ### Authentication & Authorization
 
@@ -95,7 +95,7 @@ During this phase I try to identify:
 # 📂 Repository Structure
 
 ```
-checklist_bug_hunting
+Companion_bug_hunting
 │
 ├── recon-checklist.md
 ├── web-vulnerabilities.md
