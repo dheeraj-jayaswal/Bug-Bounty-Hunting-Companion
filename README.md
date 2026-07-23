@@ -7,8 +7,16 @@ reproducible checklists.**
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Dheeraj%20Kumar%20Jayaswal-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/dheerajkumarjayaswal)
 [![GitHub](https://img.shields.io/badge/GitHub-dheeraj--jayaswal-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/dheeraj-jayaswal)
+[![Live Site](https://img.shields.io/badge/🌐%20Live%20Interactive%20Site-View%20Now-2ECC71?style=for-the-badge)](https://dheeraj-jayaswal.github.io/Bug-Bounty-Hunting-Companion/)
 
 </div>
+
+---
+
+> ⚠️ **Note:** The checklists in this repo are interactive HTML pages. GitHub's
+> normal file viewer shows raw source code, not the working page. **Always
+> open files via the live site** →
+> **https://dheeraj-jayaswal.github.io/Bug-Bounty-Hunting-Companion/**
 
 ---
 
@@ -22,7 +30,7 @@ are for. This repo is a **companion for active bug hunting**: a curated set of
 that made them work, with an interactive checklist to test for the same
 pattern on your own target.
 
-The flagship file is **[`Bounty-Reports.html`](Bounty-Reports.html)** — 30 real
+The flagship file is **[`Bounty-Reports.html`](https://dheeraj-jayaswal.github.io/Bug-Bounty-Hunting-Companion/Bounty-Reports.html)** — 30 real
 disclosed reports, organized into 6 phases:
 
 1. IDOR & Business Logic Flaws
@@ -52,11 +60,12 @@ Each report card includes:
 
 ## 📖 How to Use This
 
-1. Pick a phase relevant to what you're testing (auth, injection, SSRF, etc.)
-2. Open the report card, read the real scenario
-3. Work through the checklist against your target
-4. If it hits, use the chain formula as a guide for how far the impact can go
-5. Read the pro-tip — that's the reusable lesson, not just the one-off bug
+1. Go to the **[live site](https://dheeraj-jayaswal.github.io/Bug-Bounty-Hunting-Companion/)** — don't browse the raw `.html` files directly on github.com, they won't render
+2. Pick a phase relevant to what you're testing (auth, injection, SSRF, etc.)
+3. Open the report card, read the real scenario
+4. Work through the checklist against your target
+5. If it hits, use the chain formula as a guide for how far the impact can go
+6. Read the pro-tip — that's the reusable lesson, not just the one-off bug
 
 ## 👤 About Me
 
