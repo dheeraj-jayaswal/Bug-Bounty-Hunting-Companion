@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bug Bounty Hunting Companion — Dheeraj Kumar Jayaswal</title>
+<style>
+  :root {
+    --bg-deep: #080c12;
+    --bg-card: #0d1520;
+    --bg-card2: #111b2a;
+    --border: #1a2d40;
+    --border-glow: #e74c3c33;
+    --cyan: #00c8ff;
+    --blue: #4488ff;
+    --purple: #9b59ff;
+    --green: #00ff88;
+    --yellow: #ffd700;
+    --orange: #ff8c42;
+    --red: #ff4757;
+    --accent: #e74c3c;
+    --text-primary: #e8f4f8;
+    --text-secondary: #7ba8c0;
+    --text-dim: #4a7090;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    padding: 40px 20px 80px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  header {
+    text-align: center;
+    padding: 40px 20px 50px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  header h1 {
+    font-size: 2rem;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+  }
+  header p { color: var(--text-secondary); font-size: 1rem; max-width: 640px; margin: 0 auto; }
+  header .badges { margin-top: 18px; }
+  header .badges a {
+    color: var(--cyan);
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 0.9rem;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+  header .badges a:hover { border-color: var(--cyan); }
+
+  .section-title {
+    font-size: 1.1rem;
+    color: var(--orange);
+    margin: 36px 0 16px;
+    padding-left: 4px;
+    border-left: 3px solid var(--accent);
+    padding-left: 12px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--cyan);
+    box-shadow: 0 6px 20px var(--border-glow);
+  }
+  .card .name { font-weight: 600; font-size: 1rem; }
+  .card .desc { color: var(--text-secondary); font-size: 0.85rem; }
+
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  footer a { color: var(--cyan); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🕵️ Bug Bounty Hunting Companion</h1>
+    <p>A curated library of real, publicly-disclosed bug bounty reports and reproducible
+       checklists — by Dheeraj Kumar Jayaswal.</p>
+    <div class="badges">
+      <a href="https://github.com/dheeraj-jayaswal/Bug-Bounty-Hunting-Companion">📂 Repository</a>
+      <a href="https://linkedin.com/in/dheerajkumarjayaswal">💼 LinkedIn</a>
+      <a href="README.md">📄 README</a>
+    </div>
+  </header>
+
+  <div class="section-title">⭐ Flagship</div>
+  <div class="grid">
+    <a class="card" href="Bounty-Reports.html">
+      <span class="name">Bounty Reports</span>
+      <span class="desc">30 real disclosed reports, organized into 6 phases with chain formulas</span>
+    </a>
+  </div>
+
+  <div class="section-title">🔑 Authentication & Session</div>
+  <div class="grid">
+    <a class="card" href="Auth_checklist.html"><span class="name">Auth Checklist</span></a>
+    <a class="card" href="Login-Bypass.html"><span class="name">Login Bypass</span></a>
+    <a class="card" href="OAUTH-Bug-Hunting.html"><span class="name">OAuth Bug Hunting</span></a>
+    <a class="card" href="OTP-MFA-Bypass.html"><span class="name">OTP / MFA Bypass</span></a>
+    <a class="card" href="Password-Reset-Bug-Hunting.html"><span class="name">Password Reset</span></a>
+    <a class="card" href="Session-Management.html"><span class="name">Session Management</span></a>
+    <a class="card" href="Registration-Bug-Hunting.html"><span class="name">Registration Bug Hunting</span></a>
+    <a class="card" href="Registration-Master-2026.html"><span class="name">Registration Master 2026</span></a>
+  </div>
+
+  <div class="section-title">🛡️ Access Control & Business Logic</div>
+  <div class="grid">
+    <a class="card" href="Authorization-IDOR.html"><span class="name">Authorization / IDOR</span></a>
+    <a class="card" href="Business-Logic.html"><span class="name">Business Logic</span></a>
+  </div>
+
+  <div class="section-title">💉 Injection & Client-Side</div>
+  <div class="grid">
+    <a class="card" href="SQL_Injections.html"><span class="name">SQL Injections</span></a>
+    <a class="card" href="CSRF-Bug-Hunting.html"><span class="name">CSRF Bug Hunting</span></a>
+    <a class="card" href="Cors.html"><span class="name">CORS</span></a>
+    <a class="card" href="File-Upload.html"><span class="name">File Upload</span></a>
+    <a class="card" href="Deserialization.html"><span class="name">Insecure Deserialization</span></a>
+    <a class="card" href="JWT-Token.html"><span class="name">JWT Token Attacks</span></a>
+    <a class="card" href="SSRF.html"><span class="name">SSRF</span></a>
+  </div>
+
+  <div class="section-title">🔍 Recon</div>
+  <div class="grid">
+    <a class="card" href="Recon-Checklist.html"><span class="name">Recon Checklist</span></a>
+  </div>
+
+  <footer>
+    Licensed under <a href="LICENSE.md">CC BY 4.0</a> — reuse with attribution to Dheeraj Kumar Jayaswal.
+    <br />Real bugs. Real reports. Real checklists.
+  </footer>
+
+</div>
+</body>
+</html>
