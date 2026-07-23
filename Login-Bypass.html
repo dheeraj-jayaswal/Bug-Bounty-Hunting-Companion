@@ -1914,9 +1914,77 @@
 
         </div>
     </section>
-
-    <!-- %%PHASE5_PLACEHOLDER%% -->
-
+<script>
+    const STORAGE_KEY = 'login_bypass_state';
+    function toggleItem(el) { el.classList.toggle('done'); saveState(); updateCardProgress(el.closest('.report-card')); updateMasterProgress(); }
+    function updateCardProgress(card) {
+        if (!card) return;
+        const items = card.querySelectorAll('.checklist-item'), done = card.querySelectorAll('.checklist-item.done');
+        const pct = items.length ? Math.round((done.length / items.length) * 100) : 0;
+        const pctEl = card.querySelector('.card-progress-pct'), barEl = card.querySelector('.card-bar-fill');
+        if (pctEl) pctEl.textContent = pct + '%'; if (barEl) barEl.style.width = pct + '%';
+    }
+    function updateMasterProgress() {
+        const allItems = document.querySelectorAll('.checklist-item'), allDone = document.querySelectorAll('.checklist-item.done');
+        const pct = allItems.length ? Math.round((allDone.length / allItems.length) * 100) : 0;
+        const masterPct = document.getElementById('masterPct'); if (masterPct) masterPct.textContent = pct + '%';
+        const masterBar = document.getElementById('masterBar'); if (masterBar) masterBar.style.width = pct + '%';
+        const completedItems = document.getElementById('completedItems'); if (completedItems) completedItems.textContent = allDone.length;
+        let completedCards = 0;
+        document.querySelectorAll('.report-card').forEach(c => {
+            const t = c.querySelectorAll('.checklist-item').length, d = c.querySelectorAll('.checklist-item.done').length;
+            if (t > 0 && t === d) completedCards++;
+        });
+        const completedCardsEl = document.getElementById('completedCards'); if (completedCardsEl) completedCardsEl.textContent = completedCards;
+        ['phase1','phase2','phase3','phase4'].forEach((pid, i) => {
+            const sec = document.getElementById(pid); if (!sec) return;
+            const cards = sec.querySelectorAll('.report-card'), done = [...cards].filter(c => { const t = c.querySelectorAll('.checklist-item').length; return t > 0 && t === c.querySelectorAll('.checklist-item.done').length; });
+            const countEl = document.getElementById('p' + (i + 1) + 'count');
+            if (countEl) countEl.textContent = done.length + ' / ' + cards.length + ' reports';
+        });
+    }
+    function filterCards(type, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        document.querySelectorAll('.report-card').forEach(card => {
+            const sev = card.dataset.severity, items = card.querySelectorAll('.checklist-item'), doneItems = card.querySelectorAll('.checklist-item.done');
+            const isComplete = items.length > 0 && items.length === doneItems.length, isIncomplete = doneItems.length > 0 && !isComplete;
+            let show = false;
+            if (type === 'all') show = true;
+            else if (type === 'critical') show = sev === 'critical';
+            else if (type === 'high') show = sev === 'high';
+            else if (type === 'medium') show = sev === 'medium';
+            else if (type === 'low') show = sev === 'low';
+            else if (type === 'na') show = sev === 'na';
+            else if (type === 'complete') show = isComplete;
+            else if (type === 'incomplete') show = isIncomplete || doneItems.length === 0;
+            card.style.display = show ? '' : 'none';
+        });
+    }
+    function saveState() {
+        const state = {};
+        document.querySelectorAll('.report-card').forEach(card => {
+            const id = card.id, items = [];
+            card.querySelectorAll('.checklist-item').forEach((item, i) => { if (item.classList.contains('done')) items.push(i); });
+            if (items.length) state[id] = items;
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return;
+            const state = JSON.parse(raw);
+            Object.keys(state).forEach(id => {
+                const card = document.getElementById(id); if (!card) return;
+                const items = card.querySelectorAll('.checklist-item');
+                state[id].forEach(i => { if (items[i]) items[i].classList.add('done'); });
+                updateCardProgress(card);
+            });
+        } catch (e) {}
+        updateMasterProgress();
+    }
+    loadState();
+    </script>
 </body>
 
 </html>

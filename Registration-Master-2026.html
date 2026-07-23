@@ -82,6 +82,7 @@
   .medium { background: rgba(255,194,51,0.15); color: var(--accent-yellow); border: 1px solid var(--accent-yellow); }
 
   .report-link { color: var(--accent-blue); text-decoration: none; font-size: 11px; font-family: 'Share Tech Mono', sans-serif; border-bottom: 1px dashed; margin-bottom: 15px; display: inline-block; }
+  .illustrative-tag { color: var(--accent-purple) !important; border-bottom: none !important; background: rgba(170,85,255,0.08); padding: 2px 8px; border-radius: 4px; }
 
   .checklist { list-style: none; margin-top: 15px; }
   .checklist li { display: flex; gap: 10px; font-size: 14px; margin-bottom: 8px; color: var(--text-primary); align-items: flex-start; }
@@ -108,9 +109,9 @@
 <div class="hero">
   <div class="hero-tag">// LEVEL 999 BUG HUNTER //</div>
   <h1>🛡️ REGISTRATION <span>ULTIMATE MASTER</span><br>VETERAN CHECKLIST 2026</h1>
-  <div class="hero-sub">[ 100+ REAL HACKERONE/BUGCROWD REPORTS · 10 ATTACK PHASES · 2025-2026 FOCUS ]</div>
+  <div class="hero-sub">[ 100 ILLUSTRATIVE COMPOSITE SCENARIOS · 10 ATTACK PHASES · 2025-2026 FOCUS ]</div>
   <div class="stats-bar">
-    <div class="stat"><div class="stat-num">100+</div><div class="stat-label">REPORTS</div></div>
+    <div class="stat"><div class="stat-num">100</div><div class="stat-label">SCENARIOS</div></div>
     <div class="stat"><div class="stat-num">10</div><div class="stat-label">PHASES</div></div>
     <div class="stat"><div class="stat-num">100</div><div class="stat-label">TECHNIQUES</div></div>
     <div class="stat"><div class="stat-num">CRITICAL</div><div class="stat-label">OR NOTHING</div></div>
@@ -132,7 +133,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com/reports/2103323" target="_blank" class="report-link">RE: H1 #2103323</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find /sfsites/aura endpoints.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Strip cookies/CSRF.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify 'message' param for user records.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Expose PII.</span></li>
     </ul>
@@ -148,7 +149,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1 #2025/26-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Submit existing vs non-existing emails.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Measure response diff (e.g., 300ms vs 50ms).</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Burp Intruder to map employees.</span></li>
     </ul>
@@ -164,7 +165,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: DISCLOSED 2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check X-Served-By / X-Internal-IP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Fuzz /api/v1/auth.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Map subnet for SSRF targets.</span></li>
     </ul>
@@ -180,7 +181,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1 #2026-TOKEN</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Get verification email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Click external links (ToS, Help).</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check Referer sent to external 3rd party.</span></li>
     </ul>
@@ -196,7 +197,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Capture signup POST.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Burp Intruder + infinite payload.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check for 429 or CAPTCHA.</span></li>
     </ul>
@@ -212,7 +213,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com/reports/2025-REF" target="_blank" class="report-link">RE: CVE-2025-55129</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Zero-Width Space (U+200B) in username.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation patch.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Impersonate admin.</span></li>
     </ul>
@@ -228,7 +229,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-INSIGHTLY</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Manipulate EmailAddress parameter.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create account with existing email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Take over organization.</span></li>
     </ul>
@@ -244,7 +245,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-CRITICAL-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access /aura endpoints with Guest access.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Query internal objects (ContentDocument).</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Dump DB records.</span></li>
     </ul>
@@ -260,7 +261,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Intercept registration JSON.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject {'is_admin': true}.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check dashboard for admin tabs.</span></li>
     </ul>
@@ -276,7 +277,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-GITLAB</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Register User@site.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Then try user@site.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass unique record constraints.</span></li>
     </ul>
@@ -300,7 +301,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1 #OTP-SWAP-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger Victim OTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger Attacker OTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Attacker OTP on Victim account.</span></li>
     </ul>
@@ -316,7 +317,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: X-TWITTER-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Intercept verification response.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Change 'success':false to true.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check UI redirect.</span></li>
     </ul>
@@ -332,7 +333,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ACRONIS-STATE</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Signup -&gt; Pending state.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Force navigate to /profile/update.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check if verification is skipped.</span></li>
     </ul>
@@ -348,7 +349,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ZOMATO-REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Enter wrong OTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Examine JSON error response.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Extract session_code/valid OTP.</span></li>
     </ul>
@@ -364,7 +365,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: MTN-REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Send invalid OTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify response to {'status':'success'}.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass verification page.</span></li>
     </ul>
@@ -380,7 +381,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-GRAB</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Intercept login/signup call.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Remove password requirement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Only use SMS code validation.</span></li>
     </ul>
@@ -396,7 +397,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: UBER-PATTERN</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Open verify link.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Click 3rd party ads/help.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Attacker gets link from Referer logs.</span></li>
     </ul>
@@ -412,7 +413,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Similar to verify bypass.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Leak token to external JS/analytics.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Hijack reset link.</span></li>
     </ul>
@@ -428,7 +429,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-HIGH</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Capture OTP verify request.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Fuzz all 4-6 digit combos.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation.</span></li>
     </ul>
@@ -444,7 +445,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-DRUGS-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Enter creds.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Delete bb_refresh cookie.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Skip OTP page and enter dashboard.</span></li>
     </ul>
@@ -468,7 +469,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: MEDIUM-2025-OAUTH</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Register victim email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Victim tries 'Login with Google'.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Sessions merge -&gt; Attacker has access.</span></li>
     </ul>
@@ -484,7 +485,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: OAUTH-REDIRECT-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify redirect_uri to site.com.attacker.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Capture auth code.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Take over account.</span></li>
     </ul>
@@ -500,7 +501,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com/reports/2025-REF" target="_blank" class="report-link">RE: H1-GITLAB-OAUTH</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass unverified email requirement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Take over OAuth-linked accounts.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Hijack identity.</span></li>
     </ul>
@@ -516,7 +517,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-4144</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass PKCE protection.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Forge OAuth tokens.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unauthorized access.</span></li>
     </ul>
@@ -532,7 +533,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-MAY-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find .env or JS leak of client_secret.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Forge your own signup requests.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unrestricted data access.</span></li>
     </ul>
@@ -548,7 +549,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Register A@site.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>DB stores it as a@site.com.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass uniqueness checks.</span></li>
     </ul>
@@ -564,7 +565,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Missing CSRF on signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Force victim to create account.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Attacker known creds.</span></li>
     </ul>
@@ -580,7 +581,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-CSRF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Initiate OAuth.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Don't finish.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Force victim to complete your session.</span></li>
     </ul>
@@ -596,7 +597,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com/reports/2126292" target="_blank" class="report-link">RE: H1-SAML-BYPASS</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use %0d%0a in email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass domain enforcement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access internal org code.</span></li>
     </ul>
@@ -612,7 +613,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use token from App A on App B.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass scoping.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Gain unauthorized access.</span></li>
     </ul>
@@ -636,7 +637,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com/reports/2025-REF" target="_blank" class="report-link">RE: H1-MAINWP</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject &lt;script&gt; in Name.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Wait for Admin to view profile.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Control MainWP Dashboard.</span></li>
     </ul>
@@ -652,7 +653,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: APPLE-REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation with encoded input.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execute JS on Developer Forums.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Cookie theft.</span></li>
     </ul>
@@ -668,7 +669,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-8328</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Target register.php.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Manipulate USN argument.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Extract DB contents.</span></li>
     </ul>
@@ -684,7 +685,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025-AGATE</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject HTML tags in Name.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Admin receives poisoned email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Phishing risk.</span></li>
     </ul>
@@ -700,7 +701,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-0671</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Email Subscribers plugin.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject malicious JS payload.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create persistent backdoor.</span></li>
     </ul>
@@ -716,7 +717,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-DOD-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Intercept POST request.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject payload in firstname.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Cookie theft.</span></li>
     </ul>
@@ -732,7 +733,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com/reports/2269414" target="_blank" class="report-link">RE: H1-SSRF-$25K</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject &lt;iframe&gt; in template.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access internal AWS metadata.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Manipulate cloud resources.</span></li>
     </ul>
@@ -748,7 +749,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use numbers like 1e3.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass length/value checks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Break validation logic.</span></li>
     </ul>
@@ -764,7 +765,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-AUG-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use encoded input in signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Submit profile details.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execute JS on profile.</span></li>
     </ul>
@@ -780,7 +781,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use sleep payloads.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Monitor time delay.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Extract admin hashes.</span></li>
     </ul>
@@ -804,7 +805,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com/reports/2269414" target="_blank" class="report-link">RE: H1-REF-2269414</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject &lt;iframe&gt; in template.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access internal AWS endpoints.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Get sensitive meta-data.</span></li>
     </ul>
@@ -820,7 +821,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com/reports/2025-REF" target="_blank" class="report-link">RE: H1-LICHESS-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Make server request custom URL.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access cloud metadata.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Scan internal network.</span></li>
     </ul>
@@ -836,7 +837,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-STRIPO-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger OAST (Out-of-band).</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify internal services.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Map backend infra.</span></li>
     </ul>
@@ -852,7 +853,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-63551</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject XML entity.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger SSRF.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Expose internal files.</span></li>
     </ul>
@@ -868,7 +869,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-24813</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Target misconfigured signup servers.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execute arbitrary code.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Full server compromise.</span></li>
     </ul>
@@ -884,7 +885,7 @@
     <div class="card-meta">
       <span class="badge low">LOW</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Trigger error on signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Look for internal IPs in stack trace.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify backend server vendor.</span></li>
     </ul>
@@ -900,7 +901,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ABRITEL-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject attacker domain in header.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Wait for cache to capture.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Serve malicious JS to users.</span></li>
     </ul>
@@ -916,7 +917,7 @@
     <div class="card-meta">
       <span class="badge low">LOW</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Async check for email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Measure JSON response timing.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Enumerate users.</span></li>
     </ul>
@@ -932,7 +933,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-MEDIUM</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Send malformed JSON.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Get full stack trace.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify library versions.</span></li>
     </ul>
@@ -948,7 +949,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use URL for profile photo.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Scan internal localhost ports.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access internal APIs.</span></li>
     </ul>
@@ -972,7 +973,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-FEB-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify email via /api/v1/user/me.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass verification.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Account lockout.</span></li>
     </ul>
@@ -988,7 +989,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025-CREDITS</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Turbo Intruder mass signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass single-use invite.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Get $1000s in credits.</span></li>
     </ul>
@@ -1004,7 +1005,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-COURIER-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Request infinite OTPs.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Spam user phone/email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Denial of Wallet.</span></li>
     </ul>
@@ -1020,7 +1021,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026-CAPTCHA</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Remove g-recaptcha-response param.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Check if backend actually verifies.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Automate signup.</span></li>
     </ul>
@@ -1036,7 +1037,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use scientific notation for phone.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass numeric filters.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create invalid records.</span></li>
     </ul>
@@ -1052,7 +1053,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: UPCHIEVE-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify request param is_verified=False to True.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access dashboard immediately.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass email flow.</span></li>
     </ul>
@@ -1068,7 +1069,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-H1-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Capture valid invite signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Send 100 concurrent requests.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create multiple accounts.</span></li>
     </ul>
@@ -1084,7 +1085,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Register attacker account.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Change email to victim's.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Overwrites victim record in DB.</span></li>
     </ul>
@@ -1100,7 +1101,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025-DOS</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Send 1,000,000 char password.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Crash bcrypt/scrypt hashing CPU.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>DoS registration.</span></li>
     </ul>
@@ -1116,7 +1117,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find hidden referral=true param.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass invite requirement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Join exclusive platforms.</span></li>
     </ul>
@@ -1140,7 +1141,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ACRONIS-CHAIN</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Stored XSS in signup form.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Wait for Admin to approve.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>XSS triggers CSRF to create Admin.</span></li>
     </ul>
@@ -1156,7 +1157,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: MASTERPIECE-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify victim via timing.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Extract ID via SQLi.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Update email via IDOR.</span></li>
     </ul>
@@ -1172,7 +1173,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Poison cache with X-Forwarded-Host.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Serve malicious password reset link.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Mass Account Takeover.</span></li>
     </ul>
@@ -1188,7 +1189,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Leak token to 3rd party.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use token to register victim.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Wait for OAuth login.</span></li>
     </ul>
@@ -1204,7 +1205,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Concurrent signup requests.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject admin=true in one.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation race.</span></li>
     </ul>
@@ -1220,7 +1221,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject script in Org Name.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Admin receives 'New Org' email.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execution in admin view.</span></li>
     </ul>
@@ -1236,7 +1237,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-SSRF-$25K</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Template injection in welcome mail.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Point to 169.254.169.254.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal AWS keys.</span></li>
     </ul>
@@ -1252,7 +1253,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-OLD-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use embedded forms.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Skip session checks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Direct submission bypass.</span></li>
     </ul>
@@ -1268,7 +1269,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-$3K-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use %0d%0a in email field.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject custom headers in SMTP.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Spoof sender or CC others.</span></li>
     </ul>
@@ -1284,7 +1285,7 @@
     <div class="card-meta">
       <span class="badge low">LOW</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: BASECAMP-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify 'next' or 'redirect' param.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Redirect user to phishing site.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal post-signup tokens.</span></li>
     </ul>
@@ -1308,7 +1309,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-AI-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use 'Disregard instructions' in prompt.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Make AI agent creation Admin.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass validation logic.</span></li>
     </ul>
@@ -1324,7 +1325,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026-AI</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use prompt to generate unique bypasses.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Fuzz with LLM-optimized payloads.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass regex filters.</span></li>
     </ul>
@@ -1340,7 +1341,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use LLM to simulate human typing.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass behavior-based bot detection.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Infinite account creation.</span></li>
     </ul>
@@ -1356,7 +1357,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find OpenAI/Anthropic keys in JS.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use for free credits or data theft.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Impersonate AI service.</span></li>
     </ul>
@@ -1372,7 +1373,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Optimize signup page for AI scrapers.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject malicious links into AI summaries.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Phish new users.</span></li>
     </ul>
@@ -1388,7 +1389,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify __schema query.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Map entire DB through signup API.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find hidden admin mutations.</span></li>
     </ul>
@@ -1404,7 +1405,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026-WEB3</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass signature validation.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Login as any wallet address.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal digital assets.</span></li>
     </ul>
@@ -1420,7 +1421,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-4144</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Forge OAuth codes.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass PKCE checks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unauthorized access.</span></li>
     </ul>
@@ -1436,7 +1437,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use LLM to craft perfect phish.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass spam filters.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>High conversion ATO.</span></li>
     </ul>
@@ -1452,7 +1453,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-QL-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject hidden fields in signup mutation.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Escalate role directly in DB.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unrestricted access.</span></li>
     </ul>
@@ -1476,7 +1477,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: CVE-2025-52670</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Target banner deletion endpoint.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Change record ID to others.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Delete competitor banners.</span></li>
     </ul>
@@ -1492,7 +1493,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-SHOPIFY-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Replace documents across accounts.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Predictable file naming.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Corporate espionage.</span></li>
     </ul>
@@ -1508,7 +1509,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-YELP-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Remove business owner role.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Assume control of business profile.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Gain admin rights.</span></li>
     </ul>
@@ -1524,7 +1525,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-DUST-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Escalate from Builder to Admin.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access/Modify app secrets.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unauthorized data access.</span></li>
     </ul>
@@ -1540,7 +1541,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-SHOPIFY-ADMIN</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass admin requirement.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create unrestricted admin account.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Full platform control.</span></li>
     </ul>
@@ -1556,7 +1557,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025-MTN</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Predictable session IDs.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Sessions don't expire.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Hijack active sessions.</span></li>
     </ul>
@@ -1572,7 +1573,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VRT-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Access /admin/new_user directly.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass auth checks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Create users.</span></li>
     </ul>
@@ -1588,7 +1589,7 @@
     <div class="card-meta">
       <span class="badge low">LOW</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: H1-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Modify post-signup redirect.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Point to phishing page.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal credentials.</span></li>
     </ul>
@@ -1604,7 +1605,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: VALVE-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Automate CAPTCHA solving.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass bot detection.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Scalable account creation.</span></li>
     </ul>
@@ -1620,7 +1621,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Brute-force existing user emails.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Identify active users.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Map targets for social engineering.</span></li>
     </ul>
@@ -1644,7 +1645,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find JSON-P endpoints.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Steal user data via callbacks.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Unauthenticated data leak.</span></li>
     </ul>
@@ -1660,7 +1661,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: SHOPIFY-HPP</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Double email parameter.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Confuse frontend vs backend validation.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass uniqueness.</span></li>
     </ul>
@@ -1676,7 +1677,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Use Turkish 'I' or similar.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Change email after normalization.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass filters.</span></li>
     </ul>
@@ -1692,7 +1693,7 @@
     <div class="card-meta">
       <span class="badge medium">MEDIUM</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>XSS on your own profile.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Escalate via Support Chat injection.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Execution in admin browser.</span></li>
     </ul>
@@ -1708,7 +1709,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: SLACK-REF</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Analyze token entropy.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Predict future tokens.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Bypass email verification.</span></li>
     </ul>
@@ -1724,7 +1725,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Verify email on profile.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>But not on registration.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Collision attack.</span></li>
     </ul>
@@ -1740,7 +1741,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: OAUTH-REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Auth code in URL.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Referer header to 3rd party.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Token theft.</span></li>
     </ul>
@@ -1756,7 +1757,7 @@
     <div class="card-meta">
       <span class="badge low">LOW</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find debug endpoints.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Dump entire API schema.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Find hidden registration fields.</span></li>
     </ul>
@@ -1772,7 +1773,7 @@
     <div class="card-meta">
       <span class="badge high">HIGH</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: REF-2025</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Step 1: Signup.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Step 2: Onboard.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Inject is_staff=True in Step 2.</span></li>
     </ul>
@@ -1788,7 +1789,7 @@
     <div class="card-meta">
       <span class="badge critical">CRITICAL</span>
     </div>
-    <a href="https://hackerone.com" target="_blank" class="report-link">RE: ZEN-2026</a>
+    <span class="report-link illustrative-tag">📚 Illustrative Scenario — Composite Pattern</span>
     <ul class="checklist">
       <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Enum + SQLi + SSRF + XSS + CSRF + IDOR + BOLA + Race + HPP + ATO.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>The ultimate bounty report.</span></li><li><div class="check-box" onclick="toggleCheck(this)"></div><span>Complete system takeover.</span></li>
     </ul>
