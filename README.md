@@ -1,163 +1,87 @@
-# 🕵️ Bug Bounty Hunting Companion
-
-This repository contains my personal **Bug Bounty Hunting Companion and Methodology**.
-
-The goal of this project is to create a structured workflow for **reconnaissance, vulnerability discovery, and reporting** during web application security testing.
-
-Instead of randomly testing targets, this Companion helps maintain a **systematic and repeatable approach**.
-
----
-
-# 🎯 Purpose of This Repository
-
-This repository was created to:
-
-* Maintain a structured **bug bounty methodology**
-* Keep track of **testing checklists**
-* Document **common vulnerabilities and attack surfaces**
-* Improve my **recon workflow**
-* Build a personal **bug bounty playbook**
-
----
-
-# 🔎 Bug Hunting Methodology
-
-## 1️⃣ Target Reconnaissance
-
-* Subdomain enumeration
-* Asset discovery
-* Technology fingerprinting
-* API endpoint discovery
-* Directory enumeration
-
-Tools commonly used:
-
-* subfinder
-* amass
-* assetfinder
-* httpx
-* ffuf
-* dirsearch
-* curl
-
----
-
-## 2️⃣ Attack Surface Mapping
-
-During this phase I try to identify:
-
-* Hidden endpoints
-* API routes
-* Authentication mechanisms
-* File upload functionality
-* Admin panels
-* Debug endpoints
-
----
-
-## 3️⃣ Vulnerability Testing Companion
-
-### Authentication & Authorization
-
-* Broken authentication
-* IDOR / BOLA
-* Privilege escalation
-* Session misconfigurations
-
-### Input Validation
-
-* SQL Injection
-* XSS
-* SSTI
-* Command Injection
-
-### Access Control
-
-* Horizontal privilege escalation
-* Vertical privilege escalation
-
-### API Testing
-
-* Mass assignment
-* Rate limiting issues
-* JWT attacks
-* GraphQL vulnerabilities
-
-### Server Misconfiguration
-
-* Directory listing
-* Default credentials
-* Debug endpoints
-* Exposed config files
-
----
-
-# 📂 Repository Structure
-
-```
-Companion_bug_hunting
-│
-├── recon-checklist.md
-├── web-vulnerabilities.md
-├── api-testing-checklist.md
-├── tools-and-commands.md
-└── methodology.md
-```
-
----
-
-# 🛠 Tools Used in Bug Hunting
-
-Some tools frequently used during testing:
-
-* Burp Suite
-* OWASP ZAP
-* ffuf
-* sqlmap
-* nuclei
-* dirsearch
-* amass
-* curl
-* sublist3r
-
----
-
-# ⚠ Disclaimer
-
-All content in this repository is provided **for educational purposes only**.
-
-Testing should only be performed on systems where **you have explicit permission**.
-
-Unauthorized testing is illegal.
-
----
-
-# ⭐ Support
-
-If you find this repository useful:
-
-* Star the repo ⭐
-* Share with the security community
-* Use it as a learning resource
-
----
-
-## 🤝 Connect With Me
-
 <div align="center">
 
-[![LinkedIn](https://img.shields.io/badge/Let's%20connect%20on%20LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/dheerajkumarjayaswal)
+# 🕵️ Bug Bounty Hunting Companion
 
-*Open to consulting, collaboration, and security discussions.*
+**A curated library of real, publicly-disclosed bug bounty reports — turned into
+reproducible checklists.**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Dheeraj%20Kumar%20Jayaswal-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/dheerajkumarjayaswal)
+[![GitHub](https://img.shields.io/badge/GitHub-dheeraj--jayaswal-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/dheeraj-jayaswal)
 
 </div>
 
 ---
 
+## 📌 What This Repository Actually Is
+
+This isn't a generic vulnerability-explainer repo — that's what
+[From-Dev-To-Attacker](https://github.com/dheeraj-jayaswal/From-Dev-To-Attacker)
+and [AppSec-From-The-Trenches](https://github.com/dheeraj-jayaswal/AppSec-From-The-Trenches)
+are for. This repo is a **companion for active bug hunting**: a curated set of
+**real, publicly-disclosed HackerOne reports**, broken down into the pattern
+that made them work, with an interactive checklist to test for the same
+pattern on your own target.
+
+The flagship file is **[`Bounty-Reports.html`](Bounty-Reports.html)** — 30 real
+disclosed reports, organized into 6 phases:
+
+1. IDOR & Business Logic Flaws
+2. Browser & Client-Side Bugs
+3. Authentication & Session Bugs
+4. Injection & XSS Attacks
+5. Privacy, Info Disclosure & Cloud Bugs
+6. Race Conditions, SSRF & Privilege Escalation
+
+Each report card includes:
+
+| Element | What it gives you |
+|---|---|
+| 🔗 **Link to the real report** | The original public disclosure, so you can read the full story |
+| 📋 **Scenario summary** | The bug explained in plain language |
+| ✅ **Execution checklist** | Interactive, tickable steps to test the same pattern yourself |
+| ⛓️ **Chain formula** | How the bug escalated from initial finding to full impact |
+| 💡 **Pro tip / veteran mindset note** | The generalizable lesson behind the specific bug |
+
+## 🧭 How This Differs From My Other Repos
+
+| Repo | What it's for |
+|---|---|
+| **Bug-Bounty-Hunting-Companion** *(this repo)* | Real disclosed reports → reproducible checklists. Use this when you're actively hunting and want to test a known pattern fast. |
+| [From-Dev-To-Attacker](https://github.com/dheeraj-jayaswal/From-Dev-To-Attacker) | Original long-form write-ups on *why* vulnerabilities exist, from a developer's lens, with enterprise domain impact framing. Use this to understand a vulnerability class deeply. |
+| [AppSec-From-The-Trenches](https://github.com/dheeraj-jayaswal/AppSec-From-The-Trenches) | Broader enterprise AppSec knowledge base and methodology reference. |
+
+## 📖 How to Use This
+
+1. Pick a phase relevant to what you're testing (auth, injection, SSRF, etc.)
+2. Open the report card, read the real scenario
+3. Work through the checklist against your target
+4. If it hits, use the chain formula as a guide for how far the impact can go
+5. Read the pro-tip — that's the reusable lesson, not just the one-off bug
+
+## 👤 About Me
+
+- **Name** — Dheeraj Kumar Jayaswal
+- **Role** — Technology Lead – Offensive Security, Infosys Limited
+- **Experience** — 15+ years in IT · 5+ years in Offensive Security
+- **Domains** — Income Tax · Banking · Retail · E-commerce · Freight Logistics · Education
+
+## ⚠️ Disclaimer
+
+All content here references publicly disclosed reports and is provided for
+educational purposes. Test only on systems you own or have explicit permission
+to test. Unauthorized testing is illegal.
+
+## 🤝 Connect
+
+[LinkedIn](https://linkedin.com/in/dheerajkumarjayaswal) — open to consulting,
+collaboration, and security discussions.
+
+---
+
 <div align="center">
 
-*Security is not a product. It is a mindset built one vulnerability at a time.*
+*Real bugs. Real reports. Real checklists.*
 
-**#AppSec · #PenTest · #WebSecurity · #APISecuity · #OffensiveSecurity**
+**#BugBounty · #AppSec · #PenTest · #WebSecurity · #OffensiveSecurity**
 
 </div>
