@@ -80,6 +80,8 @@ All content here references publicly disclosed reports and is provided for
 educational purposes. Test only on systems you own or have explicit permission
 to test. Unauthorized testing is illegal.
 
+## 📄 License
+
 [![License](https://img.shields.io/badge/license-CC%20BY%204.0-blue)](LICENSE.md)
 [![Last Commit](https://img.shields.io/github/last-commit/dheeraj-jayaswal/Bug-Bounty-Hunting-Companion)](https://github.com/dheeraj-jayaswal/Bug-Bounty-Hunting-Companion/commits/main)
 
