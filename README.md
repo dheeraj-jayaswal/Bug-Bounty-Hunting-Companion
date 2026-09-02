@@ -50,6 +50,25 @@ Each report card includes:
 | ⛓️ **Chain formula** | How the bug escalated from initial finding to full impact |
 | 💡 **Pro tip / veteran mindset note** | The generalizable lesson behind the specific bug |
 
+---
+
+
+## 🧭 How This Fits With My Other Repos
+
+| Repository | What's in it |
+|---|---|
+| **[Bug-Bounty-Hunting-Companion](https://github.com/dheeraj-jayaswal/Bug-Bounty-Hunting-Companion)** *(this repo)* | Real, publicly-disclosed bug bounty reports broken into reproducible checklists |
+| [From-Dev-To-Attacker](https://github.com/dheeraj-jayaswal/From-Dev-To-Attacker) | My flagship field journal — 67 original write-ups on vulnerability patterns, written from a developer's lens, with enterprise domain-impact framing across Income Tax, Banking, Retail, E-commerce, Freight Logistics, and Education |
+| [CICD-Goat-Vapt-Writeup](https://github.com/dheeraj-jayaswal/CICD-Goat-Vapt-Writeup) | Full VAPT writeup against OWASP CICD-Goat — 16 findings including CVE-2024-23897, mapped to the OWASP Top 10 CI/CD Security Risks, with PoCs and interview-ready summaries |
+| [From-Pentester-To-Red-Teamer](https://github.com/dheeraj-jayaswal/From-Pentester-To-Red-Teamer) | My structured 24-month roadmap for transitioning from Web/API pentesting into Red Teaming — phases, labs, certifications, and progress tracked openly as I work through it |
+| [AppSec-From-The-Trenches](https://github.com/dheeraj-jayaswal/AppSec-From-The-Trenches) | Pentest tools & methodology reference — how I actually use Burp Suite, Nmap, Metasploit, Hydra, Hashcat, and more, plus my WAPT methodology |
+| [API-From-The-Trenches](https://github.com/dheeraj-jayaswal/API-From-The-Trenches) | Deep-dive API security series — OWASP API Top 10 coverage, BOLA, JWT attacks, GraphQL testing, full methodology |
+| [DarkWeb-From-The-Trenches](https://github.com/dheeraj-jayaswal/DarkWeb-From-The-Trenches) | Threat intelligence & dark web OSINT methodology — credential leak monitoring, ransomware tracking, pre-engagement TI |
+| [.pcap-Arsenal](https://github.com/dheeraj-jayaswal/.pcap-Arsenal) | Packet captures organized by protocol, for Web/API/Network-layer analysis and learning |
+
+---
+
+
 ## 🧭 How This Differs From My Other Repos
 
 | Repo | What it's for |
@@ -67,12 +86,50 @@ Each report card includes:
 5. If it hits, use the chain formula as a guide for how far the impact can go
 6. Read the pro-tip — that's the reusable lesson, not just the one-off bug
 
+---
+
+
+## 🧠 Testing Philosophy
+
+> *"The best penetration testers think like developers first and attackers second. If you understand why code was written a certain way, you'll always find more than a scanner ever will."*
+
+I approach every engagement in three phases:
+
+**1. Understand before you attack** — Read the application. Use it as a real user. Understand the business logic before touching a single tool.
+
+**2. Manual first, tools second** — Automated scanners find what they're configured to find. The interesting bugs are always found by thinking, not scanning.
+
+**3. Report like a developer** — A finding that developers can't understand or reproduce is a finding that doesn't get fixed.
+
+---
+
+
 ## 👤 About Me
 
 - **Name** — Dheeraj Kumar Jayaswal
 - **Role** — Technology Lead – Offensive Security, Infosys Limited
+- **Focus** — Web Application & API Penetration Testing
 - **Experience** — 15+ years in IT · 6+ years in Offensive Security
+- **Edge** — Former full-stack developer (ASP.NET / SQL Server) — I think like a developer, attack like a hacker
 - **Domains** — Income Tax · Banking · Retail · E-commerce · Freight Logistics · Education
+
+---
+
+
+## 🏅 Certifications
+
+| Certification | Issuer | Status |
+|---|---|---|
+| Certified Ethical Hacker (CEH) | EC-Council | ✅ 2021 |
+| AWS Certified Solutions Architect – Associate | Amazon Web Services | ✅ 2022 |
+| AWS Certified Cloud Practitioner | Amazon Web Services | ✅ 2022 |
+| Executive Certificate in Cyber Security | IIT Kanpur | ✅ 2026 |
+| OSWE — OffSec Web Expert (OSCE3 track) | OffSec | 🔄 In Progress |
+
+**Future direction — Red Teaming:** OSCP → CRTO → OSEP, CRTP, CRTL, CRTE
+
+---
+
 
 ## ⚠️ Disclaimer
 
