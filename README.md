@@ -71,7 +71,7 @@ Each report card includes:
 
 - **Name** — Dheeraj Kumar Jayaswal
 - **Role** — Technology Lead – Offensive Security, Infosys Limited
-- **Experience** — 15+ years in IT · 5+ years in Offensive Security
+- **Experience** — 15+ years in IT · 6+ years in Offensive Security
 - **Domains** — Income Tax · Banking · Retail · E-commerce · Freight Logistics · Education
 
 ## ⚠️ Disclaimer
