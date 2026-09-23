@@ -107,9 +107,9 @@ I approach every engagement in three phases:
 ## 👤 About Me
 
 - **Name** — Dheeraj Kumar Jayaswal
-- **Role** — Technology Lead – Offensive Security, Infosys Limited
+- **Role** — Principal Penetration Tester, VikingCloud (previously Technology Lead – Offensive Security, Infosys Limited)
 - **Focus** — Web Application & API Penetration Testing
-- **Experience** — 15+ years in IT · 6+ years in Offensive Security
+- **Experience** — 16+ years in IT · 9+ years in Offensive Security
 - **Edge** — Former full-stack developer (ASP.NET / SQL Server) — I think like a developer, attack like a hacker
 - **Domains** — Income Tax · Banking · Retail · E-commerce · Freight Logistics · Education
 
